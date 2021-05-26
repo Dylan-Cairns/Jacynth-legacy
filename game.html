@@ -1,0 +1,81 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/public/css/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.9.55/css/materialdesignicons.min.css"rel="stylesheet">
+  <title>Document</title>
+</head>
+<body>
+  <dix class="main-flex-container">
+  <div class="main-grid-container">
+    <div class="main-grid-item icons-grid-container">
+      <div class="icons-grid-item title">Jacynth</div>
+      <div class="icons-grid-item">
+        <span class="mdi mdi-cards-outline"></span> 24
+        <div class="icon-label">Cards left in deck</div>
+      </div>
+      <div class="icons-grid-item"><a href="#"><span class="mdi mdi-castle"> 4</a>
+        <div class="icon-label">Tokens remaining</div>
+      </div>
+      <div class="icons-grid-item"><span class="mdi mdi-timer-sand"> 3
+        <div class="icon-label">Turns left to place next token</div>
+      </div>
+      <div class="icons-grid-item"><a href="#"><span class="mdi mdi-undo-variant"></a>
+        <div class="icon-label">Undo last move</div>
+      </div>
+      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-new-box">
+        <div class="icon-label"></a>Start a new game</div>
+      </div>
+      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-information-outline">
+        <div class="icon-label"></a>Rules and credits</div>
+      </div>
+    </div>
+    <div class="main-grid-item gameboard-grid-container">
+      <div class="gameboard-grid-item"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item"></div>
+      <div class="gameboard-grid-item"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item"></div>
+      <div class="gameboard-grid-item odd"></div>
+      <div class="gameboard-grid-item"></div>
+    </div>
+    <div class="main-grid-item player-hand-grid-container">
+      <div class="player-hand-grid-item" draggable="true"ondragstart="drag(event)"></div>
+      <div class="player-hand-grid-item"></div>
+      <div class="player-hand-grid-item"></div>
+    </div>
+  </div>
+</div>
+<div id="menu" class="overlay">
+	<div class="menu-popup">
+    <a class="close" href="#">&times;</a>
+    <h2>Jacynth</h2>
+		<div class="content">
+      <h3>Rules</h3>
+      <ul>
+      <li> Start the game by putting your first influence token on one of the starting tiles.</li>
+			<li> On each turn, add a tile to the board. Then you may place an influence token, although you are not required to do so. </li>
+      <li> When you play a number card (rank 2-9), a card will immediately be flipped over from the top of the deck. 
+        If the flipped card is an Ace, Crown, Pawn or Court then it is discarded and your tile will be places as normal. 
+        If the flipped tile is a number card of equal or higher rank than your card, your card is discarded and flipped card is placed in the chosen spot instead.</li>
+      <li>When you play your fourth card (so that there are a total of eight cards in the city) you must place your second influence token if you have not done so already.</li>
+      <li>When you play your eighth card (so that there are a total of twelve cards in the city) you must place your third influence token if you have not done so already.</li>
+      <li>You may place your fourth token at any time.</li>
+      <li>Your final score in the solitaire game determines your rank in the hierarchy:</li>
+		</ul>
+    </div>
+	</div>
+</div>
+</body>
+</html>

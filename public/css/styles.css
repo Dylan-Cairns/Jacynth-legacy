@@ -1,0 +1,241 @@
+@font-face {
+  font-family: "Fortune Letters";
+  src: url("../assets/fortune-letters.ttf") format("truetype");
+}
+
+:root {
+  --gameboard-width: min(70vh, 100vw);
+  --desktop-gameboard-width: min(79vh, 75vw);
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-image: url("../assets/spikes.png");
+  background-color: #b4adea;
+  background-blend-mode: multiply;
+  font-family: "Fortune Letters", Futura, Geneva, sans-serif;
+}
+
+.title {
+  display: none;
+}
+
+.icon-label {
+  display: none;
+  font-size: 0.4em;
+  color: #a3a79f;
+}
+
+.main-flex-container {
+  display: flex;
+  justify-content: center;
+}
+
+.main-grid-container {
+  display: grid;
+  grid-gap: 0.5em;
+  width: 100vw;
+  height: 100vh;
+  grid-template-rows: auto auto auto;
+  justify-items: stretch;
+  justify-content: center;
+  align-items: start;
+  align-content: start;
+}
+
+.icons-grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  align-items: start;
+  align-content: start;
+  justify-items: center;
+  background-color: #2d2e2c;
+  width: 100vw;
+  padding: 0.25em 0em;
+}
+
+.icons-grid-item {
+  background-color: #474847;
+  color: #59ffa0;
+  padding: 0.2em;
+  border-radius: 3px;
+  font-size: 2em;
+  text-align: center;
+}
+
+.gameboard-grid-container {
+  background-image: url("../assets/marble-2.jpg");
+  border-radius: 5px;
+  border: 1px solid #50514f94;
+  display: grid;
+  justify-content: center;
+  width: var(--gameboard-width);
+  height: var(--gameboard-width);
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  justify-self: center;
+}
+
+.gameboard-grid-item {
+  color: #222;
+  background-color: #3b3b3b34;
+}
+
+.odd {
+  background-color: #50514f;
+}
+
+.player-hand-grid-container {
+  display: grid;
+  width: var(--gameboard-width);
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  justify-self: center;
+  background-color: #50514f94;
+  border-radius: 20px;
+}
+
+.player-hand-grid-item {
+  background-color: #fdfff7;
+  background-blend-mode: multiply;
+  color: #222;
+  border: 1px solid grey;
+  border-radius: 5px;
+  margin: 3px;
+  box-shadow: 2px 2px;
+  width: calc((var(--gameboard-width) - 2em) / 4);
+  height: calc((var(--gameboard-width) - 2em) / 4);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: none;
+  color: white;
+}
+
+/* Popup menus styling */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 200ms;
+  visibility: hidden;
+  opacity: 0;
+  display: grid;
+  justify-content: stretch;
+  justify-items: center;
+  align-items: start;
+}
+
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.menu-popup {
+  margin: 4em 1em;
+  padding: 1em 1em;
+  background: #fff;
+  border-radius: 5px;
+  position: relative;
+  width: 95vw;
+}
+
+.menu-popup h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.menu-popup .content {
+  max-height: 30%;
+  overflow: auto;
+}
+
+.content ul {
+  margin: 0em;
+  padding-left: 1em;
+  padding-top: 1em;
+}
+.content li {
+  padding-top: 1em;
+}
+
+.menu-popup .close {
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  transition: all 200ms;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+
+.menu-popup .close:hover {
+  color: #59ffa0;
+}
+
+@media (min-width: 600px) {
+  .title {
+    display: block;
+  }
+
+  .icon-label {
+    display: block;
+  }
+
+  .main-grid-container {
+    max-width: 100vh;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: auto fr;
+  }
+
+  .icons-grid-container {
+    grid-row: span 2;
+    grid-gap: 0.5em;
+    grid-template-columns: 1fr;
+    justify-self: stretch;
+    justify-content: center;
+    justify-items: stretch;
+    background-color: transparent;
+    width: unset;
+  }
+
+  .icons-grid-item {
+    font-size: 2.5em;
+    padding: 0.5em 0em;
+  }
+
+  .gameboard-grid-container {
+    width: var(--desktop-gameboard-width);
+    height: var(--desktop-gameboard-width);
+  }
+
+  .player-hand-grid-item {
+    width: calc((var(--desktop-gameboard-width) - 2em) / 4);
+    height: calc((var(--desktop-gameboard-width) - 2em) / 4);
+  }
+
+  .player-hand-grid-container {
+    width: var(--desktop-gameboard-width);
+  }
+
+  .menu-popup {
+    width: 60vw;
+  }
+}
