@@ -6,6 +6,7 @@
 :root {
   --gameboard-width: min(70vh, 100vw);
   --desktop-gameboard-width: min(79vh, 75vw);
+  --gameboard-spaces-width: 4;
 }
 
 *,
@@ -77,18 +78,16 @@ body {
   justify-content: center;
   width: var(--gameboard-width);
   height: var(--gameboard-width);
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(var(--gameboard-spaces-width), 1fr);
+  grid-template-rows: repeat(var(--gameboard-spaces-width), 1fr);
   justify-self: center;
 }
 
 .gameboard-grid-item {
-  color: #222;
-  background-color: #3b3b3b34;
 }
 
-.odd {
-  background-color: #50514f;
+.dark-square {
+  background-color: #50514f4d;
 }
 
 .player-hand-grid-container {

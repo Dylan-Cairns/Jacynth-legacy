@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/public/css/styles.css">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.9.55/css/materialdesignicons.min.css"rel="stylesheet">
+  <script src="app.js" charset="utf-8"></script>
   <title>Document</title>
 </head>
 <body>
-  <dix class="main-flex-container">
+  <div class="main-flex-container">
   <div class="main-grid-container">
     <div class="main-grid-item icons-grid-container">
       <div class="icons-grid-item title">Jacynth</div>
@@ -25,33 +26,16 @@
       <div class="icons-grid-item"><a href="#"><span class="mdi mdi-undo-variant"></a>
         <div class="icon-label">Undo last move</div>
       </div>
-      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-new-box">
-        <div class="icon-label"></a>Start a new game</div>
-      </div>
-      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-information-outline">
-        <div class="icon-label"></a>Rules and credits</div>
+      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-new-box"></a>
+        <div class="icon-label">Start a new game</div></div>
+      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-information-outline"></a>
+        <div class="icon-label">Rules and credits</div>
       </div>
     </div>
     <div class="main-grid-item gameboard-grid-container">
-      <div class="gameboard-grid-item"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item"></div>
-      <div class="gameboard-grid-item"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item"></div>
-      <div class="gameboard-grid-item odd"></div>
-      <div class="gameboard-grid-item"></div>
     </div>
     <div class="main-grid-item player-hand-grid-container">
-      <div class="player-hand-grid-item" draggable="true"ondragstart="drag(event)"></div>
+      <div class="player-hand-grid-item" draggable="true" ondragstart="drag(event)"></div>
       <div class="player-hand-grid-item"></div>
       <div class="player-hand-grid-item"></div>
     </div>
