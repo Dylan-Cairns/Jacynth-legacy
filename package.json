@@ -10,5 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dylan Cairns",
-  "license": "CC-BY-SA-3.0"
+  "license": "CC-BY-SA-3.0",
+  "dependencies": {
+    "csv-parse": "^4.15.4",
+    "csv-parser": "^3.0.0"
+  }
 }

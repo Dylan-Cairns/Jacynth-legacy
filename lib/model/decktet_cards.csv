@@ -1,0 +1,46 @@
+name,rank,value,suit1,suit2,suit3
+Ace of Knots,Ace,1,Knots,,
+Ace of Leaves,Ace,1,Leaves,,
+Ace of Moons,Ace,1,Moons,,
+Ace of Suns,Ace,1,Suns,,
+Ace of Waves,Ace,1,Waves,,
+Ace of Wyrms,Ace,1,Wyrms,,
+the AUTHOR,Numeral,2,Moons,Knots,
+the DESERT,Numeral,2,Suns,Wyrms,
+the ORIGIN,Numeral,2,Waves,Leaves,
+the JOURNEY,Numeral,3,Moons,Waves,
+the PAINTER,Numeral,3,Suns,Knots,
+the SAVAGE,Numeral,3,Leaves,Wyrms,
+the BATTLE,Numeral,4,Wyrms,Knots,
+the MOUNTAIN,Numeral,4,Moons,Suns,
+the SAILOR,Numeral,4,Waves,Leaves,
+the DISCOVERY,Numeral,5,Suns,Waves,
+the FOREST,Numeral,5,Moons,Leaves,
+the SOLDIER,Numeral,5,Wyrms,Knots,
+the LUNATIC,Numeral,6,Moons,Waves,
+the MARKET,Numeral,6,Leaves,Knots,
+the PENITENT,Numeral,6,Suns,Wyrms,
+the CASTLE,Numeral,7,Suns,Knots,
+the CAVE,Numeral,7,Waves,Wyrms,
+the CHANCE MEETING,Numeral,7,Moons,Leaves,
+the BETRAYAL,Numeral,8,Wyrms,Knots,
+the DIPLOMAT,Numeral,8,Moons,Suns,
+the MILL,Numeral,8,Waves,Leaves,
+the DARKNESS,Numeral,9,Waves,Wyrms,
+the MERCHANT,Numeral,9,Leaves,Knots,
+the PACT,Numeral,9,Moons,Suns,
+the WINDFALL,Crown,10,Knots,,
+the END,Crown,10,Leaves,,
+the HUNTRESS,Crown,10,Moons,,
+the BARD,Crown,10,Suns,,
+the SEA,Crown,10,Waves,,
+the CALAMITY,Crown,10,Wyrms,,
+the EXCUSE,Excuse,0,,,
+the BORDERLAND,Pawn,11,Waves,Leaves,Wyrms
+the HARVEST,Pawn,11,Moons,Suns,Leaves
+the LIGHT KEEPER,Pawn,11,Suns,Waves,Knots
+the WATCHMAN,Pawn,11,Moons,Wyrms,Knots
+the CONSUL,Court,12,Moons,Waves,Knots
+the ISLAND,Court,12,Suns,Waves,Wyrms
+the RITE,Court,12,Moons,Leaves,Wyrms
+the WINDOW,Court,12,Suns,Leaves,Knots
