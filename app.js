@@ -2,10 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const gameBoard = document.querySelector(".gameboard-grid-container");
 
   //Set board size in js and css
-  const BOARDWIDTH = 4;
+  const BOARD_DIMENSIONS = 4;
   document.documentElement.style.setProperty(
     "--gameboard-spaces-width",
-    String(BOARDWIDTH)
+    String(BOARD_DIMENSIONS)
   );
 
   const boardSpaces = [];
@@ -38,5 +38,5 @@ document.addEventListener("DOMContentLoaded", () => {
       spaces.push(space);
     }
   }
-  createBoard(gameBoard, boardSpaces, BOARDWIDTH);
+  createBoard(gameBoard, boardSpaces, BOARD_DIMENSIONS);
 });
