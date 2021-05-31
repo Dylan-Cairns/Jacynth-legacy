@@ -1,6 +1,7 @@
+export {};
 const { Card, Decktet } = require("./decktet");
 
-class boardSpace {
+class BoardSpace {
   id: string;
   card: Card | undefined;
   playerToken: string | undefined;
@@ -17,8 +18,8 @@ class boardSpace {
     this.card = card;
   }
 
-  setPlayerToken() {
-    this.playerToken = this.playerToken;
+  setPlayerToken(player: string) {
+    this.playerToken = player;
   }
 
   setControlbySuit(suit: Suit, id: string) {
@@ -46,16 +47,16 @@ class boardSpace {
   }
 }
 
-class gameBoard {
+class GameBoard {
   boardSize: number;
-  spaces: Map<string, boardSpace>;
+  spaces: Map<string, BoardSpace>;
   constructor(boardSize: number) {
     this.boardSize = boardSize;
     this.spaces = new Map();
     for (let y = 0; y < boardSize; y++) {
       for (let x = 0; x < boardSize; x++) {
         let newID = `x${x}y${y}`;
-        let newSpace = new boardSpace(newID);
+        let newSpace = new BoardSpace(newID);
         this.spaces.set(newID, newSpace);
       }
     }
@@ -66,34 +67,36 @@ class gameBoard {
   }
 
   getCard(id: string) {
-    return this.spaces.get(id).getCard();
+    return this.spaces.get(id)?.getCard();
   }
 
-  getPlayerToken(id) {
-    return this.spaces.get(id).getPlayerToken();
+  getPlayerToken(id: string) {
+    return this.spaces.get(id)?.getPlayerToken();
   }
 
-  getControllingSpace(id, suit) {
-    return this.spaces.get(id).getControllingSpace(suit);
+  getControllingSpace(id: string, suit: Suit) {
+    return this.spaces.get(id)?.getControllingSpaceID(suit);
   }
 
-  getAdjacentSpaces(id: string) {
+  getAdjacentSpaces(id: string): BoardSpace[] {
     let x = parseInt(id[1]);
     let y = parseInt(id[3]);
     let results = [];
 
-    if (x - 1 >= 0) results.push(this.spaces.get(`x${x - 1}y${y}`));
-    if (y - 1 >= 0) results.push(this.spaces.get(`x${x}y${y - 1}`));
-    if (x + 1 < this.boardSize) results.push(this.spaces.get(`x${x + 1}y${y}`));
-    if (y + 1 < this.boardSize) results.push(this.spaces.get(`x${x}y${y + 1}`));
+    if (x - 1 >= 0) results.push(this.spaces.get(`x${x - 1}y${y}`)!);
+    if (y - 1 >= 0) results.push(this.spaces.get(`x${x}y${y - 1}`)!);
+    if (x + 1 < this.boardSize)
+      results.push(this.spaces.get(`x${x + 1}y${y}`)!);
+    if (y + 1 < this.boardSize)
+      results.push(this.spaces.get(`x${x}y${y + 1}`)!);
 
     return results;
   }
 
   // To be available, a space must be empty
   // and adjacent to an already played card
-  isPlayableSpace(id) {
-    if (this.spaces.get(id).getCard()) return false;
+  isPlayableSpace(id: string) {
+    if (this.spaces.get(id)?.getCard()) return false;
 
     let adjArr = this.getAdjacentSpaces(id);
     for (let idx = 0; idx < adjArr.length; idx++) {
@@ -104,7 +107,7 @@ class gameBoard {
     return false;
   }
 
-  getAvailableSpaces() {
+  getAvailableSpaces(): Map<string, BoardSpace> {
     let results = new Map();
     this.spaces.forEach((space) => {
       let id = space.getID();
@@ -115,12 +118,16 @@ class gameBoard {
     return results;
   }
 
-  getDistrict(id, suit) {
-    if (!this.getCard(id).hasSuit(suit)) return [];
-    let results = [];
-    results.push(this.spaces.get(id));
+  getDistrict(id: string, suit: Suit) {
+    let space = this.getSpace(id);
+    let card = space?.getCard();
+    if (typeof card === Card) {
+      if (!card.hasSuit(suit)) return [];
+    }
+    let results = [] as BoardSpace[];
+    results.push(space);
 
-    let searchConnectedTiles = (id, suit) => {
+    let searchConnectedTiles = (id: string, suit: Suit) => {
       this.getAdjacentSpaces(id).forEach((space) => {
         if (!results.includes(space)) {
           if (
@@ -167,7 +174,7 @@ class gameBoard {
   }
 }
 let deck = new Decktet({ isBasicDeck: true });
-let board = new gameBoard(5);
+let board = new GameBoard(5);
 
 board.spaces.forEach((space) => space.setCard(deck.drawCard()));
 
