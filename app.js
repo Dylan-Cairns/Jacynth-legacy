@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const gameBoard = document.querySelector(".gameboard-grid-container");
 
   //Set board size in js and css
-  const BOARD_DIMENSIONS = 4;
+  const BOARD_DIMENSIONS = 6;
   document.documentElement.style.setProperty(
     "--gameboard-spaces-width",
     String(BOARD_DIMENSIONS)
