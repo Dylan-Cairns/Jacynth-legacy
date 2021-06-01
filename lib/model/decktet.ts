@@ -1,5 +1,8 @@
-type Suit = "Knots" | "Leaves" | "Moons" | "Suns" | "Waves" | "Wyrms";
-type Rank = "Ace" | "Numeral" | "Crown" | "Pawn" | "Court";
+import fs = require('fs');
+import parse = require('csv-parse/lib/sync');
+
+export type Suit = 'Knots' | 'Leaves' | 'Moons' | 'Suns' | 'Waves' | 'Wyrms';
+type Rank = 'Ace' | 'Numeral' | 'Crown' | 'Pawn' | 'Court';
 
 type ArgObj = {
   name: string;
@@ -10,7 +13,7 @@ type ArgObj = {
   suit3: Suit;
 };
 
-class Card {
+export class Card {
   name: string;
   rank: Rank;
   value: number;
@@ -19,8 +22,11 @@ class Card {
   constructor(argObj: ArgObj) {
     this.name = argObj.name;
     this.rank = argObj.rank;
-    this.value = parseInt(argObj.value);
-    this.suits = [argObj.suit1, argObj.suit2, argObj.suit3];
+    this.value = Number(argObj.value);
+    this.suits = [];
+    [argObj.suit1, argObj.suit2, argObj.suit3].forEach((suit) => {
+      if (suit) this.suits.push(suit);
+    });
   }
 
   getName() {
@@ -44,27 +50,24 @@ class Card {
   }
 }
 
-class Decktet {
+export class Decktet {
   cards: Card[];
 
   constructor(argObj: { isBasicDeck: boolean }) {
     this.cards = [];
-    const fs = require("fs");
-    const parse = require("csv-parse/lib/sync");
     // read card data from csv and convert to objects
-    let inputStrings = fs.readFileSync("decktet_cards.csv", "utf-8");
-    let inputObjects = parse(inputStrings, { columns: true });
-    // console.log(inputObjects);
+    const inputStrings = fs.readFileSync('decktet_cards.csv', 'utf-8');
+    const inputObjects = parse(inputStrings, { columns: true });
     if (argObj.isBasicDeck) {
-      for (let obj of inputObjects) {
-        if (["Ace", "Numeral", "Crown"].includes(obj.rank)) {
-          let card = new Card(obj);
+      for (const obj of inputObjects) {
+        if (['Ace', 'Numeral', 'Crown'].includes(obj.rank)) {
+          const card = new Card(obj);
           this.cards.push(card);
         }
       }
     } else {
-      for (let obj of inputObjects) {
-        let card = new Card(obj);
+      for (const obj of inputObjects) {
+        const card = new Card(obj);
         this.cards.push(card);
       }
     }
@@ -75,12 +78,12 @@ class Decktet {
     return this.cards.pop();
   }
 
-  getNumberofCards() {
+  getRemainingCards() {
     return this.cards.length;
   }
 
   shuffle() {
-    for (let idx = this.getNumberofCards() - 1; idx > 0; idx--) {
+    for (let idx = this.getRemainingCards() - 1; idx > 0; idx--) {
       const newIndex = Math.floor(Math.random() * (idx + 1));
       const oldValue = this.cards[newIndex];
       this.cards[newIndex] = this.cards[idx];
@@ -89,5 +92,4 @@ class Decktet {
   }
 }
 
-module.exports.Card = Card;
-module.exports.Decktet = Decktet;
+// const deck = new Decktet({ isBasicDeck: true });

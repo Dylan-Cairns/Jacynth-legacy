@@ -1,3 +1,5 @@
+/* eslint-disable max-statements */
+/* eslint-disable max-lines-per-function */
 document.addEventListener("DOMContentLoaded", () => {
   const gameBoard = document.querySelector(".gameboard-grid-container");
 
@@ -10,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const boardSpaces = [];
 
-  //Create checkered board with id's. Fn works for even or odd number size grids.
+  //Create checkered board with id's. works for even or odd number size grids.
   function createBoard(grid, spaces, width) {
     console.log("fn called");
     let isDark = false;
@@ -23,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // if board width is even, swap color of starting tile for each new row
       if (isBoardWidthEven) {
         if (idx > 0 && idx % width === 0) {
-          isDark = isDark ? false : true;
+          isDark = !isDark;
         }
       }
 
