@@ -1,6 +1,6 @@
 import { Suit, Card, Decktet } from './decktet';
 
-class BoardSpace {
+export class BoardSpace {
   id: string;
   card: Card | undefined;
   playerToken: string | undefined;
@@ -13,14 +13,17 @@ class BoardSpace {
     this.controllingSpaceBySuit = new Map();
   }
 
-  setCard(card: Card) {
-    if (this.getCard()) throw new Error('space already occupied by card');
+  setCard(card: Card): boolean {
+    if (this.getCard()) return false;
     this.card = card;
+    return true;
   }
 
   setPlayerToken(player: string) {
-    if (!this.getCard()) throw new Error('no card on space, cannot be claimed');
+    if (!this.getCard()) return false;
+    if (this.getPlayerToken()) return false;
     this.playerToken = player;
+    return true;
   }
 
   setControlbySuit(suit: Suit, id: string) {
@@ -49,7 +52,7 @@ class BoardSpace {
   }
 }
 
-class GameBoard {
+export class GameBoard {
   boardSize: number;
   spaces: Map<string, BoardSpace>;
   constructor(boardSize: number) {
@@ -64,27 +67,27 @@ class GameBoard {
     }
   }
 
-  getSpace(id: string) {
-    if (this.spaces.get(id) !== undefined) {
-      return this.spaces.get(id);
+  getSpace(spaceID: string) {
+    if (this.spaces.get(spaceID) !== undefined) {
+      return this.spaces.get(spaceID);
     }
   }
 
-  getCard(id: string) {
-    return this.spaces.get(id)?.getCard();
+  getCard(spaceID: string) {
+    return this.spaces.get(spaceID)?.getCard();
   }
 
-  getPlayerToken(id: string) {
-    return this.spaces.get(id)?.getPlayerToken();
+  getPlayerToken(spaceID: string) {
+    return this.spaces.get(spaceID)?.getPlayerToken();
   }
 
-  getControllingSpace(id: string, suit: Suit) {
-    return this.spaces.get(id)?.getControllingSpaceID(suit);
+  getControllingSpace(spaceID: string, suit: Suit) {
+    return this.spaces.get(spaceID)?.getControllingSpaceID(suit);
   }
 
-  getAdjacentSpaces(id: string): BoardSpace[] {
-    const x = parseInt(id[1]);
-    const y = parseInt(id[3]);
+  getAdjacentSpaces(spaceID: string): BoardSpace[] {
+    const x = parseInt(spaceID[1]);
+    const y = parseInt(spaceID[3]);
     const results = [] as BoardSpace[];
     const adjArr = [
       [x - 1, y],
@@ -106,12 +109,12 @@ class GameBoard {
 
   // To be available, a space must be empty
   // and adjacent to an already played card
-  isPlayableSpace(id: string): boolean {
-    const space = this.spaces.get(id);
+  isPlayableSpace(spaceID: string): boolean {
+    const space = this.spaces.get(spaceID);
     if (!space) return false;
     if (space.getCard()) return false;
 
-    const adjArr = this.getAdjacentSpaces(id);
+    const adjArr = this.getAdjacentSpaces(spaceID);
     for (let idx = 0; idx < adjArr.length; idx++) {
       if (adjArr[idx].getCard()) {
         return true;
@@ -131,17 +134,17 @@ class GameBoard {
     return results;
   }
 
-  getDistrict(id: string, suit: Suit): BoardSpace[] {
+  getDistrict(SpaceID: string, suit: Suit): BoardSpace[] {
     const results = [] as BoardSpace[];
-    const currentSpace = this.getSpace(id);
+    const currentSpace = this.getSpace(SpaceID);
     if (!currentSpace || !suit) return results;
     const currentCard = currentSpace.getCard();
     if (!currentCard || !currentCard.hasSuit(suit)) return results;
 
     results.push(currentSpace);
 
-    const searchConnectedTiles = (id: string, suit: Suit) => {
-      this.getAdjacentSpaces(id).forEach((space) => {
+    const searchConnectedTiles = (spaceID: string, suit: Suit) => {
+      this.getAdjacentSpaces(spaceID).forEach((space) => {
         if (!results.includes(space)) {
           const card = space.getCard();
           if (card) {
@@ -153,12 +156,12 @@ class GameBoard {
         }
       });
     };
-    searchConnectedTiles(id, suit);
+    searchConnectedTiles(SpaceID, suit);
     return results;
   }
 
-  setPlayerToken(id: string, player: string): boolean {
-    const currentSpace = this.getSpace(id);
+  setPlayerToken(spaceID: string, player: string): boolean {
+    const currentSpace = this.getSpace(spaceID);
     if (!currentSpace) return false;
     const currentCard = currentSpace.getCard();
     if (!currentCard) return false;
@@ -167,7 +170,7 @@ class GameBoard {
     // check if card belongs to another players district in any suit
     const suits = currentCard.getAllSuits();
     for (const suit of suits) {
-      const district = this.getDistrict(id, suit);
+      const district = this.getDistrict(spaceID, suit);
       for (const space of district) {
         if (space.getPlayerToken() && space.getPlayerToken() !== player) {
           return false;
@@ -178,21 +181,28 @@ class GameBoard {
     // marker and claim all districts
     currentSpace.setPlayerToken(player);
     for (const suit of suits) {
-      const district = this.getDistrict(id, suit);
+      const district = this.getDistrict(spaceID, suit);
       for (const space of district) {
-        space.setControlbySuit(suit, id);
+        space.setControlbySuit(suit, spaceID);
       }
     }
     return true;
   }
 
-  setCard(id: string, card: Card) {
-    const space = this.getSpace(id);
-    if (space) space.setCard(card);
-    // resolve any influence conflicts
+  setCard(cardID: string, card: Card): boolean {
+    const space = this.getSpace(cardID);
+    if (!space) return false;
+    if (!space.setCard(card)) return false;
+    this.resolveInfluenceConflicts(space);
+    return true;
+  }
+
+  resolveInfluenceConflicts(boardSpace: BoardSpace) {
+    const card = boardSpace.getCard();
+    if (!card) throw new Error('no card on space');
     const suits = card.getAllSuits();
     suits.forEach((suit) => {
-      const district = this.getDistrict(id, suit);
+      const district = this.getDistrict(boardSpace.getID(), suit);
       let spacesWithTokens = district.filter((space) => space.getPlayerToken());
       if (spacesWithTokens.length > 1) {
         spacesWithTokens = spacesWithTokens.sort((a, b) => {
@@ -207,32 +217,64 @@ class GameBoard {
       }
     });
   }
+  // get all spaces which a player can place a token on.
+  // A valid space must have a card, must not have a token already,
+  // and must not be part of another players district in any suit.
+  getAvailableTokenSpaces(playerID: string): BoardSpace[] {
+    // for each space on the board
+    const results = [] as BoardSpace[];
+    for (const [id, space] of this.spaces) {
+      // if no card or already has token, move to next space
+      if (!space.getCard() || space.getPlayerToken()) continue;
+      const suits = space.getControlledSuitsMap();
+      // if controlledsuitsMap is empty, it's definitely available.
+      if (suits.size === 0) {
+        results.push(space);
+        continue;
+      } else {
+        // check if the controlling space belongs to another player for each suit.
+        let ownedByOtherPlayer = false;
+        for (const [suit, controllingId] of suits) {
+          const spaceToCheckOwnerOf = this.getSpace(controllingId)!;
+          if (spaceToCheckOwnerOf.getPlayerToken() !== playerID) {
+            ownedByOtherPlayer = true;
+            break;
+          }
+        }
+        // if it doesn't belong to any other player, add it to the results
+        if (!ownedByOtherPlayer) results.push(space);
+      }
+    }
+    return results;
+  }
 }
 const deck = new Decktet({ isBasicDeck: true });
-const board = new GameBoard(5);
+const board = new GameBoard(6);
 
 board.spaces.forEach((space) => {
   const id = space.getID();
   const card = deck.drawCard() as Card;
   board.setCard(id, card);
 });
-console.log('x0y0', board.getSpace('x0y0')?.getCard()?.getAllSuits());
-console.log('x0y1', board.getSpace('x0y1')?.getCard()?.getAllSuits());
-console.log('x1y0', board.getSpace('x1y0')?.getCard()?.getAllSuits());
+// console.log('x0y0', board.getSpace('x0y0')?.getCard()?.getAllSuits());
+// console.log('x0y1', board.getSpace('x0y1')?.getCard()?.getAllSuits());
+// console.log('x1y0', board.getSpace('x1y0')?.getCard()?.getAllSuits());
 board.setPlayerToken('x0y0', 'player1');
-board
-  .getSpace('x0y0')
-  ?.getCard()
-  ?.getAllSuits()
-  ?.forEach((suit) =>
-    console.log(`district for ${suit}: `, board.getDistrict('x0y0', suit))
-  );
+// board
+//   .getSpace('x0y0')
+//   ?.getCard()
+//   ?.getAllSuits()
+//   ?.forEach((suit) =>
+//     console.log(`district for ${suit}: `, board.getDistrict('x0y0', suit))
+//   );
 
-const space1Suits = board.getCard('x0y0')?.getAllSuits() as Suit[];
-space1Suits?.forEach((suit) => {
-  const district = board.getDistrict('x0y0', suit);
-  if (district.length > 1) {
-    const space = district[district.length - 1];
-    console.log(board.setPlayerToken(space.getID(), 'player2'));
-  }
-});
+// const space1Suits = board.getCard('x0y0')?.getAllSuits() as Suit[];
+// space1Suits?.forEach((suit) => {
+//   const district = board.getDistrict('x0y0', suit);
+//   if (district.length > 1) {
+//     const space = district[district.length - 1];
+//     console.log(board.setPlayerToken(space.getID(), 'player2'));
+//   }
+// });
+
+// console.log(board.getAvailableTokenSpaces('player2').length);
