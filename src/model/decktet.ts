@@ -14,10 +14,10 @@ type ArgObj = {
 };
 
 export class Card {
-  name: string;
-  rank: Rank;
-  value: number;
-  suits: Suit[];
+  private name: string;
+  private rank: Rank;
+  private value: number;
+  private suits: Suit[];
 
   constructor(argObj: ArgObj) {
     this.name = argObj.name;
@@ -51,7 +51,7 @@ export class Card {
 }
 
 export class Decktet {
-  cards: Card[];
+  private cards: Card[];
 
   constructor(argObj: { isBasicDeck: boolean }) {
     this.cards = [];

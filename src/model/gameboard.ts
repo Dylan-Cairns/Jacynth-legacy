@@ -1,10 +1,10 @@
 import { Suit, Card, Decktet } from './decktet';
 
 export class BoardSpace {
-  id: string;
-  card: Card | undefined;
-  playerToken: string | undefined;
-  controllingSpaceBySuit: Map<Suit, string>;
+  private id: string;
+  private card: Card | undefined;
+  private playerToken: string | undefined;
+  private controllingSpaceBySuit: Map<Suit, string>;
 
   constructor(id: string) {
     this.id = id;
@@ -50,11 +50,19 @@ export class BoardSpace {
   getControllingSpaceID(suit: Suit) {
     return this.controllingSpaceBySuit.get(suit);
   }
+
+  removeCard() {
+    this.card = undefined;
+  }
+
+  removePlayerToken() {
+    this.playerToken = undefined;
+  }
 }
 
 export class GameBoard {
-  boardSize: number;
-  spaces: Map<string, BoardSpace>;
+  private boardSize: number;
+  private spaces: Map<string, BoardSpace>;
   constructor(boardSize: number) {
     this.boardSize = boardSize;
     this.spaces = new Map();
@@ -67,10 +75,18 @@ export class GameBoard {
     }
   }
 
+  getBoardSize() {
+    return this.boardSize;
+  }
+
   getSpace(spaceID: string) {
     if (this.spaces.get(spaceID) !== undefined) {
       return this.spaces.get(spaceID);
     }
+  }
+
+  getAllSpaces() {
+    return this.spaces;
   }
 
   getCard(spaceID: string) {
@@ -189,8 +205,8 @@ export class GameBoard {
     return true;
   }
 
-  setCard(cardID: string, card: Card): boolean {
-    const space = this.getSpace(cardID);
+  setCard(spaceID: string, card: Card): boolean {
+    const space = this.getSpace(spaceID);
     if (!space) return false;
     if (!space.setCard(card)) return false;
     this.resolveInfluenceConflicts(space);
@@ -247,11 +263,43 @@ export class GameBoard {
     }
     return results;
   }
+
+  getPlayerScore(playerID: string): number {
+    let score = 0;
+    this.spaces.forEach((space) => {
+      if (space.getCard()) {
+        space.getControlledSuitsMap().forEach((controllingSpaceID) => {
+          const controllingSpace = this.spaces.get(controllingSpaceID);
+          const controllingPlayerID = controllingSpace?.getPlayerToken();
+          if (controllingPlayerID === playerID) score += 1;
+        });
+      }
+    });
+    return score;
+  }
+
+  resolveInflunceForEntireBoard() {
+    this.spaces.forEach((space) => {
+      if (space.getPlayerToken()) {
+        this.resolveInfluenceConflicts(space);
+      }
+    });
+  }
+
+  removeCardAndResolveBoard(spaceID: string) {
+    this.spaces.get(spaceID)?.removeCard();
+    this.resolveInflunceForEntireBoard();
+  }
+
+  removePlayerTokenAndResolveBoard(spaceID: string) {
+    this.spaces.get(spaceID)?.removePlayerToken();
+    this.resolveInflunceForEntireBoard();
+  }
 }
 const deck = new Decktet({ isBasicDeck: true });
 const board = new GameBoard(6);
 
-board.spaces.forEach((space) => {
+board.getAllSpaces().forEach((space) => {
   const id = space.getID();
   const card = deck.drawCard() as Card;
   board.setCard(id, card);
@@ -278,3 +326,4 @@ board.setPlayerToken('x0y0', 'player1');
 // });
 
 // console.log(board.getAvailableTokenSpaces('player2').length);
+console.log(board.getPlayerScore('player1'));
