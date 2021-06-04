@@ -58,6 +58,10 @@ export class BoardSpace {
   removePlayerToken() {
     this.playerToken = undefined;
   }
+
+  resetSuitsControlMap() {
+    this.controllingSpaceBySuit = new Map();
+  }
 }
 
 export class GameBoard {
@@ -220,12 +224,17 @@ export class GameBoard {
     suits.forEach((suit) => {
       const district = this.getDistrict(boardSpace.getID(), suit);
       let spacesWithTokens = district.filter((space) => space.getPlayerToken());
-      if (spacesWithTokens.length > 1) {
-        spacesWithTokens = spacesWithTokens.sort((a, b) => {
-          const ele1 = a.getCard()?.getValue() as number;
-          const ele2 = b.getCard()?.getValue() as number;
-          return ele1 - ele2;
-        });
+      if (spacesWithTokens.length >= 1) {
+        if (spacesWithTokens.length > 1) {
+          console.log(
+            `resolving conflict on a ${suit} district of ${district.length} cards`
+          );
+          spacesWithTokens = spacesWithTokens.sort((a, b) => {
+            const ele1 = a.getCard()?.getValue() as number;
+            const ele2 = b.getCard()?.getValue() as number;
+            return ele1 - ele2;
+          });
+        }
         const controllingSpace = spacesWithTokens[0];
         district.forEach((space) => {
           space.setControlbySuit(suit, controllingSpace.getID());
@@ -287,7 +296,11 @@ export class GameBoard {
   }
 
   removeCardAndResolveBoard(spaceID: string) {
-    this.spaces.get(spaceID)?.removeCard();
+    const space = this.spaces.get(spaceID);
+    if (space) {
+      space.removeCard();
+      space.resetSuitsControlMap();
+    }
     this.resolveInflunceForEntireBoard();
   }
 
@@ -296,18 +309,18 @@ export class GameBoard {
     this.resolveInflunceForEntireBoard();
   }
 }
-const deck = new Decktet({ isBasicDeck: true });
-const board = new GameBoard(6);
+// const deck = new Decktet({ isBasicDeck: true });
+// const board = new GameBoard(6);
 
-board.getAllSpaces().forEach((space) => {
-  const id = space.getID();
-  const card = deck.drawCard() as Card;
-  board.setCard(id, card);
-});
-// console.log('x0y0', board.getSpace('x0y0')?.getCard()?.getAllSuits());
-// console.log('x0y1', board.getSpace('x0y1')?.getCard()?.getAllSuits());
-// console.log('x1y0', board.getSpace('x1y0')?.getCard()?.getAllSuits());
-board.setPlayerToken('x0y0', 'player1');
+// board.getAllSpaces().forEach((space) => {
+//   const id = space.getID();
+//   const card = deck.drawCard() as Card;
+//   board.setCard(id, card);
+// });
+// // console.log('x0y0', board.getSpace('x0y0')?.getCard()?.getAllSuits());
+// // console.log('x0y1', board.getSpace('x0y1')?.getCard()?.getAllSuits());
+// // console.log('x1y0', board.getSpace('x1y0')?.getCard()?.getAllSuits());
+// board.setPlayerToken('x0y0', 'player1');
 // board
 //   .getSpace('x0y0')
 //   ?.getCard()
@@ -326,4 +339,4 @@ board.setPlayerToken('x0y0', 'player1');
 // });
 
 // console.log(board.getAvailableTokenSpaces('player2').length);
-console.log(board.getPlayerScore('player1'));
+// console.log(board.getPlayerScore('player1'));

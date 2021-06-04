@@ -1,12 +1,12 @@
 /* eslint-disable max-statements */
 /* eslint-disable max-lines-per-function */
-document.addEventListener("DOMContentLoaded", () => {
-  const gameBoard = document.querySelector(".gameboard-grid-container");
+document.addEventListener('DOMContentLoaded', () => {
+  const gameBoard = document.querySelector('.gameboard-grid-container');
 
   //Set board size in js and css
   const BOARD_DIMENSIONS = 6;
   document.documentElement.style.setProperty(
-    "--gameboard-spaces-width",
+    '--gameboard-spaces-width',
     String(BOARD_DIMENSIONS)
   );
 
@@ -14,12 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //Create checkered board with id's. works for even or odd number size grids.
   function createBoard(grid, spaces, width) {
-    console.log("fn called");
+    console.log('fn called');
     let isDark = false;
     let isBoardWidthEven = width % 2 === 0;
     for (let idx = 0; idx < width * width; idx++) {
-      const space = document.createElement("div");
-      space.className += "gameboard-grid-item";
+      const space = document.createElement('div');
+      space.className += 'gameboard-grid-item';
       space.dataset.id = String(idx);
 
       // if board width is even, swap color of starting tile for each new row
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (isDark) {
-        space.className += " dark-square";
+        space.className += ' dark-square';
         isDark = false;
       } else {
         isDark = true;

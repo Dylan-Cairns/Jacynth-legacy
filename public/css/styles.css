@@ -1,12 +1,18 @@
 @font-face {
-  font-family: "Fortune Letters";
-  src: url("../assets/fortune-letters.ttf") format("truetype");
+  font-family: 'Fortune Letters';
+  src: url('../assets/fortune-letters.ttf') format('truetype');
 }
 
 :root {
   --gameboard-width: min(70vh, 100vw);
   --desktop-gameboard-width: min(79vh, 75vw);
-  --gameboard-spaces-width: 4;
+  --gameboard-spaces-width: 6;
+  --body-background: #659dbf;
+  --title-text: #f2f2f2;
+  --icons-grid-container-background: #2d2e2c;
+  --icons-grid-background: #474847;
+  --icon-text-color: #94eb6b;
+  --icon-label-text: #a3a79f;
 }
 
 *,
@@ -17,20 +23,25 @@
 
 body {
   margin: 0;
-  background-image: url("../assets/spikes.png");
-  background-color: #b4adea;
-  background-blend-mode: multiply;
-  font-family: "Fortune Letters", Futura, Geneva, sans-serif;
+  background-image: url('../assets/building_grey.png'),
+    url('../assets/funky-lines.png');
+  background-color: var(--body-background);
+  background-size: 100vw, auto;
+  background-blend-mode: multiply, multiply;
+  background-repeat: no-repeat, repeat;
+  background-position: right bottom, top left;
+  font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
 }
 
 .title {
   display: none;
+  color: var(--title-text);
 }
 
 .icon-label {
   display: none;
   font-size: 0.4em;
-  color: #a3a79f;
+  color: var(--icon-label-text);
 }
 
 .main-flex-container {
@@ -56,14 +67,14 @@ body {
   align-items: start;
   align-content: start;
   justify-items: center;
-  background-color: #2d2e2c;
+  background-color: var(--icons-grid-container-background);
   width: 100vw;
   padding: 0.25em 0em;
 }
 
 .icons-grid-item {
-  background-color: #474847;
-  color: #59ffa0;
+  background-color: var(--icons-grid-background);
+  color: var(--icon-text-color);
   padding: 0.2em;
   border-radius: 3px;
   font-size: 2em;
@@ -71,7 +82,9 @@ body {
 }
 
 .gameboard-grid-container {
-  background-image: url("../assets/marble-2.jpg");
+  background-image: url('../assets/2p_background.png');
+  background-size: 100%;
+  background-repeat: repeat;
   border-radius: 5px;
   border: 1px solid #50514f94;
   display: grid;
@@ -83,11 +96,9 @@ body {
   justify-self: center;
 }
 
-.gameboard-grid-item {
-}
-
 .dark-square {
-  background-color: #50514f4d;
+  /* background-color: #50514f4d; */
+  background-color: #50514f8f;
 }
 
 .player-hand-grid-container {
@@ -102,15 +113,39 @@ body {
 }
 
 .player-hand-grid-item {
-  background-color: #fdfff7;
-  background-blend-mode: multiply;
+  background-image: url('../assets/tile2.png');
+  background-size: cover;
+  background-color: #fff;
   color: #222;
   border: 1px solid grey;
   border-radius: 5px;
   margin: 3px;
-  box-shadow: 2px 2px;
-  width: calc((var(--gameboard-width) - 2em) / 4);
-  height: calc((var(--gameboard-width) - 2em) / 4);
+  /* box-shadow: 2px 2px; */
+  width: calc((var(--gameboard-width) - 2em) / 6);
+  height: calc((var(--gameboard-width) - 2em) / 6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-auto-flow: column;
+  padding: 5px;
+  justify-content: center;
+  -moz-box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
+    inset -2px -2px 2px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
+    inset -2px -2px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
+    inset -2px -2px 2px rgba(0, 0, 0, 0.4);
+}
+
+.card-cell {
+  color: #2d2e2c;
+  font-size: calc(var(--desktop-gameboard-width) / 13);
+  padding: 0px;
+}
+
+.card-cell img {
+  width: 100%;
+  height: 100%;
 }
 
 a {
@@ -192,6 +227,7 @@ a:hover {
 @media (min-width: 600px) {
   .title {
     display: block;
+    color: var(--title-text);
   }
 
   .icon-label {
@@ -226,8 +262,14 @@ a:hover {
   }
 
   .player-hand-grid-item {
-    width: calc((var(--desktop-gameboard-width) - 2em) / 4);
-    height: calc((var(--desktop-gameboard-width) - 2em) / 4);
+    width: calc((var(--gameboard-width) - 2em) / 6);
+    height: calc((var(--gameboard-width) - 2em) / 6);
+    padding: 8px;
+  }
+  .card-cell {
+    color: #2d2e2c;
+    font-size: calc(var(--desktop-gameboard-width) / 20);
+    padding: 1px;
   }
 
   .player-hand-grid-container {
