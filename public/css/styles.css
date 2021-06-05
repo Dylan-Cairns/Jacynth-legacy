@@ -6,13 +6,15 @@
 :root {
   --gameboard-width: min(70vh, 100vw);
   --desktop-gameboard-width: min(79vh, 75vw);
-  --gameboard-spaces-width: 6;
+  --gameboard-dimensions: 6;
   --body-background: #659dbf;
   --title-text: #f2f2f2;
   --icons-grid-container-background: #2d2e2c;
   --icons-grid-background: #474847;
   --icon-text-color: #94eb6b;
   --icon-label-text: #a3a79f;
+  --menu-border: #8c6746;
+  --link-hover: #f2e96d;
 }
 
 *,
@@ -23,13 +25,13 @@
 
 body {
   margin: 0;
-  background-image: url('../assets/building_grey.png'),
-    url('../assets/funky-lines.png');
+  background-image: url('../assets/building_grey_dark.png'),
+    url('../assets/funky-lines_light.png');
   background-color: var(--body-background);
   background-size: 100vw, auto;
-  background-blend-mode: multiply, multiply;
+  background-blend-mode: multiply;
   background-repeat: no-repeat, repeat;
-  background-position: right bottom, top left;
+  background-position: bottom center, top left;
   font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
 }
 
@@ -91,8 +93,8 @@ body {
   justify-content: center;
   width: var(--gameboard-width);
   height: var(--gameboard-width);
-  grid-template-columns: repeat(var(--gameboard-spaces-width), 1fr);
-  grid-template-rows: repeat(var(--gameboard-spaces-width), 1fr);
+  grid-template-columns: repeat(var(--gameboard-dimensions), 1fr);
+  grid-template-rows: repeat(var(--gameboard-dimensions), 1fr);
   justify-self: center;
 }
 
@@ -113,28 +115,37 @@ body {
 }
 
 .player-hand-grid-item {
-  background-image: url('../assets/tile2.png');
-  background-size: cover;
-  background-color: #fff;
+  position: relative;
+  background-image: url('../assets/ricepaper.png');
+  /* background-size: cover; */
+  /* background-blend-mode: multiply; */
   color: #222;
   border: 1px solid grey;
-  border-radius: 5px;
+  border-radius: 0px;
   margin: 3px;
   /* box-shadow: 2px 2px; */
-  width: calc((var(--gameboard-width) - 2em) / 6);
-  height: calc((var(--gameboard-width) - 2em) / 6);
+  width: calc(var(--gameboard-width) / var(--gameboard-dimensions));
+  height: calc(var(--gameboard-width) / var(--gameboard-dimensions));
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   grid-auto-flow: column;
-  padding: 5px;
+  padding: 0px;
   justify-content: center;
-  -moz-box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
-    inset -2px -2px 2px rgba(0, 0, 0, 0.4);
-  -webkit-box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
-    inset -2px -2px 2px rgba(0, 0, 0, 0.4);
-  box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
-    inset -2px -2px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.1),
+    inset -2px -2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-image: url('../assets/gloss.png');
+  opacity: 100%;
+  background-size: cover;
+  width: calc(var(--gameboard-width) / var(--gameboard-dimensions));
+  height: calc(var(--gameboard-width) / var(--gameboard-dimensions));
+  z-index: 10;
 }
 
 .card-cell {
@@ -155,7 +166,7 @@ a {
 
 a:hover {
   text-decoration: none;
-  color: white;
+  color: var(--link-hover);
 }
 
 /* Popup menus styling */
@@ -184,20 +195,24 @@ a:hover {
 .menu-popup {
   margin: 4em 1em;
   padding: 1em 1em;
-  background: #fff;
-  border-radius: 5px;
+  border: solid 6px var(--menu-border);
+  border-radius: 12px;
+  background-image: url('../assets/ricepaper.png');
+  background-color: #a3a79f;
   position: relative;
   width: 95vw;
 }
 
-.menu-popup h2 {
-  margin-top: 0;
+.menu-popup h1 {
+  text-align: center;
+  /* margin-top: 0; */
   color: #333;
 }
 
 .menu-popup .content {
   max-height: 30%;
   overflow: auto;
+  font-size: 1.2em;
 }
 
 .content ul {
@@ -211,20 +226,27 @@ a:hover {
 
 .menu-popup .close {
   position: absolute;
-  top: 5px;
-  right: 15px;
+  top: -5px;
+  right: 10px;
   transition: all 200ms;
-  font-size: 30px;
+  font-size: 35px;
   font-weight: bold;
   text-decoration: none;
   color: #333;
 }
 
 .menu-popup .close:hover {
-  color: #59ffa0;
+  color: var(--icon-text-color);
 }
 
 @media (min-width: 600px) {
+  body {
+    background-image: url('../assets/building_grey2.png'),
+      url('../assets/funky-lines.png');
+    background-position: bottom center, top left;
+    background-size: 100vw, auto;
+  }
+
   .title {
     display: block;
     color: var(--title-text);
@@ -262,13 +284,21 @@ a:hover {
   }
 
   .player-hand-grid-item {
-    width: calc((var(--gameboard-width) - 2em) / 6);
-    height: calc((var(--gameboard-width) - 2em) / 6);
-    padding: 8px;
+    width: calc(var(--desktop-gameboard-width) / var(--gameboard-dimensions));
+    height: calc(var(--desktop-gameboard-width) / var(--gameboard-dimensions));
+    padding: 4px;
+    box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
+      inset -2px -2px 2px rgba(0, 0, 0, 0.4);
   }
+
+  .card-overlay {
+    width: calc(var(--desktop-gameboard-width) / var(--gameboard-dimensions));
+    height: calc(var(--desktop-gameboard-width) / var(--gameboard-dimensions));
+  }
+
   .card-cell {
     color: #2d2e2c;
-    font-size: calc(var(--desktop-gameboard-width) / 20);
+    font-size: calc(var(--desktop-gameboard-width) / 15);
     padding: 1px;
   }
 

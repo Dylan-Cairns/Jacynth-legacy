@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/public/css/styles.css">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.9.55/css/materialdesignicons.min.css"rel="stylesheet">
-  <script src="app.js" charset="utf-8"></script>
   <title>Document</title>
 </head>
 <body>
@@ -36,10 +35,10 @@
     </div>
     <div class="main-grid-item player-hand-grid-container">
       <div class="player-hand-grid-item" draggable="true" ondragstart="drag(event)">
-        <div class="card-cell"><img src="public/assets/snakes.png"></div>
-        <div class="card-cell"><img src="public/assets/knots.png"></div>
-        <div class="card-cell">	&nbsp;9</div>
-        <div class="card-cell"><span class="mdi mdi-castle"></div>
+        <div class="card-cell" draggable="false"><img src="public/assets/snakes.png"></div>
+        <div class="card-cell" draggable="false"><img src="public/assets/knots.png"></div>
+        <div class="card-cell" draggable="false">	&nbsp;9</div>
+        <div class="card-cell" draggable="false"><span class="mdi mdi-castle"></div>
       </div>
       <div class="player-hand-grid-item"></div>
       <div class="player-hand-grid-item"></div>
@@ -49,7 +48,7 @@
 <div id="menu" class="overlay">
 	<div class="menu-popup">
     <a class="close" href="#">&times;</a>
-    <h2>Jacynth</h2>
+    <h1>Jacynth</h1>
 		<div class="content">
       <h3>Rules</h3>
       <ul>
@@ -68,3 +67,4 @@
 </div>
 </body>
 </html>
+<script src="app.js" charset="utf-8"></script>
