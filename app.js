@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //Create checkered board with id's. works for even or odd number size grids.
   function createBoard(grid, spaces, width) {
-    console.log('fn called');
     let isDark = false;
     let isBoardWidthEven = width % 2 === 0;
     for (let idx = 0; idx < width * width; idx++) {

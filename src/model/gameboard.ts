@@ -226,9 +226,6 @@ export class GameBoard {
       let spacesWithTokens = district.filter((space) => space.getPlayerToken());
       if (spacesWithTokens.length >= 1) {
         if (spacesWithTokens.length > 1) {
-          console.log(
-            `resolving conflict on a ${suit} district of ${district.length} cards`
-          );
           spacesWithTokens = spacesWithTokens.sort((a, b) => {
             const ele1 = a.getCard()?.getValue() as number;
             const ele2 = b.getCard()?.getValue() as number;

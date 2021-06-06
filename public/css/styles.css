@@ -114,7 +114,7 @@ body {
   border-radius: 20px;
 }
 
-.player-hand-grid-item {
+.card {
   position: relative;
   background-image: url('../assets/ricepaper.png');
   /* background-size: cover; */
@@ -283,7 +283,7 @@ a:hover {
     height: var(--desktop-gameboard-width);
   }
 
-  .player-hand-grid-item {
+  .card {
     width: calc(var(--desktop-gameboard-width) / var(--gameboard-dimensions));
     height: calc(var(--desktop-gameboard-width) / var(--gameboard-dimensions));
     padding: 4px;

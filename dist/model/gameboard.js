@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GameBoard = exports.BoardSpace = void 0;
-const decktet_1 = require("./decktet");
 class BoardSpace {
     constructor(id) {
         this.id = id;
@@ -43,6 +42,15 @@ class BoardSpace {
     getControllingSpaceID(suit) {
         return this.controllingSpaceBySuit.get(suit);
     }
+    removeCard() {
+        this.card = undefined;
+    }
+    removePlayerToken() {
+        this.playerToken = undefined;
+    }
+    resetSuitsControlMap() {
+        this.controllingSpaceBySuit = new Map();
+    }
 }
 exports.BoardSpace = BoardSpace;
 class GameBoard {
@@ -57,10 +65,16 @@ class GameBoard {
             }
         }
     }
+    getBoardSize() {
+        return this.boardSize;
+    }
     getSpace(spaceID) {
         if (this.spaces.get(spaceID) !== undefined) {
             return this.spaces.get(spaceID);
         }
+    }
+    getAllSpaces() {
+        return this.spaces;
     }
     getCard(spaceID) {
         var _a;
@@ -176,8 +190,8 @@ class GameBoard {
         }
         return true;
     }
-    setCard(cardID, card) {
-        const space = this.getSpace(cardID);
+    setCard(spaceID, card) {
+        const space = this.getSpace(spaceID);
         if (!space)
             return false;
         if (!space.setCard(card))
@@ -193,13 +207,16 @@ class GameBoard {
         suits.forEach((suit) => {
             const district = this.getDistrict(boardSpace.getID(), suit);
             let spacesWithTokens = district.filter((space) => space.getPlayerToken());
-            if (spacesWithTokens.length > 1) {
-                spacesWithTokens = spacesWithTokens.sort((a, b) => {
-                    var _a, _b;
-                    const ele1 = (_a = a.getCard()) === null || _a === void 0 ? void 0 : _a.getValue();
-                    const ele2 = (_b = b.getCard()) === null || _b === void 0 ? void 0 : _b.getValue();
-                    return ele1 - ele2;
-                });
+            if (spacesWithTokens.length >= 1) {
+                if (spacesWithTokens.length > 1) {
+                    console.log(`resolving conflict on a ${suit} district of ${district.length} cards`);
+                    spacesWithTokens = spacesWithTokens.sort((a, b) => {
+                        var _a, _b;
+                        const ele1 = (_a = a.getCard()) === null || _a === void 0 ? void 0 : _a.getValue();
+                        const ele2 = (_b = b.getCard()) === null || _b === void 0 ? void 0 : _b.getValue();
+                        return ele1 - ele2;
+                    });
+                }
                 const controllingSpace = spacesWithTokens[0];
                 district.forEach((space) => {
                     space.setControlbySuit(suit, controllingSpace.getID());
@@ -240,19 +257,53 @@ class GameBoard {
         }
         return results;
     }
+    getPlayerScore(playerID) {
+        let score = 0;
+        this.spaces.forEach((space) => {
+            if (space.getCard()) {
+                space.getControlledSuitsMap().forEach((controllingSpaceID) => {
+                    const controllingSpace = this.spaces.get(controllingSpaceID);
+                    const controllingPlayerID = controllingSpace === null || controllingSpace === void 0 ? void 0 : controllingSpace.getPlayerToken();
+                    if (controllingPlayerID === playerID)
+                        score += 1;
+                });
+            }
+        });
+        return score;
+    }
+    resolveInflunceForEntireBoard() {
+        this.spaces.forEach((space) => {
+            if (space.getPlayerToken()) {
+                this.resolveInfluenceConflicts(space);
+            }
+        });
+    }
+    removeCardAndResolveBoard(spaceID) {
+        const space = this.spaces.get(spaceID);
+        if (space) {
+            space.removeCard();
+            space.resetSuitsControlMap();
+        }
+        this.resolveInflunceForEntireBoard();
+    }
+    removePlayerTokenAndResolveBoard(spaceID) {
+        var _a;
+        (_a = this.spaces.get(spaceID)) === null || _a === void 0 ? void 0 : _a.removePlayerToken();
+        this.resolveInflunceForEntireBoard();
+    }
 }
 exports.GameBoard = GameBoard;
-const deck = new decktet_1.Decktet({ isBasicDeck: true });
-const board = new GameBoard(6);
-board.spaces.forEach((space) => {
-    const id = space.getID();
-    const card = deck.drawCard();
-    board.setCard(id, card);
-});
-// console.log('x0y0', board.getSpace('x0y0')?.getCard()?.getAllSuits());
-// console.log('x0y1', board.getSpace('x0y1')?.getCard()?.getAllSuits());
-// console.log('x1y0', board.getSpace('x1y0')?.getCard()?.getAllSuits());
-board.setPlayerToken('x0y0', 'player1');
+// const deck = new Decktet({ isBasicDeck: true });
+// const board = new GameBoard(6);
+// board.getAllSpaces().forEach((space) => {
+//   const id = space.getID();
+//   const card = deck.drawCard() as Card;
+//   board.setCard(id, card);
+// });
+// // console.log('x0y0', board.getSpace('x0y0')?.getCard()?.getAllSuits());
+// // console.log('x0y1', board.getSpace('x0y1')?.getCard()?.getAllSuits());
+// // console.log('x1y0', board.getSpace('x1y0')?.getCard()?.getAllSuits());
+// board.setPlayerToken('x0y0', 'player1');
 // board
 //   .getSpace('x0y0')
 //   ?.getCard()
@@ -269,3 +320,4 @@ board.setPlayerToken('x0y0', 'player1');
 //   }
 // });
 // console.log(board.getAvailableTokenSpaces('player2').length);
+// console.log(board.getPlayerScore('player1'));

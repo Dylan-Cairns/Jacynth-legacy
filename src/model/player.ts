@@ -223,44 +223,38 @@ export class ComputerPlayer extends Player {
   }
 }
 
-const deck = new Decktet({ isBasicDeck: true });
-const board = new GameBoard(6);
-board.setCard('x0y0', deck.drawCard()!);
-board.setCard('x0y5', deck.drawCard()!);
-board.setCard('x5y0', deck.drawCard()!);
-board.setCard('x5y5', deck.drawCard()!);
-// console.log(board.getAvailableSpaces());
-const computerPlayer1 = new ComputerPlayer(
-  'Computer1',
-  board,
-  deck,
-  'Computer2'
-);
-const computerPlayer2 = new ComputerPlayer(
-  'Computer2',
-  board,
-  deck,
-  'Computer1'
-);
-// console.log(computerPlayer1.chooseBestMove());
-
-let turnNumber = 1;
-while (board.getAvailableSpaces().size > 0) {
-  console.log(`Turn number ${turnNumber}`);
-  computerPlayer1.chooseBestMove();
-  computerPlayer2.chooseBestMove();
-  const p1score = board.getPlayerScore('Computer1');
-  const p2score = board.getPlayerScore('Computer2');
-  console.log(`Score = P1: ${p1score} vs P2: ${p2score}`);
-  turnNumber++;
-}
-console.log(`Game over.`);
-const p1score = board.getPlayerScore('Computer1');
-const p2score = board.getPlayerScore('Computer2');
-console.log(`Score = P1: ${p1score} vs P2: ${p2score}`);
-
-// computerPlayer1.chooseBestMove();
-// computerPlayer2.chooseBestMove();
+// const deck = new Decktet({ isBasicDeck: true });
+// const board = new GameBoard(6);
+// board.setCard('x0y0', deck.drawCard()!);
+// board.setCard('x0y5', deck.drawCard()!);
+// board.setCard('x5y0', deck.drawCard()!);
+// board.setCard('x5y5', deck.drawCard()!);
 // // console.log(board.getAvailableSpaces());
-// console.log(computerPlayer1.getHandArr());
-// console.log(computerPlayer1.getAllAvailableMoves());
+// const computerPlayer1 = new ComputerPlayer(
+//   'Computer1',
+//   board,
+//   deck,
+//   'Computer2'
+// );
+// const computerPlayer2 = new ComputerPlayer(
+//   'Computer2',
+//   board,
+//   deck,
+//   'Computer1'
+// );
+// // console.log(computerPlayer1.chooseBestMove());
+
+// let turnNumber = 1;
+// while (board.getAvailableSpaces().size > 0) {
+//   console.log(`Turn number ${turnNumber}`);
+//   computerPlayer1.chooseBestMove();
+//   computerPlayer2.chooseBestMove();
+//   const p1score = board.getPlayerScore('Computer1');
+//   const p2score = board.getPlayerScore('Computer2');
+//   console.log(`Score = P1: ${p1score} vs P2: ${p2score}`);
+//   turnNumber++;
+// }
+// console.log(`Game over.`);
+// const p1score = board.getPlayerScore('Computer1');
+// const p2score = board.getPlayerScore('Computer2');
+// console.log(`Final score = P1: ${p1score} vs P2: ${p2score}`);
