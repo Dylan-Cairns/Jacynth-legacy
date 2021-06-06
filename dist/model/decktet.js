@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Decktet = exports.Card = void 0;
-const fs = require("fs");
-const parse = require("csv-parse/lib/sync");
-class Card {
+import fs from 'fs';
+import parse from 'csv-parse/lib/sync';
+export class Card {
     constructor(argObj) {
         this.name = argObj.name;
         this.rank = argObj.rank;
@@ -30,14 +27,13 @@ class Card {
         return this.suits.includes(suit);
     }
 }
-exports.Card = Card;
-class Decktet {
-    constructor(argObj) {
+export class Decktet {
+    constructor(deckType) {
         this.cards = [];
         // read card data from csv and convert to objects
         const inputStrings = fs.readFileSync('decktet_cards.csv', 'utf-8');
         const inputObjects = parse(inputStrings, { columns: true });
-        if (argObj.isBasicDeck) {
+        if (deckType === 'basicDeck') {
             for (const obj of inputObjects) {
                 if (['Ace', 'Numeral', 'Crown'].includes(obj.rank)) {
                     const card = new Card(obj);
@@ -68,5 +64,3 @@ class Decktet {
         }
     }
 }
-exports.Decktet = Decktet;
-// const deck = new Decktet({ isBasicDeck: true });

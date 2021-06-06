@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GameBoard = exports.BoardSpace = void 0;
-class BoardSpace {
+export class BoardSpace {
     constructor(id) {
         this.id = id;
         this.card = undefined;
@@ -52,8 +49,7 @@ class BoardSpace {
         this.controllingSpaceBySuit = new Map();
     }
 }
-exports.BoardSpace = BoardSpace;
-class GameBoard {
+export class GameBoard {
     constructor(boardSize) {
         this.boardSize = boardSize;
         this.spaces = new Map();
@@ -209,7 +205,6 @@ class GameBoard {
             let spacesWithTokens = district.filter((space) => space.getPlayerToken());
             if (spacesWithTokens.length >= 1) {
                 if (spacesWithTokens.length > 1) {
-                    console.log(`resolving conflict on a ${suit} district of ${district.length} cards`);
                     spacesWithTokens = spacesWithTokens.sort((a, b) => {
                         var _a, _b;
                         const ele1 = (_a = a.getCard()) === null || _a === void 0 ? void 0 : _a.getValue();
@@ -292,7 +287,6 @@ class GameBoard {
         this.resolveInflunceForEntireBoard();
     }
 }
-exports.GameBoard = GameBoard;
 // const deck = new Decktet({ isBasicDeck: true });
 // const board = new GameBoard(6);
 // board.getAllSpaces().forEach((space) => {

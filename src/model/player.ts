@@ -1,4 +1,3 @@
-import { BADNAME } from 'dns';
 import { Card, Decktet } from './decktet';
 import { BoardSpace, GameBoard } from './gameboard';
 
@@ -13,19 +12,40 @@ type AiMoveSearchResultsObj = {
   withTokenScore: number | undefined;
 };
 
+export type BindPlayCardCallback = (
+  playerID: PlayerType,
+  card: Card,
+  boardSpace: BoardSpace
+) => void;
+
+export type BindDrawCardCallback = (card: Card) => void;
+
+export type PlayerType = 'humanPlayer1' | 'humanPlayer2' | 'computerPlayer';
+
 export class Player {
-  protected playerID: string;
+  protected playerID: PlayerType;
   protected hand: Card[];
   protected gameBoard: GameBoard;
   protected deck: Decktet;
   protected influenceTokens: number;
+  protected onPlayCard: BindPlayCardCallback;
+  protected onDrawCard: BindDrawCardCallback;
 
-  constructor(playerID: string, gameBoard: GameBoard, deck: Decktet) {
+  constructor(
+    playerID: PlayerType,
+    gameBoard: GameBoard,
+    deck: Decktet,
+    onPlayCard: BindPlayCardCallback,
+    onDrawCard: BindDrawCardCallback
+  ) {
     this.playerID = playerID;
     this.gameBoard = gameBoard;
     this.deck = deck;
     this.hand = [];
     this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
+    this.onPlayCard = onPlayCard;
+    this.onDrawCard = onDrawCard;
+    // Draw starting hand
     for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
       this.hand.push(this.deck.drawCard() as Card);
     }
@@ -36,9 +56,19 @@ export class Player {
       return false;
     } else {
       this.hand = this.hand.filter((ele) => ele !== card);
-      const newCard = this.deck.drawCard();
-      if (newCard) this.hand.push(newCard);
+      this.drawCard();
       return true;
+    }
+  }
+
+  drawCard() {
+    const newCard = this.deck.drawCard();
+    if (newCard) {
+      this.hand.push(newCard);
+
+      if (this.playerID !== 'computerPlayer') {
+        this.onDrawCard(newCard);
+      }
     }
   }
 
@@ -60,14 +90,16 @@ export class Player {
 }
 
 export class ComputerPlayer extends Player {
-  opponentID: string;
+  opponentID: PlayerType;
   constructor(
-    playerID: string,
+    playerID: PlayerType,
     gameBoard: GameBoard,
     deck: Decktet,
-    opponentID: string
+    opponentID: PlayerType,
+    onPlayCard: BindPlayCardCallback,
+    onDrawCard: BindDrawCardCallback
   ) {
-    super(playerID, gameBoard, deck);
+    super(playerID, gameBoard, deck, onPlayCard, onDrawCard);
     this.opponentID = opponentID;
   }
 

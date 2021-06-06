@@ -1,10 +1,11 @@
 {
   "extends": "@tsconfig/node12/tsconfig.json",
-  "module": "commonjs",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-    "lib": ["dom"]
+    "outDir": "dist/",
+    "rootDir": "src/",
+    "lib": ["dom"],
+    "module": "es2015",
+    "moduleResolution": "node"
   },
   "include": ["src/"]
 }

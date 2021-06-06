@@ -1,42 +1,83 @@
 import { BoardSpace, GameBoard } from './gameboard';
 import { Card, Decktet } from './decktet';
-import { Player, ComputerPlayer } from './player';
+import {
+  Player,
+  ComputerPlayer,
+  BindPlayCardCallback,
+  BindDrawCardCallback
+} from './player';
+
+export type GameType = 'vsAI' | 'solitaire';
+export type Layout = 'razeway' | 'towers' | 'oldcity' | 'solitaire';
+
+const SOLITAIRE_BOARD_DIMENSIONS = 4;
+const TWOPLAYER_BOARD_DIMENSIONS = 6;
 
 export class Model {
-  constructor(gameType: 'vsAI') {
-    if (gameType === 'vsAI') {
-      this.vsAI();
-    }
+  board: GameBoard;
+  deck: Decktet;
+
+  constructor(
+    gameType: GameType,
+    layout: Layout,
+    bindPlayCardCallback: BindPlayCardCallback,
+    bindDrawCardCallback: BindDrawCardCallback
+  ) {
+    const dimensions =
+      layout === 'solitaire'
+        ? SOLITAIRE_BOARD_DIMENSIONS
+        : TWOPLAYER_BOARD_DIMENSIONS;
+
+    this.deck = new Decktet('basicDeck');
+    this.board = new GameBoard(dimensions);
   }
 
-  vsAI() {
-    const deck = new Decktet({ isBasicDeck: true });
-    const board = new GameBoard(6);
-    board.setCard('x0y0', deck.drawCard()!);
-    board.setCard('x0y5', deck.drawCard()!);
-    board.setCard('x5y0', deck.drawCard()!);
-    board.setCard('x5y5', deck.drawCard()!);
-
-    const computerPlayer1 = new ComputerPlayer(
-      'Computer1',
-      board,
-      deck,
-      'Computer2'
+  vsAI(
+    bindPlayCardCallback: BindPlayCardCallback,
+    bindDrawCardCallback: BindDrawCardCallback
+  ) {
+    const humanPlayer1 = new Player(
+      'humanPlayer1',
+      this.board,
+      this.deck,
+      bindPlayCardCallback,
+      bindDrawCardCallback
     );
 
-    let turnNumber = 1;
-    while (board.getAvailableSpaces().size > 0) {
-      console.log(`Turn number ${turnNumber}`);
-      computerPlayer1.chooseBestMove();
-      computerPlayer2.chooseBestMove();
-      const p1score = board.getPlayerScore('Computer1');
-      const p2score = board.getPlayerScore('Computer2');
-      console.log(`Score = P1: ${p1score} vs P2: ${p2score}`);
-      turnNumber++;
+    const computerPlayer1 = new ComputerPlayer(
+      'computerPlayer',
+      this.board,
+      this.deck,
+      'humanPlayer1',
+      bindPlayCardCallback,
+      bindDrawCardCallback
+    );
+  }
+
+  createLayout(board: GameBoard, deck: Decktet, layout: Layout) {
+    switch (layout) {
+      case 'razeway':
+        board.setCard('x0y0', deck.drawCard()!);
+        board.setCard('x1y1', deck.drawCard()!);
+        board.setCard('x2y2', deck.drawCard()!);
+        board.setCard('x3y3', deck.drawCard()!);
+        board.setCard('x4y4', deck.drawCard()!);
+        board.setCard('x5y5', deck.drawCard()!);
+        break;
+      case 'towers':
+        board.setCard('x1y1', deck.drawCard()!);
+        board.setCard('x4y1', deck.drawCard()!);
+        board.setCard('x1y4', deck.drawCard()!);
+        board.setCard('x4y4', deck.drawCard()!);
+        break;
+      case 'oldcity':
+        board.setCard('x3y0', deck.drawCard()!);
+        board.setCard('x4y1', deck.drawCard()!);
+        board.setCard('x0y3', deck.drawCard()!);
+        board.setCard('x5y3', deck.drawCard()!);
+        board.setCard('x1y4', deck.drawCard()!);
+        board.setCard('x3y5', deck.drawCard()!);
+        break;
     }
-    console.log(`Game over.`);
-    const p1score = board.getPlayerScore('Computer1');
-    const p2score = board.getPlayerScore('Computer2');
-    console.log(`Final score = P1: ${p1score} vs P2: ${p2score}`);
   }
 }

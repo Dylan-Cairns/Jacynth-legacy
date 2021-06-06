@@ -1,13 +1,18 @@
-import { BoardSpace } from '../model/gameboard';
+import { BoardSpace, GameBoard } from '../model/gameboard';
 import { Card } from '../model/decktet';
 
 export class View {
   app: Element;
   gameBoard: Element;
+  drawDeck: Element;
+  playerHandGrid: Element;
 
-  constructor() {
+  constructor(board: GameBoard) {
     this.app = this.getElement('#root')!;
     this.gameBoard = this.getElement('.gameboard-grid-container')!;
+    this.drawDeck = this.getElement('drawDeck')!;
+    this.playerHandGrid = this.getElement('player-hand-grid-container')!;
+    this.createBoardSpaces(board);
   }
 
   getElement(selector: string) {
@@ -23,11 +28,9 @@ export class View {
     return element;
   }
 
-  createBoardSpaces(
-    gridContainerEle: Element,
-    spacesMap: Map<string, BoardSpace>,
-    dimensions: number
-  ) {
+  createBoardSpaces(board: GameBoard) {
+    const spacesMap = board.getAllSpaces();
+    const dimensions = board.getBoardSize();
     let isDark = false;
     const isBoardWidthEven = dimensions % 2 === 0;
 
@@ -51,7 +54,7 @@ export class View {
       } else {
         isDark = true;
       }
-      gridContainerEle.appendChild(spaceDiv);
+      this.gameBoard.appendChild(spaceDiv);
     });
   }
 
@@ -87,5 +90,19 @@ export class View {
   addTokenToSpace(player: 'player1' | 'player2', spaceID: string) {
     const boardSpace = this.getElement(spaceID);
     boardSpace?.appendChild(this.createToken(player));
+  }
+
+  playerDrawCard(card: Card) {
+    const cardDiv = this.createCard(card);
+    this.playerHandGrid?.appendChild(cardDiv);
+  }
+
+  playerPlayCard(card: Card, boardSpace: BoardSpace) {
+    this.playerHandGrid;
+  }
+
+  computerPlayCard(card: Card, boardSpace: BoardSpace) {
+    const cardDiv = this.createCard(card);
+    this.addCardToSpace(cardDiv, boardSpace.getID());
   }
 }

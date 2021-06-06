@@ -1,5 +1,5 @@
-import fs = require('fs');
-import parse = require('csv-parse/lib/sync');
+import fs from 'fs';
+import parse from 'csv-parse/lib/sync';
 
 export type Suit = 'Knots' | 'Leaves' | 'Moons' | 'Suns' | 'Waves' | 'Wyrms';
 type Rank = 'Ace' | 'Numeral' | 'Crown' | 'Pawn' | 'Court';
@@ -53,12 +53,12 @@ export class Card {
 export class Decktet {
   private cards: Card[];
 
-  constructor(argObj: { isBasicDeck: boolean }) {
+  constructor(deckType: 'basicDeck' | 'extendedDeck') {
     this.cards = [];
     // read card data from csv and convert to objects
     const inputStrings = fs.readFileSync('decktet_cards.csv', 'utf-8');
     const inputObjects = parse(inputStrings, { columns: true });
-    if (argObj.isBasicDeck) {
+    if (deckType === 'basicDeck') {
       for (const obj of inputObjects) {
         if (['Ace', 'Numeral', 'Crown'].includes(obj.rank)) {
           const card = new Card(obj);
@@ -91,5 +91,3 @@ export class Decktet {
     }
   }
 }
-
-// const deck = new Decktet({ isBasicDeck: true });
