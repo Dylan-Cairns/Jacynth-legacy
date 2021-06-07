@@ -10,6 +10,9 @@ export class Model {
             : TWOPLAYER_BOARD_DIMENSIONS;
         this.deck = new Decktet('basicDeck');
         this.board = new GameBoard(dimensions);
+        if (gameType === 'vsAI') {
+            this.vsAI(bindPlayCardCallback, bindDrawCardCallback);
+        }
     }
     vsAI(bindPlayCardCallback, bindDrawCardCallback) {
         const humanPlayer1 = new Player('humanPlayer1', this.board, this.deck, bindPlayCardCallback, bindDrawCardCallback);
@@ -38,6 +41,12 @@ export class Model {
                 board.setCard('x5y3', deck.drawCard());
                 board.setCard('x1y4', deck.drawCard());
                 board.setCard('x3y5', deck.drawCard());
+                break;
+            case 'solitaire':
+                board.setCard('x0y0', deck.drawCard());
+                board.setCard('x0y3', deck.drawCard());
+                board.setCard('x0y3', deck.drawCard());
+                board.setCard('x3y3', deck.drawCard());
                 break;
         }
     }

@@ -1,5 +1,3 @@
-import { Controller } from './controller/controller';
-import { Model, Layout } from './model/model';
-import { View } from './view/view';
+import { Controller } from './controller/controller.js';
 
 const controller = new Controller('vsAI', 'razeway');

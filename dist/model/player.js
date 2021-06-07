@@ -13,6 +13,7 @@ export class Player {
         for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
             this.hand.push(this.deck.drawCard());
         }
+        console.log(`${this.playerID} created`);
     }
     playCard(spaceID, card) {
         if (!this.gameBoard.setCard(spaceID, card)) {

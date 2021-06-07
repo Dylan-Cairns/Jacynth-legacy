@@ -5,7 +5,7 @@ import {
   ComputerPlayer,
   BindPlayCardCallback,
   BindDrawCardCallback
-} from './player';
+} from './player.js';
 
 export type GameType = 'vsAI' | 'solitaire';
 export type Layout = 'razeway' | 'towers' | 'oldcity' | 'solitaire';
@@ -30,6 +30,10 @@ export class Model {
 
     this.deck = new Decktet('basicDeck');
     this.board = new GameBoard(dimensions);
+
+    if (gameType === 'vsAI') {
+      this.vsAI(bindPlayCardCallback, bindDrawCardCallback);
+    }
   }
 
   vsAI(
@@ -77,6 +81,12 @@ export class Model {
         board.setCard('x5y3', deck.drawCard()!);
         board.setCard('x1y4', deck.drawCard()!);
         board.setCard('x3y5', deck.drawCard()!);
+        break;
+      case 'solitaire':
+        board.setCard('x0y0', deck.drawCard()!);
+        board.setCard('x0y3', deck.drawCard()!);
+        board.setCard('x0y3', deck.drawCard()!);
+        board.setCard('x3y3', deck.drawCard()!);
         break;
     }
   }

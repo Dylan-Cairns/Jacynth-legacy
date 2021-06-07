@@ -77,6 +77,7 @@ export class View {
     }
     playerDrawCard(card) {
         var _a;
+        console.log(`view playerDrawCard method called`);
         const cardDiv = this.createCard(card);
         (_a = this.playerHandGrid) === null || _a === void 0 ? void 0 : _a.appendChild(cardDiv);
     }

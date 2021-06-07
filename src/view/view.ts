@@ -1,5 +1,5 @@
-import { BoardSpace, GameBoard } from '../model/gameboard';
-import { Card } from '../model/decktet';
+import { BoardSpace, GameBoard } from '../model/gameboard.js';
+import { Card } from '../model/decktet.js';
 
 export class View {
   app: Element;
@@ -93,6 +93,7 @@ export class View {
   }
 
   playerDrawCard(card: Card) {
+    console.log(`view playerDrawCard method called`);
     const cardDiv = this.createCard(card);
     this.playerHandGrid?.appendChild(cardDiv);
   }

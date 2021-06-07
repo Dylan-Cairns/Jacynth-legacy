@@ -9,9 +9,11 @@ export class Player {
         this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
         this.onPlayCard = onPlayCard;
         this.onDrawCard = onDrawCard;
+        console.log(`${this.playerID} created`);
+        console.log(`hand size: `, PLAYER_HAND_SIZE);
         // Draw starting hand
         for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
-            this.hand.push(this.deck.drawCard());
+            this.drawCard();
         }
     }
     playCard(spaceID, card) {
@@ -28,6 +30,7 @@ export class Player {
         const newCard = this.deck.drawCard();
         if (newCard) {
             this.hand.push(newCard);
+            console.log(`${this.playerID} drawing card`);
             if (this.playerID !== 'computerPlayer') {
                 this.onDrawCard(newCard);
             }
