@@ -1,4 +1,4 @@
-import { Suit, Card, Decktet } from './decktet';
+import { Suit, Card, Decktet } from './decktet.js';
 
 export class BoardSpace {
   private id: string;

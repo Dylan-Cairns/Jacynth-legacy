@@ -1,13 +1,15 @@
 {
   "name": "jacynth",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "Jacynth game",
+  "main": "server.js",
   "type": "module",
   "directories": {
     "src": "src"
   },
   "scripts": {
+    "start": "node server",
+    "dev": "nodemon server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dylan Cairns",

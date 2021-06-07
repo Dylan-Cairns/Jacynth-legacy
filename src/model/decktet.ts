@@ -449,6 +449,3 @@ export class Decktet {
     }
   }
 }
-
-const deck = new Decktet('extendedDeck');
-console.log(deck);

@@ -1,6 +1,6 @@
 import { GameBoard } from './gameboard.js';
 import { Decktet } from './decktet.js';
-import { Player, ComputerPlayer } from './player';
+import { Player, ComputerPlayer } from './player.js';
 const SOLITAIRE_BOARD_DIMENSIONS = 4;
 const TWOPLAYER_BOARD_DIMENSIONS = 6;
 export class Model {

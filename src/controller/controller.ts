@@ -1,8 +1,8 @@
-import { Model, GameType, Layout } from '../model/model';
-import { Card, Decktet } from '../model/decktet';
-import { View } from '../view/view';
-import { BoardSpace } from '../model/gameboard';
-import { Player, PlayerType } from '../model/player';
+import { Model, GameType, Layout } from '../model/model.js';
+import { Card, Decktet } from '../model/decktet.js';
+import { View } from '../view/view.js';
+import { BoardSpace } from '../model/gameboard.js';
+import { Player, PlayerType } from '../model/player.js';
 
 export class Controller {
   model: Model;

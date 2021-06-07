@@ -146,11 +146,26 @@ body {
   color: #2d2e2c;
   font-size: calc(var(--desktop-gameboard-width) / 13);
   padding: 0px;
+  background-size: cover;
 }
 
-.card-cell img {
-  width: 100%;
-  height: 100%;
+.Knots {
+  background-image: url('../assets/knots.png');
+}
+.Leaves {
+  background-image: url('../assets/leaves.png');
+}
+.Moons {
+  background-image: url('../assets/moons.png');
+}
+.Suns {
+  background-image: url('../assets/suns.png');
+}
+.Waves {
+  background-image: url('../assets/waves.png');
+}
+.Wyrms {
+  background-image: url('../assets/snakes.png');
 }
 
 a {

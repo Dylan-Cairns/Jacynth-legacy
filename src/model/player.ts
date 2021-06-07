@@ -1,5 +1,5 @@
-import { Card, Decktet } from './decktet';
-import { BoardSpace, GameBoard } from './gameboard';
+import { Card, Decktet } from './decktet.js';
+import { BoardSpace, GameBoard } from './gameboard.js';
 
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
