@@ -101,7 +101,6 @@ body {
 }
 
 .dark-square {
-  /* background-color: #50514f4d; */
   background-color: #50514f8f;
 }
 
@@ -131,7 +130,6 @@ body {
   border: 1px solid grey;
   border-radius: 0px;
   margin: 3px;
-  /* box-shadow: 2px 2px; */
   width: calc(var(--gameboard-width) / var(--gameboard-dimensions));
   height: calc(var(--gameboard-width) / var(--gameboard-dimensions));
   display: grid;
@@ -142,18 +140,6 @@ body {
   justify-content: center;
   box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.1),
     inset -2px -2px 2px rgba(0, 0, 0, 0.1);
-}
-
-.card-overlay {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  background-image: url('../assets/gloss.png');
-  opacity: 100%;
-  background-size: cover;
-  width: calc(var(--gameboard-width) / var(--gameboard-dimensions));
-  height: calc(var(--gameboard-width) / var(--gameboard-dimensions));
-  z-index: 10;
 }
 
 .card-cell {

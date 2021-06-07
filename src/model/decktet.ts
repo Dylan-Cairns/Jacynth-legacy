@@ -1,10 +1,7 @@
-import fs from 'fs';
-import parse from 'csv-parse/lib/sync';
-
 export type Suit = 'Knots' | 'Leaves' | 'Moons' | 'Suns' | 'Waves' | 'Wyrms';
 type Rank = 'Ace' | 'Numeral' | 'Crown' | 'Pawn' | 'Court';
 
-type ArgObj = {
+type RawCardObj = {
   name: string;
   rank: Rank;
   value: string;
@@ -13,13 +10,376 @@ type ArgObj = {
   suit3: Suit;
 };
 
+const RAW_CARD_OBJECTS = [
+  {
+    name: 'Ace of Knots',
+    rank: 'Ace',
+    value: '1',
+    suit1: 'Knots',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'Ace of Leaves',
+    rank: 'Ace',
+    value: '1',
+    suit1: 'Leaves',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'Ace of Moons',
+    rank: 'Ace',
+    value: '1',
+    suit1: 'Moons',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'Ace of Suns',
+    rank: 'Ace',
+    value: '1',
+    suit1: 'Suns',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'Ace of Waves',
+    rank: 'Ace',
+    value: '1',
+    suit1: 'Waves',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'Ace of Wyrms',
+    rank: 'Ace',
+    value: '1',
+    suit1: 'Wyrms',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the AUTHOR',
+    rank: 'Numeral',
+    value: '2',
+    suit1: 'Moons',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the DESERT',
+    rank: 'Numeral',
+    value: '2',
+    suit1: 'Suns',
+    suit2: 'Wyrms',
+    suit3: ''
+  },
+  {
+    name: 'the ORIGIN',
+    rank: 'Numeral',
+    value: '2',
+    suit1: 'Waves',
+    suit2: 'Leaves',
+    suit3: ''
+  },
+  {
+    name: 'the JOURNEY',
+    rank: 'Numeral',
+    value: '3',
+    suit1: 'Moons',
+    suit2: 'Waves',
+    suit3: ''
+  },
+  {
+    name: 'the PAINTER',
+    rank: 'Numeral',
+    value: '3',
+    suit1: 'Suns',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the SAVAGE',
+    rank: 'Numeral',
+    value: '3',
+    suit1: 'Leaves',
+    suit2: 'Wyrms',
+    suit3: ''
+  },
+  {
+    name: 'the BATTLE',
+    rank: 'Numeral',
+    value: '4',
+    suit1: 'Wyrms',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the MOUNTAIN',
+    rank: 'Numeral',
+    value: '4',
+    suit1: 'Moons',
+    suit2: 'Suns',
+    suit3: ''
+  },
+  {
+    name: 'the SAILOR',
+    rank: 'Numeral',
+    value: '4',
+    suit1: 'Waves',
+    suit2: 'Leaves',
+    suit3: ''
+  },
+  {
+    name: 'the DISCOVERY',
+    rank: 'Numeral',
+    value: '5',
+    suit1: 'Suns',
+    suit2: 'Waves',
+    suit3: ''
+  },
+  {
+    name: 'the FOREST',
+    rank: 'Numeral',
+    value: '5',
+    suit1: 'Moons',
+    suit2: 'Leaves',
+    suit3: ''
+  },
+  {
+    name: 'the SOLDIER',
+    rank: 'Numeral',
+    value: '5',
+    suit1: 'Wyrms',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the LUNATIC',
+    rank: 'Numeral',
+    value: '6',
+    suit1: 'Moons',
+    suit2: 'Waves',
+    suit3: ''
+  },
+  {
+    name: 'the MARKET',
+    rank: 'Numeral',
+    value: '6',
+    suit1: 'Leaves',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the PENITENT',
+    rank: 'Numeral',
+    value: '6',
+    suit1: 'Suns',
+    suit2: 'Wyrms',
+    suit3: ''
+  },
+  {
+    name: 'the CASTLE',
+    rank: 'Numeral',
+    value: '7',
+    suit1: 'Suns',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the CAVE',
+    rank: 'Numeral',
+    value: '7',
+    suit1: 'Waves',
+    suit2: 'Wyrms',
+    suit3: ''
+  },
+  {
+    name: 'the CHANCE MEETING',
+    rank: 'Numeral',
+    value: '7',
+    suit1: 'Moons',
+    suit2: 'Leaves',
+    suit3: ''
+  },
+  {
+    name: 'the BETRAYAL',
+    rank: 'Numeral',
+    value: '8',
+    suit1: 'Wyrms',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the DIPLOMAT',
+    rank: 'Numeral',
+    value: '8',
+    suit1: 'Moons',
+    suit2: 'Suns',
+    suit3: ''
+  },
+  {
+    name: 'the MILL',
+    rank: 'Numeral',
+    value: '8',
+    suit1: 'Waves',
+    suit2: 'Leaves',
+    suit3: ''
+  },
+  {
+    name: 'the DARKNESS',
+    rank: 'Numeral',
+    value: '9',
+    suit1: 'Waves',
+    suit2: 'Wyrms',
+    suit3: ''
+  },
+  {
+    name: 'the MERCHANT',
+    rank: 'Numeral',
+    value: '9',
+    suit1: 'Leaves',
+    suit2: 'Knots',
+    suit3: ''
+  },
+  {
+    name: 'the PACT',
+    rank: 'Numeral',
+    value: '9',
+    suit1: 'Moons',
+    suit2: 'Suns',
+    suit3: ''
+  },
+  {
+    name: 'the WINDFALL',
+    rank: 'Crown',
+    value: '10',
+    suit1: 'Knots',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the END',
+    rank: 'Crown',
+    value: '10',
+    suit1: 'Leaves',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the HUNTRESS',
+    rank: 'Crown',
+    value: '10',
+    suit1: 'Moons',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the BARD',
+    rank: 'Crown',
+    value: '10',
+    suit1: 'Suns',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the SEA',
+    rank: 'Crown',
+    value: '10',
+    suit1: 'Waves',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the CALAMITY',
+    rank: 'Crown',
+    value: '10',
+    suit1: 'Wyrms',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the EXCUSE',
+    rank: 'Excuse',
+    value: '0',
+    suit1: '',
+    suit2: '',
+    suit3: ''
+  },
+  {
+    name: 'the BORDERLAND',
+    rank: 'Pawn',
+    value: '11',
+    suit1: 'Waves',
+    suit2: 'Leaves',
+    suit3: 'Wyrms'
+  },
+  {
+    name: 'the HARVEST',
+    rank: 'Pawn',
+    value: '11',
+    suit1: 'Moons',
+    suit2: 'Suns',
+    suit3: 'Leaves'
+  },
+  {
+    name: 'the LIGHT KEEPER',
+    rank: 'Pawn',
+    value: '11',
+    suit1: 'Suns',
+    suit2: 'Waves',
+    suit3: 'Knots'
+  },
+  {
+    name: 'the WATCHMAN',
+    rank: 'Pawn',
+    value: '11',
+    suit1: 'Moons',
+    suit2: 'Wyrms',
+    suit3: 'Knots'
+  },
+  {
+    name: 'the CONSUL',
+    rank: 'Court',
+    value: '12',
+    suit1: 'Moons',
+    suit2: 'Waves',
+    suit3: 'Knots'
+  },
+  {
+    name: 'the ISLAND',
+    rank: 'Court',
+    value: '12',
+    suit1: 'Suns',
+    suit2: 'Waves',
+    suit3: 'Wyrms'
+  },
+  {
+    name: 'the RITE',
+    rank: 'Court',
+    value: '12',
+    suit1: 'Moons',
+    suit2: 'Leaves',
+    suit3: 'Wyrms'
+  },
+  {
+    name: 'the WINDOW',
+    rank: 'Court',
+    value: '12',
+    suit1: 'Suns',
+    suit2: 'Leaves',
+    suit3: 'Knots'
+  }
+] as RawCardObj[];
+
 export class Card {
   private name: string;
   private rank: Rank;
   private value: number;
   private suits: Suit[];
 
-  constructor(argObj: ArgObj) {
+  constructor(argObj: RawCardObj) {
     this.name = argObj.name;
     this.rank = argObj.rank;
     this.value = Number(argObj.value);
@@ -55,18 +415,16 @@ export class Decktet {
 
   constructor(deckType: 'basicDeck' | 'extendedDeck') {
     this.cards = [];
-    // read card data from csv and convert to objects
-    const inputStrings = fs.readFileSync('decktet_cards.csv', 'utf-8');
-    const inputObjects = parse(inputStrings, { columns: true });
+
     if (deckType === 'basicDeck') {
-      for (const obj of inputObjects) {
+      for (const obj of RAW_CARD_OBJECTS) {
         if (['Ace', 'Numeral', 'Crown'].includes(obj.rank)) {
           const card = new Card(obj);
           this.cards.push(card);
         }
       }
     } else {
-      for (const obj of inputObjects) {
+      for (const obj of RAW_CARD_OBJECTS) {
         const card = new Card(obj);
         this.cards.push(card);
       }
@@ -91,3 +449,6 @@ export class Decktet {
     }
   }
 }
+
+const deck = new Decktet('extendedDeck');
+console.log(deck);
