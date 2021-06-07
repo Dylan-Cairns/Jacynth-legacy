@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('fn called');
     let isDark = false;
     let isBoardWidthEven = width % 2 === 0;
-    for (let idx = 0; idx < width * width - 1; idx++) {
+    for (let idx = 0; idx < width * width; idx++) {
       const space = document.createElement('div');
       space.className += 'gameboard-grid-item';
       space.dataset.id = String(idx);
