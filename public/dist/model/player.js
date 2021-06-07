@@ -10,7 +10,6 @@ export class Player {
         this.onPlayCard = onPlayCard;
         this.onDrawCard = onDrawCard;
         console.log(`${this.playerID} created`);
-        console.log(`hand size: `, PLAYER_HAND_SIZE);
         // Draw starting hand
         for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
             this.drawCard();

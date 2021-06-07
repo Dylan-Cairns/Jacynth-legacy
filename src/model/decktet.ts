@@ -3,6 +3,7 @@ type Rank = 'Ace' | 'Numeral' | 'Crown' | 'Pawn' | 'Court';
 
 type RawCardObj = {
   name: string;
+  id: string;
   rank: Rank;
   value: string;
   suit1: Suit;
@@ -13,6 +14,7 @@ type RawCardObj = {
 const RAW_CARD_OBJECTS = [
   {
     name: 'Ace of Knots',
+    id: '0',
     rank: 'Ace',
     value: '1',
     suit1: 'Knots',
@@ -21,6 +23,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'Ace of Leaves',
+    id: '1',
     rank: 'Ace',
     value: '1',
     suit1: 'Leaves',
@@ -29,6 +32,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'Ace of Moons',
+    id: '2',
     rank: 'Ace',
     value: '1',
     suit1: 'Moons',
@@ -37,6 +41,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'Ace of Suns',
+    id: '3',
     rank: 'Ace',
     value: '1',
     suit1: 'Suns',
@@ -45,6 +50,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'Ace of Waves',
+    id: '4',
     rank: 'Ace',
     value: '1',
     suit1: 'Waves',
@@ -53,6 +59,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'Ace of Wyrms',
+    id: '5',
     rank: 'Ace',
     value: '1',
     suit1: 'Wyrms',
@@ -61,6 +68,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the AUTHOR',
+    id: '6',
     rank: 'Numeral',
     value: '2',
     suit1: 'Moons',
@@ -69,6 +77,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the DESERT',
+    id: '7',
     rank: 'Numeral',
     value: '2',
     suit1: 'Suns',
@@ -77,6 +86,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the ORIGIN',
+    id: '8',
     rank: 'Numeral',
     value: '2',
     suit1: 'Waves',
@@ -85,6 +95,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the JOURNEY',
+    id: '9',
     rank: 'Numeral',
     value: '3',
     suit1: 'Moons',
@@ -93,6 +104,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the PAINTER',
+    id: '10',
     rank: 'Numeral',
     value: '3',
     suit1: 'Suns',
@@ -101,6 +113,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the SAVAGE',
+    id: '11',
     rank: 'Numeral',
     value: '3',
     suit1: 'Leaves',
@@ -109,6 +122,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the BATTLE',
+    id: '12',
     rank: 'Numeral',
     value: '4',
     suit1: 'Wyrms',
@@ -117,6 +131,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the MOUNTAIN',
+    id: '13',
     rank: 'Numeral',
     value: '4',
     suit1: 'Moons',
@@ -125,6 +140,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the SAILOR',
+    id: '14',
     rank: 'Numeral',
     value: '4',
     suit1: 'Waves',
@@ -133,6 +149,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the DISCOVERY',
+    id: '15',
     rank: 'Numeral',
     value: '5',
     suit1: 'Suns',
@@ -141,6 +158,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the FOREST',
+    id: '16',
     rank: 'Numeral',
     value: '5',
     suit1: 'Moons',
@@ -149,6 +167,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the SOLDIER',
+    id: '17',
     rank: 'Numeral',
     value: '5',
     suit1: 'Wyrms',
@@ -157,6 +176,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the LUNATIC',
+    id: '18',
     rank: 'Numeral',
     value: '6',
     suit1: 'Moons',
@@ -165,6 +185,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the MARKET',
+    id: '19',
     rank: 'Numeral',
     value: '6',
     suit1: 'Leaves',
@@ -173,6 +194,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the PENITENT',
+    id: '20',
     rank: 'Numeral',
     value: '6',
     suit1: 'Suns',
@@ -181,6 +203,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the CASTLE',
+    id: '21',
     rank: 'Numeral',
     value: '7',
     suit1: 'Suns',
@@ -189,6 +212,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the CAVE',
+    id: '22',
     rank: 'Numeral',
     value: '7',
     suit1: 'Waves',
@@ -197,6 +221,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the CHANCE MEETING',
+    id: '23',
     rank: 'Numeral',
     value: '7',
     suit1: 'Moons',
@@ -205,6 +230,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the BETRAYAL',
+    id: '24',
     rank: 'Numeral',
     value: '8',
     suit1: 'Wyrms',
@@ -213,6 +239,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the DIPLOMAT',
+    id: '25',
     rank: 'Numeral',
     value: '8',
     suit1: 'Moons',
@@ -221,6 +248,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the MILL',
+    id: '26',
     rank: 'Numeral',
     value: '8',
     suit1: 'Waves',
@@ -229,6 +257,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the DARKNESS',
+    id: '27',
     rank: 'Numeral',
     value: '9',
     suit1: 'Waves',
@@ -237,6 +266,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the MERCHANT',
+    id: '28',
     rank: 'Numeral',
     value: '9',
     suit1: 'Leaves',
@@ -245,6 +275,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the PACT',
+    id: '29',
     rank: 'Numeral',
     value: '9',
     suit1: 'Moons',
@@ -253,6 +284,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the WINDFALL',
+    id: '30',
     rank: 'Crown',
     value: '10',
     suit1: 'Knots',
@@ -261,6 +293,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the END',
+    id: '31',
     rank: 'Crown',
     value: '10',
     suit1: 'Leaves',
@@ -269,6 +302,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the HUNTRESS',
+    id: '32',
     rank: 'Crown',
     value: '10',
     suit1: 'Moons',
@@ -277,6 +311,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the BARD',
+    id: '33',
     rank: 'Crown',
     value: '10',
     suit1: 'Suns',
@@ -285,6 +320,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the SEA',
+    id: '34',
     rank: 'Crown',
     value: '10',
     suit1: 'Waves',
@@ -293,6 +329,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the CALAMITY',
+    id: '35',
     rank: 'Crown',
     value: '10',
     suit1: 'Wyrms',
@@ -301,6 +338,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the EXCUSE',
+    id: '36',
     rank: 'Excuse',
     value: '0',
     suit1: '',
@@ -309,6 +347,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the BORDERLAND',
+    id: '37',
     rank: 'Pawn',
     value: '11',
     suit1: 'Waves',
@@ -317,6 +356,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the HARVEST',
+    id: '38',
     rank: 'Pawn',
     value: '11',
     suit1: 'Moons',
@@ -325,6 +365,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the LIGHT KEEPER',
+    id: '39',
     rank: 'Pawn',
     value: '11',
     suit1: 'Suns',
@@ -333,6 +374,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the WATCHMAN',
+    id: '40',
     rank: 'Pawn',
     value: '11',
     suit1: 'Moons',
@@ -341,6 +383,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the CONSUL',
+    id: '41',
     rank: 'Court',
     value: '12',
     suit1: 'Moons',
@@ -349,6 +392,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the ISLAND',
+    id: '42',
     rank: 'Court',
     value: '12',
     suit1: 'Suns',
@@ -357,6 +401,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the RITE',
+    id: '43',
     rank: 'Court',
     value: '12',
     suit1: 'Moons',
@@ -365,6 +410,7 @@ const RAW_CARD_OBJECTS = [
   },
   {
     name: 'the WINDOW',
+    id: '44',
     rank: 'Court',
     value: '12',
     suit1: 'Suns',
@@ -375,12 +421,14 @@ const RAW_CARD_OBJECTS = [
 
 export class Card {
   private name: string;
+  private id: string;
   private rank: Rank;
   private value: number;
   private suits: Suit[];
 
   constructor(argObj: RawCardObj) {
     this.name = argObj.name;
+    this.id = argObj.id;
     this.rank = argObj.rank;
     this.value = Number(argObj.value);
     this.suits = [];
@@ -391,6 +439,10 @@ export class Card {
 
   getName() {
     return this.name;
+  }
+
+  getId() {
+    return this.id;
   }
 
   getRank() {

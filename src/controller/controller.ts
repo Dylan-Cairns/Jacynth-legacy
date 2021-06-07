@@ -9,13 +9,11 @@ export class Controller {
   view: View;
 
   constructor(gameType: GameType, layout: Layout) {
-    this.model = new Model(
-      'vsAI',
-      'razeway',
-      this.handlePlayCard,
-      this.handleDrawCard
-    );
+    this.model = new Model('vsAI', 'razeway');
     this.view = new View(this.model.board);
+    if (gameType === 'vsAI') {
+      this.model.vsAI(this.handlePlayCard, this.handleDrawCard);
+    }
   }
 
   handlePlayCard = (
@@ -23,6 +21,7 @@ export class Controller {
     card: Card,
     boardSpace: BoardSpace
   ) => {
+    console.log('play card method called');
     if (playerID === 'computerPlayer') {
       this.view.computerPlayCard(card, boardSpace);
     }
@@ -30,7 +29,6 @@ export class Controller {
 
   handleDrawCard = (card: Card) => {
     console.log(`controller handleDrawCard method called`);
-    console.log(this);
     this.view.playerDrawCard(card);
   };
 }

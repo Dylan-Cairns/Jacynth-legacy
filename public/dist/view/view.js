@@ -3,17 +3,17 @@ export class View {
         this.app = this.getElement('#root');
         this.gameBoard = this.getElement('.gameboard-grid-container');
         this.drawDeck = this.getElement('drawDeck');
-        this.playerHandGrid = this.getElement('player-hand-grid-container');
+        this.playerHandGrid = this.getElement('.player-hand-grid-container');
         this.createBoardSpaces(board);
     }
     getElement(selector) {
         const element = document.querySelector(selector);
         return element;
     }
-    createElement(tag, className) {
+    createElement(tag, ...classNames) {
         const element = document.createElement(tag);
-        if (className)
-            element.classList.add(className);
+        if (classNames)
+            element.classList.add(...classNames);
         return element;
     }
     createBoardSpaces(board) {
@@ -27,7 +27,7 @@ export class View {
             const x = Number(spaceID[1]);
             const y = Number(spaceID[3]);
             spaceDiv.className += 'gameboard-grid-item';
-            spaceDiv.dataset.id = spaceID;
+            spaceDiv.id = spaceID;
             // if board width is even, swap color of starting tile for each new row
             if (isBoardWidthEven) {
                 if (x === 0 && y > 0) {
@@ -47,17 +47,23 @@ export class View {
     }
     createCard(card) {
         // get the values from the card
+        const id = card.getId();
         const suits = card.getAllSuits();
         const cardComponents = [];
         const value = card.getValue();
         // create the card
-        const cardDiv = this.createElement('div', 'card-container');
+        const cardDiv = this.createElement('div', 'card');
+        cardDiv.id = id;
         // create and append the children
-        const valueDiv = this.createElement('div', `card-cell ${value}`);
-        valueDiv.textContent = String(value);
+        const valueDiv = this.createElement('div', `card-cell`);
+        valueDiv.textContent = this.prepareValueForDisplay(value);
         suits.forEach((suit) => {
-            cardComponents.push(this.createElement('div', `card-cell ${suit}`));
+            cardComponents.push(this.createElement('div', 'card-cell', suit));
         });
+        if (suits.length < 2) {
+            const placeHolderDiv = this.createElement('div', `card-cell`);
+            cardComponents.push(placeHolderDiv);
+        }
         cardComponents.push(valueDiv);
         cardComponents.forEach((ele) => {
             cardDiv.appendChild(ele);
@@ -68,7 +74,9 @@ export class View {
         return this.createElement('div', `card-cell token ${player}`);
     }
     addCardToSpace(cardDiv, spaceID) {
-        const boardSpace = this.getElement(spaceID);
+        console.log('spaceID: ', spaceID);
+        const boardSpace = document.getElementById(spaceID);
+        console.log(boardSpace);
         boardSpace === null || boardSpace === void 0 ? void 0 : boardSpace.appendChild(cardDiv);
     }
     addTokenToSpace(player, spaceID) {
@@ -77,15 +85,31 @@ export class View {
     }
     playerDrawCard(card) {
         var _a;
-        console.log(`view playerDrawCard method called`);
+        console.log(`view playerDrawCard method called with card ${card.getName()}`);
         const cardDiv = this.createCard(card);
+        console.log('created cardDiv', cardDiv);
         (_a = this.playerHandGrid) === null || _a === void 0 ? void 0 : _a.appendChild(cardDiv);
     }
     playerPlayCard(card, boardSpace) {
         this.playerHandGrid;
     }
     computerPlayCard(card, boardSpace) {
+        console.log('computerplaycard method called');
         const cardDiv = this.createCard(card);
         this.addCardToSpace(cardDiv, boardSpace.getID());
+    }
+    prepareValueForDisplay(value) {
+        switch (value) {
+            case 0:
+                return '.';
+            case 10:
+                return '*';
+            case 11:
+                return '#';
+            case 12:
+                return '%%';
+            default:
+                return String(value);
+        }
     }
 }
