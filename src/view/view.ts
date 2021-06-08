@@ -89,9 +89,7 @@ export class View {
   }
 
   addCardToSpace(cardDiv: HTMLElement, spaceID: string) {
-    console.log('spaceID: ', spaceID);
     const boardSpace = document.getElementById(spaceID);
-    console.log(boardSpace);
     boardSpace?.appendChild(cardDiv);
   }
 
@@ -111,10 +109,85 @@ export class View {
   }
 
   computerPlayCard(card: Card, boardSpace: BoardSpace) {
-    console.log('computerplaycard method called');
     const cardDiv = this.createCard(card);
     this.addCardToSpace(cardDiv, boardSpace.getID());
   }
+
+  bindPlayerPlayCard = (callback: () => Map<string, BoardSpace>) => {
+    let draggedCard: HTMLElement;
+
+    // get all available spaces from the model
+    document.addEventListener('dragstart', (event) => {
+      draggedCard = event.target as HTMLElement;
+      this.highlightAvailableCardSpaces(callback);
+    });
+
+    document.addEventListener(
+      'dragover',
+      function (event) {
+        // prevent default to allow drop
+        event.preventDefault();
+      },
+      false
+    );
+
+    document.addEventListener(
+      'dragenter',
+      function (event) {
+        // highlight potential drop target when the draggable element enters it
+        const targetSpace = event.target as HTMLInputElement;
+        if (targetSpace.classList) {
+          targetSpace.classList.add('dragenter');
+        }
+      },
+      false
+    );
+
+    document.addEventListener(
+      'dragleave',
+      function (event) {
+        // remove highlighting
+        const targetSpace = event.target as HTMLInputElement;
+        if (targetSpace.classList) {
+          targetSpace.classList.remove('dragenter');
+        }
+      },
+      false
+    );
+
+    document.addEventListener('drop', (event) => {
+      event.preventDefault();
+      const targetSpace = event.target as HTMLInputElement;
+      if (targetSpace.classList.contains('playable-space')) {
+        if (draggedCard && draggedCard.parentNode && targetSpace) {
+          draggedCard.draggable = false;
+          draggedCard.parentNode.removeChild(draggedCard);
+          targetSpace.appendChild(draggedCard);
+        }
+      }
+    });
+
+    document.addEventListener('dragend', (event) => {
+      // remove all available spaces highlighting
+      const draggedCard = event.target as HTMLElement;
+      Array.from(this.gameBoard.children).forEach((space) => {
+        space.classList.remove('playable-space');
+      });
+    });
+  };
+
+  highlightAvailableCardSpaces = (
+    getAvailableSpacesCallback: () => Map<string, BoardSpace>
+  ) => {
+    const availableSpaces = getAvailableSpacesCallback();
+    availableSpaces.forEach((space) => {
+      const spaceID = space.getID();
+      const availableSpace = document.getElementById(spaceID);
+      if (availableSpace) {
+        availableSpace.classList.add('playable-space');
+      }
+    });
+  };
 
   private prepareValueForDisplay(value: number) {
     switch (value) {

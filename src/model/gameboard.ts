@@ -143,7 +143,7 @@ export class GameBoard {
     return false;
   }
 
-  getAvailableSpaces(): Map<string, BoardSpace> {
+  getAvailableSpaces = (): Map<string, BoardSpace> => {
     const results = new Map();
     this.spaces.forEach((space) => {
       const id = space.getID();
@@ -152,7 +152,7 @@ export class GameBoard {
       }
     });
     return results;
-  }
+  };
 
   getDistrict(SpaceID: string, suit: Suit): BoardSpace[] {
     const results = [] as BoardSpace[];

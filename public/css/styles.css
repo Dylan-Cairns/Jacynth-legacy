@@ -90,9 +90,6 @@ body {
 }
 
 .gameboard-grid-container {
-  /* background-image: url('../assets/2p_background.png'); */
-  /* background-size: 100%;
-  background-repeat: repeat; */
   background-color: rgba(255, 250, 240, 0.424);
   border-radius: 10px;
   display: grid;
@@ -100,6 +97,7 @@ body {
   height: var(--gameboard-width);
   grid-template-columns: repeat(var(--gameboard-dimensions), 1fr);
   grid-template-rows: repeat(var(--gameboard-dimensions), 1fr);
+  justify-self: center;
 }
 
 .gameboard-grid-item {
@@ -114,7 +112,7 @@ body {
 }
 
 .gameboard-grid-item::after {
-  z-index: -1;
+  z-index: -2;
   content: ' ';
   position: absolute;
   left: 0.5em;
@@ -126,15 +124,25 @@ body {
 }
 
 .dark-square::after {
-  background-color: rgba(255, 250, 240, 0.514);
+  background-color: rgba(255, 250, 240, 0.555);
 }
 
-.playable-space {
-  width: calc(var(--gameboard-width) / var(--gameboard-dimensions) -0.25em);
-  height: calc(var(--gameboard-width) / var(--gameboard-dimensions) -0.25em);
-  border: solid 6px var(--icon-text-color);
-  border-radius: 12px;
-  opacity: 0.7;
+.playable-space::before {
+  z-index: 2;
+  content: ' ';
+  position: absolute;
+  left: 0.3em;
+  top: 0.3em;
+  right: 0.3em;
+  bottom: 0.3em;
+  border: solid 10px var(--icon-text-color);
+  border-radius: 15px;
+  width: calc(var(--gameboard-width) / var(--gameboard-dimensions)-0.25em);
+  height: calc(var(--gameboard-width) / var(--gameboard-dimensions)-0.25em);
+}
+
+.dragenter::before {
+  background-color: white;
 }
 
 .player-hand-grid-container {
@@ -155,19 +163,18 @@ body {
   border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
   border-radius: 10px;
   margin: 0px;
+  padding: 1px;
   width: calc(var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em);
   height: calc(var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em);
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   grid-auto-flow: column;
-  padding: 0px;
   justify-content: center;
   box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.1),
     inset -2px -2px 2px rgba(0, 0, 0, 0.1);
   animation: slide-up 1s ease;
   transition: background 1s ease-in-out;
-  user-select: none;
 }
 
 .card-cell {
@@ -176,7 +183,7 @@ body {
   text-align: center;
   align-content: center;
   font-size: calc(var(--desktop-gameboard-width) / 13);
-  padding: 0px;
+  margin: 1px;
   background-size: cover;
 }
 

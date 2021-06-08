@@ -17,10 +17,10 @@ export class Model {
         this.deck = new Decktet('extendedDeck');
         this.board = new GameBoard(dimensions);
     }
-    vsAI(bindPlayCardCallback, bindDrawCardCallback) {
-        this.createLayout(this.board, this.deck, 'razeway', bindPlayCardCallback);
-        const humanPlayer1 = new Player('humanPlayer1', this.board, this.deck, bindPlayCardCallback, bindDrawCardCallback);
-        const computerPlayer1 = new ComputerPlayer('computerPlayer', this.board, this.deck, 'humanPlayer1', bindPlayCardCallback, bindDrawCardCallback);
+    vsAI(handlePlayCardCallback, handleDrawCardCallback) {
+        this.createLayout(this.board, this.deck, 'razeway', handlePlayCardCallback);
+        const humanPlayer1 = new Player('humanPlayer1', this.board, this.deck, handlePlayCardCallback, handleDrawCardCallback);
+        const computerPlayer1 = new ComputerPlayer('computerPlayer', this.board, this.deck, 'humanPlayer1', handlePlayCardCallback, handleDrawCardCallback);
     }
     createLayout(board, deck, layout, bindPlayCardCallback) {
         const handleInitialPlacement = (spaceID) => {

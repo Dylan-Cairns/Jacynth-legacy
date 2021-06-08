@@ -17,5 +17,6 @@ export class Controller {
         if (gameType === 'vsAI') {
             this.model.vsAI(this.handlePlayCard, this.handleDrawCard);
         }
+        this.view.bindPlayerPlayCard(this.model.board.getAvailableSpaces);
     }
 }

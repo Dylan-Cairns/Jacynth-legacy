@@ -51,6 +51,16 @@ export class BoardSpace {
 }
 export class GameBoard {
     constructor(boardSize) {
+        this.getAvailableSpaces = () => {
+            const results = new Map();
+            this.spaces.forEach((space) => {
+                const id = space.getID();
+                if (this.isPlayableSpace(id)) {
+                    results.set(id, space);
+                }
+            });
+            return results;
+        };
         this.boardSize = boardSize;
         this.spaces = new Map();
         for (let y = 0; y < boardSize; y++) {
@@ -120,16 +130,6 @@ export class GameBoard {
             }
         }
         return false;
-    }
-    getAvailableSpaces() {
-        const results = new Map();
-        this.spaces.forEach((space) => {
-            const id = space.getID();
-            if (this.isPlayableSpace(id)) {
-                results.set(id, space);
-            }
-        });
-        return results;
     }
     getDistrict(SpaceID, suit) {
         const results = [];

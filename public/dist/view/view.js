@@ -1,5 +1,57 @@
 export class View {
     constructor(board) {
+        this.bindPlayerPlayCard = (callback) => {
+            let draggedCard;
+            document.addEventListener('dragstart', (event) => {
+                draggedCard = event.target;
+                this.highlightAvailableCardSpaces(callback);
+            });
+            document.addEventListener('dragover', function (event) {
+                // prevent default to allow drop
+                event.preventDefault();
+            }, false);
+            document.addEventListener('dragenter', function (event) {
+                // highlight potential drop target when the draggable element enters it
+                const targetSpace = event.target;
+                if (targetSpace.classList) {
+                    targetSpace.classList.add('dragenter');
+                }
+            }, false);
+            document.addEventListener('dragleave', function (event) {
+                // highlight potential drop target when the draggable element enters it
+                const targetSpace = event.target;
+                if (targetSpace.classList) {
+                    targetSpace.classList.remove('dragenter');
+                }
+            }, false);
+            document.addEventListener('drop', (event) => {
+                event.preventDefault();
+                const targetSpace = event.target;
+                if (targetSpace.classList.contains('playable-space')) {
+                    if (draggedCard && draggedCard.parentNode && targetSpace) {
+                        draggedCard.draggable = false;
+                        draggedCard.parentNode.removeChild(draggedCard);
+                        targetSpace.appendChild(draggedCard);
+                    }
+                }
+            });
+            document.addEventListener('dragend', (event) => {
+                const draggedCard = event.target;
+                Array.from(this.gameBoard.children).forEach((space) => {
+                    space.classList.remove('playable-space');
+                });
+            });
+        };
+        this.highlightAvailableCardSpaces = (getAvailableSpacesCallback) => {
+            const availableSpaces = getAvailableSpacesCallback();
+            availableSpaces.forEach((space) => {
+                const spaceID = space.getID();
+                const availableSpace = document.getElementById(spaceID);
+                if (availableSpace) {
+                    availableSpace.classList.add('playable-space');
+                }
+            });
+        };
         this.app = this.getElement('#root');
         this.gameBoard = this.getElement('.gameboard-grid-container');
         this.drawDeck = this.getElement('drawDeck');
@@ -74,9 +126,7 @@ export class View {
         return this.createElement('div', `card-cell token ${player}`);
     }
     addCardToSpace(cardDiv, spaceID) {
-        console.log('spaceID: ', spaceID);
         const boardSpace = document.getElementById(spaceID);
-        console.log(boardSpace);
         boardSpace === null || boardSpace === void 0 ? void 0 : boardSpace.appendChild(cardDiv);
     }
     addTokenToSpace(player, spaceID) {
@@ -90,10 +140,9 @@ export class View {
         (_a = this.playerHandGrid) === null || _a === void 0 ? void 0 : _a.appendChild(cardDiv);
     }
     playerPlayCard(card, boardSpace) {
-        this.playerHandGrid;
+        this.getElement;
     }
     computerPlayCard(card, boardSpace) {
-        console.log('computerplaycard method called');
         const cardDiv = this.createCard(card);
         this.addCardToSpace(cardDiv, boardSpace.getID());
     }
