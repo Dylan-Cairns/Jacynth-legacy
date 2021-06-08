@@ -12,13 +12,13 @@ type AiMoveSearchResultsObj = {
   withTokenScore: number | undefined;
 };
 
-export type BindPlayCardCallback = (
+export type HandlePlayCardCallback = (
   playerID: PlayerType,
   card: Card,
   boardSpace: BoardSpace
 ) => void;
 
-export type BindDrawCardCallback = (card: Card) => void;
+export type HandleDrawCardCallback = (card: Card) => void;
 
 export type PlayerType = 'humanPlayer1' | 'humanPlayer2' | 'computerPlayer';
 
@@ -28,15 +28,15 @@ export class Player {
   protected gameBoard: GameBoard;
   protected deck: Decktet;
   protected influenceTokens: number;
-  protected onPlayCard: BindPlayCardCallback;
-  protected onDrawCard: BindDrawCardCallback;
+  protected onPlayCard: HandlePlayCardCallback;
+  protected onDrawCard: HandleDrawCardCallback;
 
   constructor(
     playerID: PlayerType,
     gameBoard: GameBoard,
     deck: Decktet,
-    onPlayCard: BindPlayCardCallback,
-    onDrawCard: BindDrawCardCallback
+    onPlayCard: HandlePlayCardCallback,
+    onDrawCard: HandleDrawCardCallback
   ) {
     this.playerID = playerID;
     this.gameBoard = gameBoard;
@@ -97,8 +97,8 @@ export class ComputerPlayer extends Player {
     gameBoard: GameBoard,
     deck: Decktet,
     opponentID: PlayerType,
-    onPlayCard: BindPlayCardCallback,
-    onDrawCard: BindDrawCardCallback
+    onPlayCard: HandlePlayCardCallback,
+    onDrawCard: HandleDrawCardCallback
   ) {
     super(playerID, gameBoard, deck, onPlayCard, onDrawCard);
     this.opponentID = opponentID;

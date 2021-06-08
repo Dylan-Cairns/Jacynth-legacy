@@ -101,16 +101,13 @@ export class View {
   }
 
   playerDrawCard(card: Card) {
-    console.log(
-      `view playerDrawCard method called with card ${card.getName()}`
-    );
     const cardDiv = this.createCard(card);
-    console.log('created cardDiv', cardDiv);
+    cardDiv.draggable = true;
     this.playerHandGrid?.appendChild(cardDiv);
   }
 
   playerPlayCard(card: Card, boardSpace: BoardSpace) {
-    this.playerHandGrid;
+    this.getElement;
   }
 
   computerPlayCard(card: Card, boardSpace: BoardSpace) {

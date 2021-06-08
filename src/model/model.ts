@@ -3,8 +3,8 @@ import { Decktet } from './decktet.js';
 import {
   Player,
   ComputerPlayer,
-  BindPlayCardCallback,
-  BindDrawCardCallback
+  HandlePlayCardCallback,
+  HandleDrawCardCallback
 } from './player.js';
 
 export type GameType = 'vsAI' | 'solitaire';
@@ -34,17 +34,17 @@ export class Model {
   }
 
   vsAI(
-    bindPlayCardCallback: BindPlayCardCallback,
-    bindDrawCardCallback: BindDrawCardCallback
+    handlePlayCardCallback: HandlePlayCardCallback,
+    handleDrawCardCallback: HandleDrawCardCallback
   ) {
-    this.createLayout(this.board, this.deck, 'razeway', bindPlayCardCallback);
+    this.createLayout(this.board, this.deck, 'razeway', handlePlayCardCallback);
 
     const humanPlayer1 = new Player(
       'humanPlayer1',
       this.board,
       this.deck,
-      bindPlayCardCallback,
-      bindDrawCardCallback
+      handlePlayCardCallback,
+      handleDrawCardCallback
     );
 
     const computerPlayer1 = new ComputerPlayer(
@@ -52,8 +52,8 @@ export class Model {
       this.board,
       this.deck,
       'humanPlayer1',
-      bindPlayCardCallback,
-      bindDrawCardCallback
+      handlePlayCardCallback,
+      handleDrawCardCallback
     );
   }
 
@@ -61,7 +61,7 @@ export class Model {
     board: GameBoard,
     deck: Decktet,
     layout: Layout,
-    bindPlayCardCallback: BindPlayCardCallback
+    bindPlayCardCallback: HandlePlayCardCallback
   ) {
     const handleInitialPlacement = (spaceID: string) => {
       const card = deck.drawCard()!;

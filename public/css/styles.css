@@ -12,8 +12,7 @@
   --gameboard-width: min(70vh, 100vw);
   --desktop-gameboard-width: min(79vh, 75vw);
   --gameboard-dimensions: 6;
-  /* --body-background: #659dbf; */
-  --body-background: #143950;
+  --body-background: #659dbf;
   --title-text: #f2f2f2;
   --icons-grid-container-background: #2d2e2c;
   --icons-grid-background: #474847;
@@ -21,7 +20,7 @@
   --icon-label-text: #a3a79f;
   --menu-border: #8c6746;
   --link-hover: #f2e96d;
-  --dark-text: #dad6d6;
+  --dark-text: var(--icons-grid-container-background);
 }
 
 *,
@@ -91,33 +90,48 @@ body {
 }
 
 .gameboard-grid-container {
-  background-image: url('../assets/2p_background.png');
-  background-size: 100%;
-  background-repeat: repeat;
-  border-radius: 5px;
-  border: 1px solid #50514f94;
+  /* background-image: url('../assets/2p_background.png'); */
+  /* background-size: 100%;
+  background-repeat: repeat; */
+  background-color: rgba(255, 250, 240, 0.424);
+  border-radius: 10px;
   display: grid;
   width: var(--gameboard-width);
   height: var(--gameboard-width);
   grid-template-columns: repeat(var(--gameboard-dimensions), 1fr);
   grid-template-rows: repeat(var(--gameboard-dimensions), 1fr);
-  justify-self: center;
-  justify-content: center;
-  align-self: center;
 }
 
 .gameboard-grid-item {
+  position: relative;
   padding: 0px;
   margin: 0px;
+  width: calc(var(--gameboard-width) / var(--gameboard-dimensions)-0.25em);
+  height: calc(var(--gameboard-width) / var(--gameboard-dimensions)-0.25em);
+  display: grid;
+  align-content: center;
+  justify-content: center;
 }
 
-.dark-square {
-  background-color: #50514f8f;
+.gameboard-grid-item::after {
+  z-index: -1;
+  content: ' ';
+  position: absolute;
+  left: 0.5em;
+  top: 0.5em;
+  right: 0.5em;
+  bottom: 0.5em;
+  background-color: rgba(255, 250, 240, 0.308);
+  border-radius: 10px;
+}
+
+.dark-square::after {
+  background-color: rgba(255, 250, 240, 0.514);
 }
 
 .playable-space {
-  width: calc(var(--gameboard-width) / var(--gameboard-dimensions));
-  height: calc(var(--gameboard-width) / var(--gameboard-dimensions));
+  width: calc(var(--gameboard-width) / var(--gameboard-dimensions) -0.25em);
+  height: calc(var(--gameboard-width) / var(--gameboard-dimensions) -0.25em);
   border: solid 6px var(--icon-text-color);
   border-radius: 12px;
   opacity: 0.7;
@@ -136,16 +150,13 @@ body {
 }
 
 .card {
-  position: relative;
-  background-image: url('../assets/ricepaper.png');
-  background-color: rgba(0, 0, 0, 0.671);
-  background-blend-mode: multiply;
+  background-color: #fffcd8;
   color: var(--dark-text);
-  border: 1px solid grey;
-  border-radius: 0px;
+  border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
+  border-radius: 10px;
   margin: 0px;
-  width: calc(var(--gameboard-width) / var(--gameboard-dimensions));
-  height: calc(var(--gameboard-width) / var(--gameboard-dimensions));
+  width: calc(var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em);
+  height: calc(var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em);
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
@@ -156,10 +167,12 @@ body {
     inset -2px -2px 2px rgba(0, 0, 0, 0.1);
   animation: slide-up 1s ease;
   transition: background 1s ease-in-out;
+  user-select: none;
 }
 
 .card-cell {
   font-family: 'Fortune Widgets';
+  color: #2d2e2c;
   text-align: center;
   align-content: center;
   font-size: calc(var(--desktop-gameboard-width) / 13);
@@ -232,6 +245,7 @@ a:hover {
 
 .menu-popup h1 {
   text-align: center;
+  font-size: 8em;
   /* margin-top: 0; */
   color: #333;
 }
@@ -249,6 +263,13 @@ a:hover {
 }
 .content li {
   padding-top: 1em;
+}
+
+.content img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .menu-popup .close {
@@ -314,14 +335,13 @@ a:hover {
   }
 
   .card {
-    padding: 4px;
     box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
       inset -2px -2px 2px rgba(0, 0, 0, 0.4);
   }
 
   .card-cell {
+    color: #2d2e2c;
     font-size: calc(var(--gameboard-width) / 15);
-    padding: 1px;
   }
 
   .menu-popup {
