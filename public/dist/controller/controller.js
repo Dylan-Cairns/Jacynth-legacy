@@ -14,9 +14,9 @@ export class Controller {
         };
         this.model = new Model('vsAI', 'razeway');
         this.view = new View(this.model.board);
+        this.view.bindPlayerPlayCard(this.model.board.getAvailableSpaces);
         if (gameType === 'vsAI') {
             this.model.vsAI(this.handlePlayCard, this.handleDrawCard);
         }
-        this.view.bindPlayerPlayCard(this.model.board.getAvailableSpaces);
     }
 }

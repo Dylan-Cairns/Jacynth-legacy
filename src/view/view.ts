@@ -9,9 +9,9 @@ export class View {
 
   constructor(board: GameBoard) {
     this.app = this.getElement('#root')!;
-    this.gameBoard = this.getElement('.gameboard-grid-container')!;
+    this.gameBoard = this.getElement('.gameboard')!;
     this.drawDeck = this.getElement('drawDeck')!;
-    this.playerHandGrid = this.getElement('.player-hand-grid-container')!;
+    this.playerHandGrid = this.getElement('.player-hand')!;
     this.createBoardSpaces(board);
   }
 
@@ -39,7 +39,7 @@ export class View {
       const spaceID = spaceObj.getID();
       const x = Number(spaceID[1]);
       const y = Number(spaceID[3]);
-      spaceDiv.className += 'gameboard-grid-item';
+      spaceDiv.classList.add('boardSpace');
       spaceDiv.id = spaceID;
       // if board width is even, swap color of starting tile for each new row
       if (isBoardWidthEven) {
@@ -49,7 +49,7 @@ export class View {
       }
       // alternate dark and light tiles of the board
       if (isDark) {
-        spaceDiv.className += ' dark-square';
+        spaceDiv.classList.add('dark-square');
         isDark = false;
       } else {
         isDark = true;
@@ -193,6 +193,8 @@ export class View {
     switch (value) {
       case 0:
         return '.';
+      case 1:
+        return 'A';
       case 10:
         return '*';
       case 11:

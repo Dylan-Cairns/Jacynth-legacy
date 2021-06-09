@@ -2,6 +2,7 @@ export class View {
     constructor(board) {
         this.bindPlayerPlayCard = (callback) => {
             let draggedCard;
+            // get all available spaces from the model
             document.addEventListener('dragstart', (event) => {
                 draggedCard = event.target;
                 this.highlightAvailableCardSpaces(callback);
@@ -18,7 +19,7 @@ export class View {
                 }
             }, false);
             document.addEventListener('dragleave', function (event) {
-                // highlight potential drop target when the draggable element enters it
+                // remove highlighting
                 const targetSpace = event.target;
                 if (targetSpace.classList) {
                     targetSpace.classList.remove('dragenter');
@@ -36,6 +37,7 @@ export class View {
                 }
             });
             document.addEventListener('dragend', (event) => {
+                // remove all available spaces highlighting
                 const draggedCard = event.target;
                 Array.from(this.gameBoard.children).forEach((space) => {
                     space.classList.remove('playable-space');
@@ -53,9 +55,9 @@ export class View {
             });
         };
         this.app = this.getElement('#root');
-        this.gameBoard = this.getElement('.gameboard-grid-container');
+        this.gameBoard = this.getElement('.gameboard');
         this.drawDeck = this.getElement('drawDeck');
-        this.playerHandGrid = this.getElement('.player-hand-grid-container');
+        this.playerHandGrid = this.getElement('.player-hand');
         this.createBoardSpaces(board);
     }
     getElement(selector) {
@@ -78,7 +80,7 @@ export class View {
             const spaceID = spaceObj.getID();
             const x = Number(spaceID[1]);
             const y = Number(spaceID[3]);
-            spaceDiv.className += 'gameboard-grid-item';
+            spaceDiv.classList.add('boardSpace');
             spaceDiv.id = spaceID;
             // if board width is even, swap color of starting tile for each new row
             if (isBoardWidthEven) {
@@ -88,7 +90,7 @@ export class View {
             }
             // alternate dark and light tiles of the board
             if (isDark) {
-                spaceDiv.className += ' dark-square';
+                spaceDiv.classList.add('dark-square');
                 isDark = false;
             }
             else {
@@ -150,6 +152,8 @@ export class View {
         switch (value) {
             case 0:
                 return '.';
+            case 1:
+                return 'A';
             case 10:
                 return '*';
             case 11:

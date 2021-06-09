@@ -11,36 +11,18 @@
 </head>
 <body>
   <div class="main-flex-container">
-  <div class="main-grid-container">
-    <div class="main-grid-item icons-grid-container">
-      <div class="icons-grid-item title">Jacynth</div>
-      <div class="icons-grid-item">
-        <span class="mdi mdi-cards-outline" id="drawDeck"></span> 24
-        <div class="icon-label">Cards left in deck</div>
-      </div>
-      <div class="icons-grid-item"><a href="#"><span class="mdi mdi-castle"> 4</a>
-        <div class="icon-label">Tokens remaining</div>
-      </div>
-      <div class="icons-grid-item"><span class="mdi mdi-timer-sand"> 3
-        <div class="icon-label">Turns left to place next token</div>
-      </div>
-      <div class="icons-grid-item"><a href="#"><span class="mdi mdi-undo-variant"></a>
-        <div class="icon-label">Undo last move</div>
-      </div>
-      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-new-box"></a>
-        <div class="icon-label">Start a new game</div></div>
-      <div class="icons-grid-item"><a href="#menu"><span class="mdi mdi-information-outline"></a>
-        <div class="icon-label">Rules and credits</div>
-      </div>
+  <div class="main-grid">
+    <div class="menuBar">
+      <div class="menuBar-item title">Jacynth</div>
+      <div class="menuBar-item"><a href="#menu"><span class="mdi mdi-information-outline"></a></div>
     </div>
-    <div class="main-grid-item gameboard-grid-container">
-      
-    </div>
-    <div class="main-grid-item player-hand-grid-container">
-    </div>
+    <div class="gameboard"></div>
+    <div class="HUD-container enemyHUD">enemyHUD</div>
+    <div class="HUD-container playerHUD">playerHUD</div>
+    <div class="player-hand"></div>
   </div>
 </div>
-<div id="menu" class="overlay">
+<!-- <div id="menu" class="overlay">
 	<div class="menu-popup">
     <a class="close" href="#">&times;</a>
     <h1>Jacynth</h1>
@@ -60,7 +42,7 @@
 		</ul>
     </div>
 	</div>
-</div>
+</div> -->
 <script type="module" src="/dist/app.js"></script>
 </body>
 </html>
