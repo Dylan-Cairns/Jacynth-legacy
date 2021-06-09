@@ -17,12 +17,24 @@
       <div class="menuBar-item"><a href="#menu"><span class="mdi mdi-information-outline"></a></div>
     </div>
     <div class="gameboard"></div>
-    <div class="HUD-container enemyHUD">enemyHUD</div>
-    <div class="HUD-container playerHUD">playerHUD</div>
+    <div class="HUD-container enemyHUD">
+      <div class="playerIcon"><img src="/assets/sailer_losing.png"></div>
+      <div class="HUDText">
+        <div class="HUDelement name">COMPUTER</div>
+        <div class="HUDelement">Score 44 Tokens 5</div>
+      </div>
+    </div>
+    <div class="HUD-container playerHUD">
+      <div class="playerIcon"><img src="/assets/penitent_winning.png"></div>
+      <div class="HUDText">
+        <div class="HUDelement name">PLAYER</div>
+        <div class="HUDelement">Score 44 Tokens 5</div>
+      </div>
+    </div>
     <div class="player-hand"></div>
   </div>
 </div>
-<!-- <div id="menu" class="overlay">
+<div id="menu" class="overlay">
 	<div class="menu-popup">
     <a class="close" href="#">&times;</a>
     <h1>Jacynth</h1>
@@ -42,7 +54,7 @@
 		</ul>
     </div>
 	</div>
-</div> -->
+</div>
 <script type="module" src="/dist/app.js"></script>
 </body>
 </html>

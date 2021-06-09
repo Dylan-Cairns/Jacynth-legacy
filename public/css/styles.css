@@ -12,15 +12,17 @@
   --gameboard-width: min(65vh, 100vw);
   --desktop-gameboard-width: min(90vh, 49vw);
   --gameboard-dimensions: 6;
+  --card-size: calc(
+    var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em
+  );
   --body-background: #659dbf;
   --title-text: #f2f2f2;
-  --icons-grid-container-background: #2d2e2c;
-  --icons-grid-background: #474847;
+  --dark-text: #2d2e2c;
+  --box-background: #50514f94;
   --icon-text-color: #94eb6b;
   --icon-label-text: #a3a79f;
   --menu-border: #8c6746;
   --link-hover: #f2e96d;
-  --dark-text: var(--icons-grid-container-background);
 }
 
 *,
@@ -64,8 +66,35 @@ body {
 }
 
 .HUD-container {
-  background-color: #2d2e2c00;
-  border: solid 1px black;
+  align-content: end;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  justify-content: start;
+  align-items: end;
+  align-content: end;
+  justify-items: stretch;
+  justify-content: start;
+  margin: 0em 0.25em;
+}
+
+.HUDText {
+  background-color: var(--box-background);
+  color: white;
+  border-radius: 0em 1em 1em 0em;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-content: end;
+  align-items: end;
+  justify-content: start;
+}
+
+.name {
+  text-transform: uppercase;
+  font-size: 1.5em;
+}
+
+.HUDelement {
+  margin: 0.25em;
 }
 
 .enemyHUD {
@@ -74,6 +103,17 @@ body {
 
 .playerHUD {
   grid-area: playerHUD;
+}
+
+.playerIcon {
+  width: var(--card-size);
+  background-color: #f2f2f27e;
+  border-radius: 15px;
+}
+
+.playerIcon img {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .menuBar {
@@ -88,7 +128,7 @@ body {
 }
 
 .menuBar-item {
-  color: black;
+  color: rgb(255, 255, 255);
   padding: 0.2em;
   border-radius: 3px;
   font-size: 2em;
@@ -96,7 +136,7 @@ body {
 }
 
 .gameboard {
-  /* background-color: rgba(255, 250, 240, 0.424); */
+  background-color: rgba(255, 250, 240, 0.13);
   grid-area: gameboard;
   border-radius: 10px;
   display: grid;
@@ -149,19 +189,19 @@ body {
 
 .dragenter::before {
   border-color: white;
+  border-style: dashed;
 }
 
 .player-hand {
   grid-area: playerHand;
   display: grid;
-  width: var(--gameboard-width);
+  width: calc(var(--gameboard-width) - 0.5em);
   grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
   justify-items: center;
-  /* justify-self: center; */
-  background-color: #50514f94;
+  background-color: var(--box-background);
   border-radius: 20px;
   padding: 3px;
+  margin: 0em 0.25em;
 }
 
 .card {
@@ -171,8 +211,8 @@ body {
   border-radius: 10px;
   margin: 0px;
   padding: 1px;
-  width: calc(var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em);
-  height: calc(var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em);
+  width: var(--card-size);
+  height: var(--card-size);
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
@@ -321,14 +361,19 @@ a:hover {
   .main-grid {
     grid-template-columns: auto auto;
     grid-template-areas:
-      'menuBar gameboard'
-      'enemyHUD gameboard'
-      'playerHUD gameboard'
-      'playerHand gameboard'
-      '. gameboard'
-      '. gameboard'
-      '. gameboard'
-      '. gameboard';
+      'menuBar menuBar gameboard'
+      'enemyHUD playerHUD gameboard'
+      'playerHand playerHand gameboard'
+      '. . gameboard'
+      '. . gameboard'
+      '. . gameboard'
+      '. . gameboard'
+      '. . gameboard';
+  }
+
+  .HUDText {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
   }
 
   .gameboard {
