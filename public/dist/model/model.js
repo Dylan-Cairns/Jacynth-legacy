@@ -10,17 +10,17 @@ const BOARD_LAYOUTS = {
     solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
 export class Model {
-    constructor(gameType, layout) {
+    constructor(gameType, layout, deckType) {
         const dimensions = layout === 'solitaire'
             ? SOLITAIRE_BOARD_DIMENSIONS
             : TWOPLAYER_BOARD_DIMENSIONS;
-        this.deck = new Decktet('extendedDeck');
+        this.deck = new Decktet(deckType);
         this.board = new GameBoard(dimensions);
     }
     vsAI(handlePlayCardCallback, handleDrawCardCallback) {
         this.createLayout(this.board, this.deck, 'razeway', handlePlayCardCallback);
-        const humanPlayer1 = new Player('humanPlayer1', this.board, this.deck, handlePlayCardCallback, handleDrawCardCallback);
-        const computerPlayer1 = new ComputerPlayer('computerPlayer', this.board, this.deck, 'humanPlayer1', handlePlayCardCallback, handleDrawCardCallback);
+        this.player1 = new Player('humanPlayer1', this.board, this.deck, handlePlayCardCallback, handleDrawCardCallback);
+        this.player2 = new ComputerPlayer('computerPlayer', this.board, this.deck, 'humanPlayer1', handlePlayCardCallback, handleDrawCardCallback);
     }
     createLayout(board, deck, layout, bindPlayCardCallback) {
         const handleInitialPlacement = (spaceID) => {

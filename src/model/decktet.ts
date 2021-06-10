@@ -1,4 +1,5 @@
 export type Suit = 'Knots' | 'Leaves' | 'Moons' | 'Suns' | 'Waves' | 'Wyrms';
+export type DeckType = 'basicDeck' | 'extendedDeck';
 type Rank = 'Ace' | 'Numeral' | 'Crown' | 'Pawn' | 'Court';
 
 type RawCardObj = {
@@ -465,7 +466,7 @@ export class Card {
 export class Decktet {
   private cards: Card[];
 
-  constructor(deckType: 'basicDeck' | 'extendedDeck') {
+  constructor(deckType: DeckType) {
     this.cards = [];
 
     if (deckType === 'basicDeck') {

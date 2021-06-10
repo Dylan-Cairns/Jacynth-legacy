@@ -1,4 +1,5 @@
 import { Suit, Card, Decktet } from './decktet.js';
+import { PlayerType } from './player.js';
 
 export class BoardSpace {
   private id: string;
@@ -105,6 +106,19 @@ export class GameBoard {
     return this.spaces.get(spaceID)?.getControllingSpaceID(suit);
   }
 
+  setCard(spaceID: string, card: Card): boolean {
+    const space = this.getSpace(spaceID);
+    if (!space) return false;
+    if (!space.setCard(card)) return false;
+    this.resolveInfluenceConflicts(space);
+    return true;
+  }
+
+  removeCard(spaceID: string) {
+    const space = this.getSpace(spaceID);
+    space?.removeCard();
+  }
+
   getAdjacentSpaces(spaceID: string): BoardSpace[] {
     const x = parseInt(spaceID[1]);
     const y = parseInt(spaceID[3]);
@@ -143,12 +157,12 @@ export class GameBoard {
     return false;
   }
 
-  getAvailableSpaces = (): Map<string, BoardSpace> => {
-    const results = new Map();
+  getAvailableSpaces = (): BoardSpace[] => {
+    const results = [] as BoardSpace[];
     this.spaces.forEach((space) => {
       const id = space.getID();
       if (this.isPlayableSpace(id)) {
-        results.set(id, space);
+        results.push(space);
       }
     });
     return results;
@@ -209,14 +223,6 @@ export class GameBoard {
     return true;
   }
 
-  setCard(spaceID: string, card: Card): boolean {
-    const space = this.getSpace(spaceID);
-    if (!space) return false;
-    if (!space.setCard(card)) return false;
-    this.resolveInfluenceConflicts(space);
-    return true;
-  }
-
   resolveInfluenceConflicts(boardSpace: BoardSpace) {
     const card = boardSpace.getCard();
     if (!card) throw new Error('no card on space');
@@ -242,7 +248,9 @@ export class GameBoard {
   // get all spaces which a player can place a token on.
   // A valid space must have a card, must not have a token already,
   // and must not be part of another players district in any suit.
-  getAvailableTokenSpaces(playerID: string): BoardSpace[] {
+  getAvailableTokenSpaces = (playerID: PlayerType): BoardSpace[] => {
+    console.log(this);
+    console.log(playerID);
     // for each space on the board
     const results = [] as BoardSpace[];
     for (const [id, space] of this.spaces) {
@@ -267,8 +275,9 @@ export class GameBoard {
         if (!ownedByOtherPlayer) results.push(space);
       }
     }
+    console.log(results);
     return results;
-  }
+  };
 
   getPlayerScore(playerID: string): number {
     let score = 0;

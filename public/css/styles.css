@@ -9,12 +9,13 @@
 }
 
 :root {
-  --gameboard-width: min(65vh, 100vw);
+  --gameboard-width: min(60vh, 100vw);
   --desktop-gameboard-width: min(90vh, 49vw);
   --gameboard-dimensions: 6;
   --card-size: calc(
     var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em
   );
+  --border-radius: calc(var(--gameboard-width) / 70);
   --body-background: #659dbf;
   --title-text: #f2f2f2;
   --dark-text: #2d2e2c;
@@ -43,11 +44,6 @@ body {
   font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
 }
 
-.main-flex-container {
-  display: flex;
-  justify-content: center;
-}
-
 .main-grid {
   display: grid;
   grid-gap: 0.5em;
@@ -62,7 +58,7 @@ body {
     'enemyHUD'
     'gameboard'
     'playerHUD'
-    'playerHand';
+    'playerHandContainer';
 }
 
 .HUD-container {
@@ -80,7 +76,8 @@ body {
 .HUDText {
   background-color: var(--box-background);
   color: white;
-  border-radius: 0em 1em 1em 0em;
+  border-radius: var(--border-radius) var(--border-radius) var(--border-radius)
+    0em;
   display: grid;
   grid-template-columns: auto auto;
   align-content: end;
@@ -108,7 +105,7 @@ body {
 .playerIcon {
   width: var(--card-size);
   background-color: #f2f2f27e;
-  border-radius: 15px;
+  border-radius: var(--border-radius);
 }
 
 .playerIcon img {
@@ -130,15 +127,65 @@ body {
 .menuBar-item {
   color: rgb(255, 255, 255);
   padding: 0.2em;
-  border-radius: 3px;
   font-size: 2em;
   text-align: center;
+}
+
+.player-hand-container {
+  width: calc(var(--gameboard-width) - 0.5em);
+  grid-area: playerHandContainer;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+}
+
+.player-hand {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  justify-items: center;
+  background-color: var(--box-background);
+  border-radius: var(--border-radius);
+  padding: 3px;
+  align-items: center;
+  justify-content: stretch;
+}
+
+.button-Container {
+  display: grid;
+  grid-template-columns: auto auto;
+  background-color: var(--box-background);
+  border-radius: var(--border-radius);
+  padding: 5px;
+}
+
+.endTurnbutton {
+  position: relative;
+  color: rgb(107, 107, 107);
+  background-color: var(--box-background);
+  border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
+  border-radius: var(--border-radius);
+  margin: 0px;
+  width: var(--card-size);
+  height: var(--card-size);
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  font-size: calc(var(--desktop-gameboard-width) / 13);
+  user-select: none;
+}
+
+.endTurnButton.active {
+  color: var(--icon-text-color);
+}
+
+.endTurnButton.active:hover {
+  color: white;
 }
 
 .gameboard {
   background-color: rgba(255, 250, 240, 0.13);
   grid-area: gameboard;
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   display: grid;
   width: var(--gameboard-width);
   height: var(--gameboard-width);
@@ -166,7 +213,7 @@ body {
   right: 0.5em;
   bottom: 0.5em;
   background-color: rgba(255, 250, 240, 0.178);
-  border-radius: 10px;
+  border-radius: var(--border-radius);
 }
 
 .dark-square::after {
@@ -174,17 +221,15 @@ body {
 }
 
 .playable-space::before {
-  z-index: -1;
+  z-index: 2;
   content: ' ';
   position: absolute;
   left: 0.3em;
   top: 0.3em;
   right: 0.3em;
   bottom: 0.3em;
-  border: solid 10px var(--icon-text-color);
-  border-radius: 15px;
-  width: calc(var(--gameboard-width) / var(--gameboard-dimensions)-0.25em);
-  height: calc(var(--gameboard-width) / var(--gameboard-dimensions)-0.25em);
+  border: solid calc(0.005 * var(--gameboard-width)) var(--icon-text-color);
+  border-radius: var(--border-radius);
 }
 
 .dragenter::before {
@@ -192,23 +237,26 @@ body {
   border-style: dashed;
 }
 
-.player-hand {
-  grid-area: playerHand;
+.influenceToken {
+  border-radius: var(--border-radius);
+  border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
+  border-radius: 10px;
+  margin: 0px;
+  padding: 1px;
+  width: var(--card-size);
+  height: var(--card-size);
   display: grid;
-  width: calc(var(--gameboard-width) - 0.5em);
-  grid-template-columns: 1fr 1fr 1fr;
-  justify-items: center;
-  background-color: var(--box-background);
-  border-radius: 20px;
-  padding: 3px;
-  margin: 0em 0.25em;
+  justify-content: center;
+  align-content: center;
+  font-size: 1.5em;
+  user-select: none;
 }
 
 .card {
   background-color: #fffcd8;
   color: var(--dark-text);
   border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   margin: 0px;
   padding: 1px;
   width: var(--card-size);
@@ -360,10 +408,11 @@ a:hover {
 
   .main-grid {
     grid-template-columns: auto auto;
+    align-content: center;
     grid-template-areas:
       'menuBar menuBar gameboard'
       'enemyHUD playerHUD gameboard'
-      'playerHand playerHand gameboard'
+      'playerHandContainer playerHandContainer gameboard'
       '. . gameboard'
       '. . gameboard'
       '. . gameboard'
@@ -378,6 +427,10 @@ a:hover {
 
   .gameboard {
     grid-row-start: span 8;
+  }
+
+  .endTurnbutton {
+    font-size: 2em;
   }
 
   .card {

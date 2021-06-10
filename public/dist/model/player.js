@@ -21,9 +21,13 @@ export class Player {
         }
         else {
             this.hand = this.hand.filter((ele) => ele !== card);
-            this.drawCard();
             return true;
         }
+    }
+    undoPlayCard(spaceID, card) {
+        var _a;
+        this.hand.push(card);
+        (_a = this.gameBoard.getSpace(spaceID)) === null || _a === void 0 ? void 0 : _a.removeCard();
     }
     drawCard() {
         const newCard = this.deck.drawCard();
@@ -112,7 +116,7 @@ export class ComputerPlayer extends Player {
         });
         return resultsArr;
     }
-    chooseBestMove() {
+    computerTakeTurn() {
         var _a;
         const allMoves = this.getAllAvailableMoves();
         const topCardOnlyMove = allMoves.sort((a, b) => {
@@ -156,47 +160,14 @@ export class ComputerPlayer extends Player {
                 console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
             }
         }
+        this.drawCard();
     }
     // helper fn to adjust requirements for placing an influence
     // token as the game progresses
     adjustMinThreshold(hopedForAmt) {
-        const spaceLeft = this.gameBoard.getAvailableSpaces().size;
+        const spaceLeft = this.gameBoard.getAvailableSpaces().length;
         const sizeOfTheBoard = this.gameBoard.getBoardSize();
         const settledForNumber = Math.ceil(hopedForAmt * (spaceLeft / sizeOfTheBoard));
         return settledForNumber;
     }
 }
-// const deck = new Decktet({ isBasicDeck: true });
-// const board = new GameBoard(6);
-// board.setCard('x0y0', deck.drawCard()!);
-// board.setCard('x0y5', deck.drawCard()!);
-// board.setCard('x5y0', deck.drawCard()!);
-// board.setCard('x5y5', deck.drawCard()!);
-// // console.log(board.getAvailableSpaces());
-// const computerPlayer1 = new ComputerPlayer(
-//   'Computer1',
-//   board,
-//   deck,
-//   'Computer2'
-// );
-// const computerPlayer2 = new ComputerPlayer(
-//   'Computer2',
-//   board,
-//   deck,
-//   'Computer1'
-// );
-// // console.log(computerPlayer1.chooseBestMove());
-// let turnNumber = 1;
-// while (board.getAvailableSpaces().size > 0) {
-//   console.log(`Turn number ${turnNumber}`);
-//   computerPlayer1.chooseBestMove();
-//   computerPlayer2.chooseBestMove();
-//   const p1score = board.getPlayerScore('Computer1');
-//   const p2score = board.getPlayerScore('Computer2');
-//   console.log(`Score = P1: ${p1score} vs P2: ${p2score}`);
-//   turnNumber++;
-// }
-// console.log(`Game over.`);
-// const p1score = board.getPlayerScore('Computer1');
-// const p2score = board.getPlayerScore('Computer2');
-// console.log(`Final score = P1: ${p1score} vs P2: ${p2score}`);

@@ -1,11 +1,16 @@
 export class View {
     constructor(board) {
-        this.bindPlayerPlayCard = (callback) => {
-            let draggedCard;
+        this.bindPlayerInterface = (availCardSpacesCallback, availTokenSpacesCallback, playCardCallback) => {
+            let draggedElement;
             // get all available spaces from the model
             document.addEventListener('dragstart', (event) => {
-                draggedCard = event.target;
-                this.highlightAvailableCardSpaces(callback);
+                draggedElement = event.target;
+                if (draggedElement.classList.contains('card')) {
+                    this.highlightAvailableSpaces(availCardSpacesCallback);
+                }
+                else if (draggedElement.classList.contains('influenceToken')) {
+                    this.highlightAvailableSpaces(availTokenSpacesCallback);
+                }
             });
             document.addEventListener('dragover', function (event) {
                 // prevent default to allow drop
@@ -28,11 +33,26 @@ export class View {
             document.addEventListener('drop', (event) => {
                 event.preventDefault();
                 const targetSpace = event.target;
+                // check space is playable
                 if (targetSpace.classList.contains('playable-space')) {
-                    if (draggedCard && draggedCard.parentNode && targetSpace) {
-                        draggedCard.draggable = false;
-                        draggedCard.parentNode.removeChild(draggedCard);
-                        targetSpace.appendChild(draggedCard);
+                    // if dragged item is a card, place the card,
+                    // disable dragging of remaining cards and enable dragging token,
+                    // and invoke playcard callback to trigger change in model
+                    if (draggedElement.classList.contains('card')) {
+                        if (draggedElement.parentNode && targetSpace) {
+                            const playerCardsArr = Array.from(draggedElement.parentNode.children);
+                            playerCardsArr.forEach((ele) => {
+                                if (ele.classList.contains('card') && ele.draggable) {
+                                    ele.draggable = false;
+                                }
+                                else if (ele.classList.contains('influenceToken')) {
+                                    ele.draggable = true;
+                                }
+                            });
+                            draggedElement.parentNode.removeChild(draggedElement);
+                            targetSpace.appendChild(draggedElement);
+                            console.log(draggedElement.id);
+                        }
                     }
                 }
             });
@@ -44,7 +64,7 @@ export class View {
                 });
             });
         };
-        this.highlightAvailableCardSpaces = (getAvailableSpacesCallback) => {
+        this.highlightAvailableSpaces = (getAvailableSpacesCallback) => {
             const availableSpaces = getAvailableSpacesCallback();
             availableSpaces.forEach((space) => {
                 const spaceID = space.getID();

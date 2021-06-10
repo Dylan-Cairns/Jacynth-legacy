@@ -10,15 +10,14 @@
   <title>Document</title>
 </head>
 <body>
-  <div class="main-flex-container">
   <div class="main-grid">
     <div class="menuBar">
       <div class="menuBar-item title">Jacynth</div>
-      <div class="menuBar-item"><a href="#menu"><span class="mdi mdi-information-outline"></a></div>
+      <div class="menuBar-item"><a href="#menu"><span class="mdi mdi-menu"></a></div>
     </div>
     <div class="gameboard"></div>
     <div class="HUD-container enemyHUD">
-      <div class="playerIcon"><img src="/assets/sailer_losing.png"></div>
+      <div class="playerIcon"><img src="/assets/sailer_winning.png"></div>
       <div class="HUDText">
         <div class="HUDelement name">COMPUTER</div>
         <div class="HUDelement">Score 44 Tokens 5</div>
@@ -31,9 +30,16 @@
         <div class="HUDelement">Score 44 Tokens 5</div>
       </div>
     </div>
-    <div class="player-hand"></div>
+    <div class="player-hand-container">
+      <div class="player-hand">
+        <div class="influenceToken"><span class="mdi mdi-48px mdi-castle"></span></div>
+      </div>
+      <div class="button-container">
+        <div class="endTurnButton active">undo</div>
+        <div class="endTurnButton">end<br>turn</div>
+      </div>
+    </div>
   </div>
-</div>
 <div id="menu" class="overlay">
 	<div class="menu-popup">
     <a class="close" href="#">&times;</a>

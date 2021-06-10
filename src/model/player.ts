@@ -12,13 +12,13 @@ type AiMoveSearchResultsObj = {
   withTokenScore: number | undefined;
 };
 
-export type HandlePlayCardCallback = (
+export type SendCardPlaytoViewCB = (
   playerID: PlayerType,
   card: Card,
   boardSpace: BoardSpace
 ) => void;
 
-export type HandleDrawCardCallback = (card: Card) => void;
+export type SendCardDrawtoViewCB = (card: Card) => void;
 
 export type PlayerType = 'humanPlayer1' | 'humanPlayer2' | 'computerPlayer';
 
@@ -28,23 +28,23 @@ export class Player {
   protected gameBoard: GameBoard;
   protected deck: Decktet;
   protected influenceTokens: number;
-  protected onPlayCard: HandlePlayCardCallback;
-  protected onDrawCard: HandleDrawCardCallback;
+  protected sendCardPlaytoView: SendCardPlaytoViewCB;
+  protected sendCardDrawtoView: SendCardDrawtoViewCB;
 
   constructor(
     playerID: PlayerType,
     gameBoard: GameBoard,
     deck: Decktet,
-    onPlayCard: HandlePlayCardCallback,
-    onDrawCard: HandleDrawCardCallback
+    sendCardPlaytoView: SendCardPlaytoViewCB,
+    sendCardDrawtoView: SendCardDrawtoViewCB
   ) {
     this.playerID = playerID;
     this.gameBoard = gameBoard;
     this.deck = deck;
     this.hand = [];
     this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
-    this.onPlayCard = onPlayCard;
-    this.onDrawCard = onDrawCard;
+    this.sendCardPlaytoView = sendCardPlaytoView;
+    this.sendCardDrawtoView = sendCardDrawtoView;
     console.log(`${this.playerID} created`);
     // Draw starting hand
     for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
@@ -57,9 +57,13 @@ export class Player {
       return false;
     } else {
       this.hand = this.hand.filter((ele) => ele !== card);
-      this.drawCard();
       return true;
     }
+  }
+
+  undoPlayCard(spaceID: string, card: Card) {
+    this.hand.push(card);
+    this.gameBoard.getSpace(spaceID)?.removeCard();
   }
 
   drawCard() {
@@ -68,7 +72,7 @@ export class Player {
       this.hand.push(newCard);
       console.log(`${this.playerID} drawing card`);
       if (this.playerID !== 'computerPlayer') {
-        this.onDrawCard(newCard);
+        this.sendCardDrawtoView(newCard);
       }
     }
   }
@@ -97,14 +101,14 @@ export class ComputerPlayer extends Player {
     gameBoard: GameBoard,
     deck: Decktet,
     opponentID: PlayerType,
-    onPlayCard: HandlePlayCardCallback,
-    onDrawCard: HandleDrawCardCallback
+    onPlayCard: SendCardPlaytoViewCB,
+    onDrawCard: SendCardDrawtoViewCB
   ) {
     super(playerID, gameBoard, deck, onPlayCard, onDrawCard);
     this.opponentID = opponentID;
   }
 
-  getAllAvailableMoves() {
+  private getAllAvailableMoves() {
     const currentHumanScore = this.gameBoard.getPlayerScore(this.opponentID);
     const currentComputerScore = this.gameBoard.getPlayerScore(this.playerID);
     const resultsArr = [] as AiMoveSearchResultsObj[];
@@ -178,7 +182,7 @@ export class ComputerPlayer extends Player {
     return resultsArr;
   }
 
-  chooseBestMove() {
+  computerTakeTurn() {
     const allMoves = this.getAllAvailableMoves();
     const topCardOnlyMove = allMoves.sort((a, b) => {
       return a.cardOnlyScore - b.cardOnlyScore;
@@ -241,12 +245,13 @@ export class ComputerPlayer extends Player {
         );
       }
     }
+    this.drawCard();
   }
 
   // helper fn to adjust requirements for placing an influence
   // token as the game progresses
-  adjustMinThreshold(hopedForAmt: number) {
-    const spaceLeft = this.gameBoard.getAvailableSpaces().size;
+  private adjustMinThreshold(hopedForAmt: number) {
+    const spaceLeft = this.gameBoard.getAvailableSpaces().length;
     const sizeOfTheBoard = this.gameBoard.getBoardSize();
     const settledForNumber = Math.ceil(
       hopedForAmt * (spaceLeft / sizeOfTheBoard)
@@ -255,39 +260,3 @@ export class ComputerPlayer extends Player {
     return settledForNumber;
   }
 }
-
-// const deck = new Decktet({ isBasicDeck: true });
-// const board = new GameBoard(6);
-// board.setCard('x0y0', deck.drawCard()!);
-// board.setCard('x0y5', deck.drawCard()!);
-// board.setCard('x5y0', deck.drawCard()!);
-// board.setCard('x5y5', deck.drawCard()!);
-// // console.log(board.getAvailableSpaces());
-// const computerPlayer1 = new ComputerPlayer(
-//   'Computer1',
-//   board,
-//   deck,
-//   'Computer2'
-// );
-// const computerPlayer2 = new ComputerPlayer(
-//   'Computer2',
-//   board,
-//   deck,
-//   'Computer1'
-// );
-// // console.log(computerPlayer1.chooseBestMove());
-
-// let turnNumber = 1;
-// while (board.getAvailableSpaces().size > 0) {
-//   console.log(`Turn number ${turnNumber}`);
-//   computerPlayer1.chooseBestMove();
-//   computerPlayer2.chooseBestMove();
-//   const p1score = board.getPlayerScore('Computer1');
-//   const p2score = board.getPlayerScore('Computer2');
-//   console.log(`Score = P1: ${p1score} vs P2: ${p2score}`);
-//   turnNumber++;
-// }
-// console.log(`Game over.`);
-// const p1score = board.getPlayerScore('Computer1');
-// const p2score = board.getPlayerScore('Computer2');
-// console.log(`Final score = P1: ${p1score} vs P2: ${p2score}`);

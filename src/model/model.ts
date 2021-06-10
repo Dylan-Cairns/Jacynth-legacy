@@ -1,10 +1,10 @@
 import { GameBoard } from './gameboard.js';
-import { Decktet } from './decktet.js';
+import { Decktet, DeckType } from './decktet.js';
 import {
   Player,
   ComputerPlayer,
-  HandlePlayCardCallback,
-  HandleDrawCardCallback
+  SendCardPlaytoViewCB,
+  SendCardDrawtoViewCB
 } from './player.js';
 
 export type GameType = 'vsAI' | 'solitaire';
@@ -22,52 +22,54 @@ const BOARD_LAYOUTS = {
 export class Model {
   board: GameBoard;
   deck: Decktet;
+  player1: Player | undefined;
+  player2: Player | undefined;
 
-  constructor(gameType: GameType, layout: Layout) {
+  constructor(gameType: GameType, layout: Layout, deckType: DeckType) {
     const dimensions =
       layout === 'solitaire'
         ? SOLITAIRE_BOARD_DIMENSIONS
         : TWOPLAYER_BOARD_DIMENSIONS;
 
-    this.deck = new Decktet('extendedDeck');
+    this.deck = new Decktet(deckType);
     this.board = new GameBoard(dimensions);
   }
 
   vsAI(
-    handlePlayCardCallback: HandlePlayCardCallback,
-    handleDrawCardCallback: HandleDrawCardCallback
+    sendCardPlaytoView: SendCardPlaytoViewCB,
+    sendCardDrawtoView: SendCardDrawtoViewCB
   ) {
-    this.createLayout(this.board, this.deck, 'razeway', handlePlayCardCallback);
+    this.createLayout(this.board, this.deck, 'razeway', sendCardPlaytoView);
 
-    const humanPlayer1 = new Player(
+    this.player1 = new Player(
       'humanPlayer1',
       this.board,
       this.deck,
-      handlePlayCardCallback,
-      handleDrawCardCallback
+      sendCardPlaytoView,
+      sendCardDrawtoView
     );
 
-    const computerPlayer1 = new ComputerPlayer(
+    this.player2 = new ComputerPlayer(
       'computerPlayer',
       this.board,
       this.deck,
       'humanPlayer1',
-      handlePlayCardCallback,
-      handleDrawCardCallback
+      sendCardPlaytoView,
+      sendCardDrawtoView
     );
   }
 
-  createLayout(
+  private createLayout(
     board: GameBoard,
     deck: Decktet,
     layout: Layout,
-    bindPlayCardCallback: HandlePlayCardCallback
+    sendCardPlaytoView: SendCardPlaytoViewCB
   ) {
     const handleInitialPlacement = (spaceID: string) => {
       const card = deck.drawCard()!;
       const space = this.board.getSpace(spaceID)!;
       board.setCard(spaceID, card);
-      bindPlayCardCallback('computerPlayer', card, space);
+      sendCardPlaytoView('computerPlayer', card, space);
     };
     switch (layout) {
       case 'razeway':
