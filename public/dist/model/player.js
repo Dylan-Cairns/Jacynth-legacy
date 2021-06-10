@@ -1,49 +1,71 @@
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 export class Player {
-    constructor(playerID, gameBoard, deck, onPlayCard, onDrawCard) {
+    constructor(playerID, gameBoard, deck) {
+        this.playCard = (spaceID, cardID) => {
+            console.log('play card method called');
+            console.log('cardID: ', cardID);
+            const card = this.getCardFromHandByID(cardID);
+            console.log(card);
+            if (!card)
+                return false;
+            if (!this.gameBoard.setCard(spaceID, card)) {
+                return false;
+            }
+            else {
+                console.log('card set succesfully');
+                this.hand = this.hand.filter((ele) => ele !== card);
+                return true;
+            }
+        };
+        this.drawCard = () => {
+            const newCard = this.deck.drawCard();
+            if (newCard) {
+                this.hand.push(newCard);
+                console.log(`${this.playerID} drawing card`);
+                if (this.playerID !== 'Computer') {
+                    if (this.sendCardDrawtoView) {
+                        this.sendCardDrawtoView(newCard);
+                    }
+                }
+            }
+        };
+        this.getAvailableTokenSpaces = () => {
+            return this.gameBoard.getAvailableTokenSpaces(this.playerID);
+        };
+        this.placeToken = (spaceID) => {
+            return this.gameBoard.setPlayerToken(spaceID, this.playerID);
+        };
+        this.undoPlaceToken = (spaceID) => {
+            return this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
+        };
         this.playerID = playerID;
         this.gameBoard = gameBoard;
         this.deck = deck;
         this.hand = [];
         this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
-        this.onPlayCard = onPlayCard;
-        this.onDrawCard = onDrawCard;
         console.log(`${this.playerID} created`);
-        // Draw starting hand
+    }
+    undoPlayCard(spaceID) {
+        const space = this.gameBoard.getSpace(spaceID);
+        if (space) {
+            const card = space.getCard();
+            if (card) {
+                this.hand.push(card);
+                this.gameBoard.removeCardAndResolveBoard(spaceID);
+            }
+        }
+    }
+    drawStartingHand() {
         for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
             this.drawCard();
         }
     }
-    playCard(spaceID, card) {
-        if (!this.gameBoard.setCard(spaceID, card)) {
-            return false;
-        }
-        else {
-            this.hand = this.hand.filter((ele) => ele !== card);
-            return true;
-        }
-    }
-    undoPlayCard(spaceID, card) {
-        var _a;
-        this.hand.push(card);
-        (_a = this.gameBoard.getSpace(spaceID)) === null || _a === void 0 ? void 0 : _a.removeCard();
-    }
-    drawCard() {
-        const newCard = this.deck.drawCard();
-        if (newCard) {
-            this.hand.push(newCard);
-            console.log(`${this.playerID} drawing card`);
-            if (this.playerID !== 'computerPlayer') {
-                this.onDrawCard(newCard);
-            }
-        }
-    }
-    placeToken(spaceID) {
-        return this.gameBoard.setPlayerToken(spaceID, this.playerID);
-    }
     getInfluenceTokensNo() {
         return this.influenceTokens;
+    }
+    getCardFromHandByID(cardID) {
+        return this.hand.filter((card) => card.getId() === cardID)[0];
     }
     getHandArr() {
         return this.hand;
@@ -51,10 +73,19 @@ export class Player {
     getHandSize() {
         return this.hand.length;
     }
+    bindSendCardPlayToView(sendCardPlaytoView) {
+        this.sendCardPlaytoView = sendCardPlaytoView;
+    }
+    bindSendTokenPlayToView(sendTokenPlayToViewCB) {
+        this.sendTokenPlayToView = sendTokenPlayToViewCB;
+    }
+    bindDrawCard(sendCardDrawtoView) {
+        this.sendCardDrawtoView = sendCardDrawtoView;
+    }
 }
 export class ComputerPlayer extends Player {
-    constructor(playerID, gameBoard, deck, opponentID, onPlayCard, onDrawCard) {
-        super(playerID, gameBoard, deck, onPlayCard, onDrawCard);
+    constructor(playerID, gameBoard, deck, opponentID) {
+        super(playerID, gameBoard, deck);
         this.opponentID = opponentID;
     }
     getAllAvailableMoves() {
@@ -147,7 +178,7 @@ export class ComputerPlayer extends Player {
                 (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.SpaceToPlaceToken) &&
                 (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.withTokenScore) > topCardOnlyMove.cardOnlyScore) {
                 finalChoice = topTokenMove;
-                this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay);
+                this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
                 console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
                 const spaceToPlaceToken = finalChoice.SpaceToPlaceToken;
                 if (spaceToPlaceToken) {
@@ -156,7 +187,7 @@ export class ComputerPlayer extends Player {
                 }
             }
             else {
-                this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay);
+                this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
                 console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
             }
         }

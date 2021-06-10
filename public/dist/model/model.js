@@ -16,18 +16,24 @@ export class Model {
             : TWOPLAYER_BOARD_DIMENSIONS;
         this.deck = new Decktet(deckType);
         this.board = new GameBoard(dimensions);
+        this.player1 = new Player('Player1', this.board, this.deck);
+        this.player2 = new ComputerPlayer('Computer', this.board, this.deck, 'Player1');
     }
-    vsAI(handlePlayCardCallback, handleDrawCardCallback) {
-        this.createLayout(this.board, this.deck, 'razeway', handlePlayCardCallback);
-        this.player1 = new Player('humanPlayer1', this.board, this.deck, handlePlayCardCallback, handleDrawCardCallback);
-        this.player2 = new ComputerPlayer('computerPlayer', this.board, this.deck, 'humanPlayer1', handlePlayCardCallback, handleDrawCardCallback);
+    createGame() {
+        this.createLayout(this.board, this.deck, 'razeway');
+        this.player1.drawStartingHand();
+        this.player2.drawStartingHand();
     }
-    createLayout(board, deck, layout, bindPlayCardCallback) {
+    bindSendCardPlayToView(sendCardPlaytoView) {
+        this.sendCardPlaytoView = sendCardPlaytoView;
+    }
+    createLayout(board, deck, layout) {
         const handleInitialPlacement = (spaceID) => {
             const card = deck.drawCard();
             const space = this.board.getSpace(spaceID);
             board.setCard(spaceID, card);
-            bindPlayCardCallback('computerPlayer', card, space);
+            if (this.sendCardPlaytoView)
+                this.sendCardPlaytoView(card, space);
         };
         switch (layout) {
             case 'razeway':

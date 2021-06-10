@@ -30,6 +30,7 @@
 *::after,
 *::before {
   box-sizing: border-box;
+  font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
 }
 
 body {
@@ -41,7 +42,6 @@ body {
   background-blend-mode: multiply;
   background-repeat: no-repeat, repeat;
   background-position: bottom center, top left;
-  font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
 }
 
 .main-grid {
@@ -158,9 +158,9 @@ body {
   padding: 5px;
 }
 
-.endTurnbutton {
+.inGameButton {
   position: relative;
-  color: rgb(107, 107, 107);
+  color: var(--icon-text-color);
   background-color: var(--box-background);
   border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
   border-radius: var(--border-radius);
@@ -170,16 +170,18 @@ body {
   display: grid;
   justify-content: center;
   align-content: center;
-  font-size: calc(var(--desktop-gameboard-width) / 13);
+  font-size: calc(var(--gameboard-width) / 20);
   user-select: none;
+  cursor: pointer;
 }
 
-.endTurnButton.active {
-  color: var(--icon-text-color);
-}
-
-.endTurnButton.active:hover {
+.inGameButton:hover {
   color: white;
+}
+
+.inGameButton:disabled {
+  color: rgb(107, 107, 107);
+  cursor: unset;
 }
 
 .gameboard {
@@ -237,7 +239,8 @@ body {
   border-style: dashed;
 }
 
-.influenceToken {
+.influenceTokenContainer {
+  position: relative;
   border-radius: var(--border-radius);
   border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
   border-radius: 10px;
@@ -248,8 +251,26 @@ body {
   display: grid;
   justify-content: center;
   align-content: center;
+}
+
+.influenceToken {
+  position: absolute;
+  left: 25%;
+  top: 25%;
+  z-index: 50;
+  margin: 0px;
+  padding: 0px;
   font-size: 1.5em;
   user-select: none;
+  width: calc(var(--card-size) * 0.5);
+  height: calc(var(--card-size) * 0.5);
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  background-image: url('../assets/meeple.png');
+  background-size: 95%;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .card {

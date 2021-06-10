@@ -22,8 +22,9 @@ const BOARD_LAYOUTS = {
 export class Model {
   board: GameBoard;
   deck: Decktet;
-  player1: Player | undefined;
-  player2: Player | undefined;
+  player1: Player;
+  player2: Player;
+  sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
 
   constructor(gameType: GameType, layout: Layout, deckType: DeckType) {
     const dimensions =
@@ -33,43 +34,31 @@ export class Model {
 
     this.deck = new Decktet(deckType);
     this.board = new GameBoard(dimensions);
-  }
-
-  vsAI(
-    sendCardPlaytoView: SendCardPlaytoViewCB,
-    sendCardDrawtoView: SendCardDrawtoViewCB
-  ) {
-    this.createLayout(this.board, this.deck, 'razeway', sendCardPlaytoView);
-
-    this.player1 = new Player(
-      'humanPlayer1',
-      this.board,
-      this.deck,
-      sendCardPlaytoView,
-      sendCardDrawtoView
-    );
-
+    this.player1 = new Player('Player1', this.board, this.deck);
     this.player2 = new ComputerPlayer(
-      'computerPlayer',
+      'Computer',
       this.board,
       this.deck,
-      'humanPlayer1',
-      sendCardPlaytoView,
-      sendCardDrawtoView
+      'Player1'
     );
   }
 
-  private createLayout(
-    board: GameBoard,
-    deck: Decktet,
-    layout: Layout,
-    sendCardPlaytoView: SendCardPlaytoViewCB
-  ) {
+  createGame() {
+    this.createLayout(this.board, this.deck, 'razeway');
+    this.player1.drawStartingHand();
+    this.player2.drawStartingHand();
+  }
+
+  bindSendCardPlayToView(sendCardPlaytoView: SendCardPlaytoViewCB) {
+    this.sendCardPlaytoView = sendCardPlaytoView;
+  }
+
+  private createLayout(board: GameBoard, deck: Decktet, layout: Layout) {
     const handleInitialPlacement = (spaceID: string) => {
       const card = deck.drawCard()!;
       const space = this.board.getSpace(spaceID)!;
       board.setCard(spaceID, card);
-      sendCardPlaytoView('computerPlayer', card, space);
+      if (this.sendCardPlaytoView) this.sendCardPlaytoView(card, space);
     };
     switch (layout) {
       case 'razeway':

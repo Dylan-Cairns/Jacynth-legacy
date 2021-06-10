@@ -1,5 +1,5 @@
 import { Suit, Card, Decktet } from './decktet.js';
-import { PlayerType } from './player.js';
+import { PlayerID } from './player.js';
 
 export class BoardSpace {
   private id: string;
@@ -114,10 +114,10 @@ export class GameBoard {
     return true;
   }
 
-  removeCard(spaceID: string) {
-    const space = this.getSpace(spaceID);
-    space?.removeCard();
-  }
+  // removeCard(spaceID: string) {
+  //   const space = this.getSpace(spaceID);
+  //   space?.removeCard();
+  // }
 
   getAdjacentSpaces(spaceID: string): BoardSpace[] {
     const x = parseInt(spaceID[1]);
@@ -194,7 +194,7 @@ export class GameBoard {
     return results;
   }
 
-  setPlayerToken(spaceID: string, player: string): boolean {
+  setPlayerToken(spaceID: string, playerID: PlayerID): boolean {
     const currentSpace = this.getSpace(spaceID);
     if (!currentSpace) return false;
     const currentCard = currentSpace.getCard();
@@ -206,20 +206,21 @@ export class GameBoard {
     for (const suit of suits) {
       const district = this.getDistrict(spaceID, suit);
       for (const space of district) {
-        if (space.getPlayerToken() && space.getPlayerToken() !== player) {
+        if (space.getPlayerToken() && space.getPlayerToken() !== playerID) {
           return false;
         }
       }
     }
     // if no marker and not controlled by another player, place
     // marker and claim all districts
-    currentSpace.setPlayerToken(player);
+    currentSpace.setPlayerToken(playerID);
     for (const suit of suits) {
       const district = this.getDistrict(spaceID, suit);
       for (const space of district) {
         space.setControlbySuit(suit, spaceID);
       }
     }
+    console.log('player token set');
     return true;
   }
 
@@ -248,7 +249,7 @@ export class GameBoard {
   // get all spaces which a player can place a token on.
   // A valid space must have a card, must not have a token already,
   // and must not be part of another players district in any suit.
-  getAvailableTokenSpaces = (playerID: PlayerType): BoardSpace[] => {
+  getAvailableTokenSpaces = (playerID: PlayerID): BoardSpace[] => {
     console.log(this);
     console.log(playerID);
     // for each space on the board
@@ -279,7 +280,7 @@ export class GameBoard {
     return results;
   };
 
-  getPlayerScore(playerID: string): number {
+  getPlayerScore = (playerID: string): number => {
     let score = 0;
     this.spaces.forEach((space) => {
       if (space.getCard()) {
@@ -291,7 +292,7 @@ export class GameBoard {
       }
     });
     return score;
-  }
+  };
 
   resolveInflunceForEntireBoard() {
     this.spaces.forEach((space) => {
@@ -301,19 +302,19 @@ export class GameBoard {
     });
   }
 
-  removeCardAndResolveBoard(spaceID: string) {
+  removeCardAndResolveBoard = (spaceID: string) => {
     const space = this.spaces.get(spaceID);
     if (space) {
       space.removeCard();
       space.resetSuitsControlMap();
     }
     this.resolveInflunceForEntireBoard();
-  }
+  };
 
-  removePlayerTokenAndResolveBoard(spaceID: string) {
+  removePlayerTokenAndResolveBoard = (spaceID: string) => {
     this.spaces.get(spaceID)?.removePlayerToken();
     this.resolveInflunceForEntireBoard();
-  }
+  };
 }
 // const deck = new Decktet({ isBasicDeck: true });
 // const board = new GameBoard(6);

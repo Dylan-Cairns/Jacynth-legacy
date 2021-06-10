@@ -97,6 +97,33 @@ export class GameBoard {
             console.log(results);
             return results;
         };
+        this.getPlayerScore = (playerID) => {
+            let score = 0;
+            this.spaces.forEach((space) => {
+                if (space.getCard()) {
+                    space.getControlledSuitsMap().forEach((controllingSpaceID) => {
+                        const controllingSpace = this.spaces.get(controllingSpaceID);
+                        const controllingPlayerID = controllingSpace === null || controllingSpace === void 0 ? void 0 : controllingSpace.getPlayerToken();
+                        if (controllingPlayerID === playerID)
+                            score += 1;
+                    });
+                }
+            });
+            return score;
+        };
+        this.removeCardAndResolveBoard = (spaceID) => {
+            const space = this.spaces.get(spaceID);
+            if (space) {
+                space.removeCard();
+                space.resetSuitsControlMap();
+            }
+            this.resolveInflunceForEntireBoard();
+        };
+        this.removePlayerTokenAndResolveBoard = (spaceID) => {
+            var _a;
+            (_a = this.spaces.get(spaceID)) === null || _a === void 0 ? void 0 : _a.removePlayerToken();
+            this.resolveInflunceForEntireBoard();
+        };
         this.boardSize = boardSize;
         this.spaces = new Map();
         for (let y = 0; y < boardSize; y++) {
@@ -139,10 +166,10 @@ export class GameBoard {
         this.resolveInfluenceConflicts(space);
         return true;
     }
-    removeCard(spaceID) {
-        const space = this.getSpace(spaceID);
-        space === null || space === void 0 ? void 0 : space.removeCard();
-    }
+    // removeCard(spaceID: string) {
+    //   const space = this.getSpace(spaceID);
+    //   space?.removeCard();
+    // }
     getAdjacentSpaces(spaceID) {
         const x = parseInt(spaceID[1]);
         const y = parseInt(spaceID[3]);
@@ -205,7 +232,7 @@ export class GameBoard {
         searchConnectedTiles(SpaceID, suit);
         return results;
     }
-    setPlayerToken(spaceID, player) {
+    setPlayerToken(spaceID, playerID) {
         const currentSpace = this.getSpace(spaceID);
         if (!currentSpace)
             return false;
@@ -219,20 +246,21 @@ export class GameBoard {
         for (const suit of suits) {
             const district = this.getDistrict(spaceID, suit);
             for (const space of district) {
-                if (space.getPlayerToken() && space.getPlayerToken() !== player) {
+                if (space.getPlayerToken() && space.getPlayerToken() !== playerID) {
                     return false;
                 }
             }
         }
         // if no marker and not controlled by another player, place
         // marker and claim all districts
-        currentSpace.setPlayerToken(player);
+        currentSpace.setPlayerToken(playerID);
         for (const suit of suits) {
             const district = this.getDistrict(spaceID, suit);
             for (const space of district) {
                 space.setControlbySuit(suit, spaceID);
             }
         }
+        console.log('player token set');
         return true;
     }
     resolveInfluenceConflicts(boardSpace) {
@@ -259,39 +287,12 @@ export class GameBoard {
             }
         });
     }
-    getPlayerScore(playerID) {
-        let score = 0;
-        this.spaces.forEach((space) => {
-            if (space.getCard()) {
-                space.getControlledSuitsMap().forEach((controllingSpaceID) => {
-                    const controllingSpace = this.spaces.get(controllingSpaceID);
-                    const controllingPlayerID = controllingSpace === null || controllingSpace === void 0 ? void 0 : controllingSpace.getPlayerToken();
-                    if (controllingPlayerID === playerID)
-                        score += 1;
-                });
-            }
-        });
-        return score;
-    }
     resolveInflunceForEntireBoard() {
         this.spaces.forEach((space) => {
             if (space.getPlayerToken()) {
                 this.resolveInfluenceConflicts(space);
             }
         });
-    }
-    removeCardAndResolveBoard(spaceID) {
-        const space = this.spaces.get(spaceID);
-        if (space) {
-            space.removeCard();
-            space.resetSuitsControlMap();
-        }
-        this.resolveInflunceForEntireBoard();
-    }
-    removePlayerTokenAndResolveBoard(spaceID) {
-        var _a;
-        (_a = this.spaces.get(spaceID)) === null || _a === void 0 ? void 0 : _a.removePlayerToken();
-        this.resolveInflunceForEntireBoard();
     }
 }
 // const deck = new Decktet({ isBasicDeck: true });
