@@ -139,7 +139,6 @@ export class GameBoard {
             return score;
         };
         this.resolveInflunceForEntireBoard = () => {
-            console.log('resolveInfluenceForEntireBoard called');
             this.spaces.forEach((space) => {
                 space.resetSuitsControlMap();
             });
@@ -159,7 +158,6 @@ export class GameBoard {
         };
         this.removePlayerTokenAndResolveBoard = (spaceID) => {
             var _a;
-            console.log('removePlayerTokenAndResolveBoard method called');
             (_a = this.spaces.get(spaceID)) === null || _a === void 0 ? void 0 : _a.removePlayerToken();
             this.resolveInflunceForEntireBoard();
         };

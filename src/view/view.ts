@@ -9,6 +9,8 @@ export class View {
   influenceTokenContainer: HTMLElement;
   undoButton: HTMLButtonElement;
   endTurnButton: HTMLButtonElement;
+  player1HUD: HTMLElement;
+  player2HUD: HTMLElement;
   pickupSound: HTMLMediaElement;
   dropSound: HTMLMediaElement;
   clickSound: HTMLMediaElement;
@@ -27,7 +29,10 @@ export class View {
   undoPlaceToken: ((spaceID: string) => void) | undefined;
   computerTakeTurn: (() => void) | undefined;
   getCardDrawFromModel: (() => void) | undefined;
-  getAvailableTokensNumber: (() => number) | undefined;
+  getP1AvailableTokensNumber: (() => number) | undefined;
+  getP2AvailableTokensNumber: (() => number) | undefined;
+  getPlayer1Score: (() => void) | undefined;
+  getPlayer2Score: (() => void) | undefined;
 
   constructor(board: GameBoard) {
     this.app = document.querySelector('#root')! as HTMLElement;
@@ -46,12 +51,13 @@ export class View {
       'endTurnButton'
     ) as HTMLButtonElement;
     this.endTurnButton.disabled = true;
+    this.player1HUD = document.getElementById('player1HUD') as HTMLElement;
+    this.player2HUD = document.getElementById('player2HUD') as HTMLElement;
     this.pickupSound = document.getElementById(
       'pickupSound'
     ) as HTMLMediaElement;
     this.clickSound = document.getElementById('clickSound') as HTMLMediaElement;
     this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
-    console.log(this.dropSound);
     this.undoMovesArr = [];
     this.createBoardSpaces(board);
     // create initial influence token
@@ -209,9 +215,7 @@ export class View {
       this.disableAllTokenDragging();
       this.undoButton.disabled = true;
       this.endTurnButton.disabled = true;
-      if (this.getAvailableTokensNumber) {
-        console.log(this.getAvailableTokensNumber());
-      }
+      this.updateHUD();
     });
   }
 
@@ -278,13 +282,29 @@ export class View {
     return cardDiv;
   };
 
+  private updateHUD() {
+    if (
+      this.getPlayer1Score &&
+      this.getPlayer2Score &&
+      this.getP1AvailableTokensNumber &&
+      this.getP2AvailableTokensNumber
+    ) {
+      const p1Score = this.getPlayer1Score();
+      const p2Score = this.getPlayer2Score();
+      const p1Tokens = this.getP1AvailableTokensNumber();
+      const p2Tokens = this.getP2AvailableTokensNumber();
+      this.player1HUD.textContent = `Score ${p1Score} Tokens ${p1Tokens}`;
+      this.player2HUD.textContent = `Score ${p2Score} Tokens ${p2Tokens}`;
+    }
+  }
+
   private addInfluenceTokenToHand() {
     // if there's already a token in hand, return
     if (this.influenceTokenContainer.querySelector('.influenceToken')) {
       return;
     }
-    if (this.getAvailableTokensNumber) {
-      if (this.getAvailableTokensNumber() > 0) {
+    if (this.getP1AvailableTokensNumber) {
+      if (this.getP1AvailableTokensNumber() > 0) {
         const token = this.createElement(
           'div',
           'influenceToken',
@@ -425,7 +445,19 @@ export class View {
     this.getCardDrawFromModel = drawCardCB;
   }
 
-  bindGetAvailableTokens(availTokensCB: () => number) {
-    this.getAvailableTokensNumber = availTokensCB;
+  bindGetP1AvailableTokens(availTokensCB: () => number) {
+    this.getP1AvailableTokensNumber = availTokensCB;
+  }
+
+  bindGetP2AvailableTokens(availTokensCB: () => number) {
+    this.getP2AvailableTokensNumber = availTokensCB;
+  }
+
+  bindGetPlayer1Score(getPlayer1ScoreCB: () => void) {
+    this.getPlayer1Score = getPlayer1ScoreCB;
+  }
+
+  bindGetPlayer2Score(getPlayer2ScoreCB: () => void) {
+    this.getPlayer2Score = getPlayer2ScoreCB;
   }
 }

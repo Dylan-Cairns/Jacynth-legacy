@@ -47,11 +47,13 @@ export class Player {
         };
         this.undoPlaceToken = (spaceID) => {
             this.influenceTokens++;
-            console.log(`undoPlaceToken player method called on ${this.playerID}`);
             return this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
         };
         this.getInfluenceTokensNo = () => {
             return this.influenceTokens;
+        };
+        this.getScore = () => {
+            return this.gameBoard.getPlayerScore(this.playerID);
         };
         this.playerID = playerID;
         this.gameBoard = gameBoard;
@@ -74,9 +76,6 @@ export class Player {
     getHandSize() {
         return this.hand.length;
     }
-    getScore() {
-        return this.gameBoard.getPlayerScore(this.playerID);
-    }
     bindSendCardPlayToView(sendCardPlaytoView) {
         this.sendCardPlaytoView = sendCardPlaytoView;
     }
@@ -93,6 +92,7 @@ export class ComputerPlayer extends Player {
         this.computerTakeTurn = () => {
             var _a;
             const allMoves = this.getAllAvailableMoves();
+            console.log(allMoves);
             const topCardOnlyMove = allMoves.sort((a, b) => {
                 return a.cardOnlyScore - b.cardOnlyScore;
             })[0];

@@ -287,7 +287,6 @@ export class GameBoard {
   };
 
   resolveInflunceForEntireBoard = () => {
-    console.log('resolveInfluenceForEntireBoard called');
     this.spaces.forEach((space) => {
       space.resetSuitsControlMap();
     });
@@ -308,7 +307,6 @@ export class GameBoard {
   };
 
   removePlayerTokenAndResolveBoard = (spaceID: string) => {
-    console.log('removePlayerTokenAndResolveBoard method called');
     this.spaces.get(spaceID)?.removePlayerToken();
     this.resolveInflunceForEntireBoard();
   };

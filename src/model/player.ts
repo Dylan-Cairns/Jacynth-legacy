@@ -91,7 +91,6 @@ export class Player {
 
   undoPlaceToken = (spaceID: string) => {
     this.influenceTokens++;
-    console.log(`undoPlaceToken player method called on ${this.playerID}`);
     return this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
   };
 
@@ -111,9 +110,9 @@ export class Player {
     return this.hand.length;
   }
 
-  getScore() {
+  getScore = () => {
     return this.gameBoard.getPlayerScore(this.playerID);
-  }
+  };
 
   bindSendCardPlayToView(sendCardPlaytoView: SendCardPlaytoViewCB) {
     this.sendCardPlaytoView = sendCardPlaytoView;
@@ -216,6 +215,7 @@ export class ComputerPlayer extends Player {
 
   computerTakeTurn = () => {
     const allMoves = this.getAllAvailableMoves();
+    console.log(allMoves);
     const topCardOnlyMove = allMoves.sort((a, b) => {
       return a.cardOnlyScore - b.cardOnlyScore;
     })[0];

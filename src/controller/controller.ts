@@ -29,7 +29,10 @@ export class Controller {
     this.view.bindUndoPlaceToken(this.model.player1.undoPlaceToken);
     this.view.bindComputerTakeTurn(this.model.player2.computerTakeTurn);
     this.view.bindGetCardDrawFromModel(this.model.player1.drawCard);
-    this.view.bindGetAvailableTokens(this.model.player1.getInfluenceTokensNo);
+    this.view.bindGetP1AvailableTokens(this.model.player1.getInfluenceTokensNo);
+    this.view.bindGetP2AvailableTokens(this.model.player2.getInfluenceTokensNo);
+    this.view.bindGetPlayer1Score(this.model.player1.getScore);
+    this.view.bindGetPlayer2Score(this.model.player2.getScore);
 
     this.model.createGame(layout);
   }
