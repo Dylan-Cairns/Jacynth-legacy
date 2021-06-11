@@ -39,10 +39,19 @@ export class Player {
             return this.gameBoard.getAvailableTokenSpaces(this.playerID);
         };
         this.placeToken = (spaceID) => {
-            return this.gameBoard.setPlayerToken(spaceID, this.playerID);
+            if (this.influenceTokens > 0) {
+                this.influenceTokens--;
+                return this.gameBoard.setPlayerToken(spaceID, this.playerID);
+            }
+            return false;
         };
         this.undoPlaceToken = (spaceID) => {
+            this.influenceTokens++;
+            console.log(`undoPlaceToken player method called on ${this.playerID}`);
             return this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
+        };
+        this.getInfluenceTokensNo = () => {
+            return this.influenceTokens;
         };
         this.playerID = playerID;
         this.gameBoard = gameBoard;
@@ -56,9 +65,6 @@ export class Player {
             this.drawCard();
         }
     }
-    getInfluenceTokensNo() {
-        return this.influenceTokens;
-    }
     getCardFromHandByID(cardID) {
         return this.hand.filter((card) => card.getId() === cardID)[0];
     }
@@ -67,6 +73,9 @@ export class Player {
     }
     getHandSize() {
         return this.hand.length;
+    }
+    getScore() {
+        return this.gameBoard.getPlayerScore(this.playerID);
     }
     bindSendCardPlayToView(sendCardPlaytoView) {
         this.sendCardPlaytoView = sendCardPlaytoView;
@@ -81,6 +90,61 @@ export class Player {
 export class ComputerPlayer extends Player {
     constructor(playerID, gameBoard, deck, opponentID) {
         super(playerID, gameBoard, deck);
+        this.computerTakeTurn = () => {
+            var _a;
+            const allMoves = this.getAllAvailableMoves();
+            const topCardOnlyMove = allMoves.sort((a, b) => {
+                return a.cardOnlyScore - b.cardOnlyScore;
+            })[0];
+            const topTokenMove = allMoves.sort((a, b) => {
+                // two undefined values should be treated as equal ( 0 )
+                if (typeof a.withTokenScore === 'undefined' &&
+                    typeof b.withTokenScore === 'undefined')
+                    return 0;
+                // if a is undefined and b isn't a should have a lower index in the array
+                else if (typeof a.withTokenScore === 'undefined')
+                    return 1;
+                // if b is undefined and a isn't a should have a higher index in the array
+                else if (typeof b.withTokenScore === 'undefined')
+                    return -1;
+                // if both numbers are defined compare as normal
+                else
+                    return a.withTokenScore - b.withTokenScore;
+            })[0];
+            let finalChoice = topCardOnlyMove;
+            // If the top score from placing a token is higher than from only placing a card,
+            // choose the move that places a token as well as a card.
+            // Otherwise only place a card. Minimum threshold for token placement
+            //  was already tested in getAllAvailableMoves method, no need to test again.
+            if (this.influenceTokens > 0) {
+                if ((topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.withTokenScore) &&
+                    (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.SpaceToPlaceToken) &&
+                    (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.withTokenScore) > topCardOnlyMove.cardOnlyScore) {
+                    finalChoice = topTokenMove;
+                    this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
+                    if (this.sendCardPlaytoView) {
+                        this.sendCardPlaytoView(finalChoice.cardToPlay, finalChoice.spaceToPlaceCard);
+                    }
+                    console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
+                    const spaceToPlaceToken = finalChoice.SpaceToPlaceToken;
+                    if (spaceToPlaceToken) {
+                        this.placeToken(spaceToPlaceToken.getID());
+                        if (this.sendTokenPlayToView) {
+                            this.sendTokenPlayToView(spaceToPlaceToken);
+                        }
+                        console.log(`${this.playerID} played a token to ${(_a = finalChoice.SpaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getID()}`);
+                    }
+                }
+                else {
+                    this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
+                    if (this.sendCardPlaytoView) {
+                        this.sendCardPlaytoView(finalChoice.cardToPlay, finalChoice.spaceToPlaceCard);
+                    }
+                    console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
+                }
+            }
+            this.drawCard();
+        };
         this.opponentID = opponentID;
     }
     getAllAvailableMoves() {
@@ -141,52 +205,6 @@ export class ComputerPlayer extends Player {
             });
         });
         return resultsArr;
-    }
-    computerTakeTurn() {
-        var _a;
-        const allMoves = this.getAllAvailableMoves();
-        const topCardOnlyMove = allMoves.sort((a, b) => {
-            return a.cardOnlyScore - b.cardOnlyScore;
-        })[0];
-        const topTokenMove = allMoves.sort((a, b) => {
-            // two undefined values should be treated as equal ( 0 )
-            if (typeof a.withTokenScore === 'undefined' &&
-                typeof b.withTokenScore === 'undefined')
-                return 0;
-            // if a is undefined and b isn't a should have a lower index in the array
-            else if (typeof a.withTokenScore === 'undefined')
-                return 1;
-            // if b is undefined and a isn't a should have a higher index in the array
-            else if (typeof b.withTokenScore === 'undefined')
-                return -1;
-            // if both numbers are defined compare as normal
-            else
-                return a.withTokenScore - b.withTokenScore;
-        })[0];
-        let finalChoice = topCardOnlyMove;
-        // If the top score from placing a token is higher than from only placing a card,
-        // choose the move that places a token as well as a card.
-        // Otherwise only place a card. Minimum threshold for token placement
-        //  was already tested in getAllAvailableMoves method, no need to test again.
-        if (this.influenceTokens > 0) {
-            if ((topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.withTokenScore) &&
-                (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.SpaceToPlaceToken) &&
-                (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.withTokenScore) > topCardOnlyMove.cardOnlyScore) {
-                finalChoice = topTokenMove;
-                this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
-                console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
-                const spaceToPlaceToken = finalChoice.SpaceToPlaceToken;
-                if (spaceToPlaceToken) {
-                    this.placeToken(spaceToPlaceToken.getID());
-                    console.log(`${this.playerID} played a token to ${(_a = finalChoice.SpaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getID()}`);
-                }
-            }
-            else {
-                this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
-                console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
-            }
-        }
-        this.drawCard();
     }
     // helper fn to adjust requirements for placing an influence
     // token as the game progresses

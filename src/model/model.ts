@@ -1,11 +1,6 @@
 import { GameBoard } from './gameboard.js';
 import { Decktet, DeckType } from './decktet.js';
-import {
-  Player,
-  ComputerPlayer,
-  SendCardPlaytoViewCB,
-  SendCardDrawtoViewCB
-} from './player.js';
+import { Player, ComputerPlayer, SendCardPlaytoViewCB } from './player.js';
 
 export type GameType = 'vsAI' | 'solitaire';
 export type Layout = 'razeway' | 'towers' | 'oldcity' | 'solitaire';
@@ -15,7 +10,7 @@ const TWOPLAYER_BOARD_DIMENSIONS = 6;
 const BOARD_LAYOUTS = {
   razeway: ['x0y0', 'x1y1', 'x2y2', 'x3y3', 'x4y4', 'x5y5'],
   towers: ['x1y1', 'x4y1', 'x1y4', 'x4y4'],
-  oldcity: ['x3y0', 'x4y1', 'x0y3', 'x5y3', 'x1y4', 'x3y5'],
+  oldcity: ['x2y0', 'x4y1', 'x0y2', 'x5y3', 'x1y4', 'x3y5'],
   solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
 
@@ -23,7 +18,7 @@ export class Model {
   board: GameBoard;
   deck: Decktet;
   player1: Player;
-  player2: Player;
+  player2: ComputerPlayer;
   sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
 
   constructor(gameType: GameType, layout: Layout, deckType: DeckType) {
@@ -43,8 +38,8 @@ export class Model {
     );
   }
 
-  createGame() {
-    this.createLayout(this.board, this.deck, 'razeway');
+  createGame(layout: Layout) {
+    this.createLayout(this.board, this.deck, layout);
     this.player1.drawStartingHand();
     this.player2.drawStartingHand();
   }

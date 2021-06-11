@@ -6,7 +6,7 @@ const TWOPLAYER_BOARD_DIMENSIONS = 6;
 const BOARD_LAYOUTS = {
     razeway: ['x0y0', 'x1y1', 'x2y2', 'x3y3', 'x4y4', 'x5y5'],
     towers: ['x1y1', 'x4y1', 'x1y4', 'x4y4'],
-    oldcity: ['x3y0', 'x4y1', 'x0y3', 'x5y3', 'x1y4', 'x3y5'],
+    oldcity: ['x2y0', 'x4y1', 'x0y2', 'x5y3', 'x1y4', 'x3y5'],
     solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
 export class Model {
@@ -19,8 +19,8 @@ export class Model {
         this.player1 = new Player('Player1', this.board, this.deck);
         this.player2 = new ComputerPlayer('Computer', this.board, this.deck, 'Player1');
     }
-    createGame() {
-        this.createLayout(this.board, this.deck, 'razeway');
+    createGame(layout) {
+        this.createLayout(this.board, this.deck, layout);
         this.player1.drawStartingHand();
         this.player2.drawStartingHand();
     }

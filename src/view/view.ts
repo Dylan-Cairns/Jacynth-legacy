@@ -9,6 +9,9 @@ export class View {
   influenceTokenContainer: HTMLElement;
   undoButton: HTMLButtonElement;
   endTurnButton: HTMLButtonElement;
+  pickupSound: HTMLMediaElement;
+  dropSound: HTMLMediaElement;
+  clickSound: HTMLMediaElement;
   draggedElement: HTMLElement | undefined;
   undoMovesArr: {
     draggedEle: HTMLElement;
@@ -22,6 +25,9 @@ export class View {
   sendTokenPlayToModel: ((spaceID: string) => boolean) | undefined;
   undoPlayCard: ((spaceID: string) => void) | undefined;
   undoPlaceToken: ((spaceID: string) => void) | undefined;
+  computerTakeTurn: (() => void) | undefined;
+  getCardDrawFromModel: (() => void) | undefined;
+  getAvailableTokensNumber: (() => number) | undefined;
 
   constructor(board: GameBoard) {
     this.app = document.querySelector('#root')! as HTMLElement;
@@ -35,14 +41,26 @@ export class View {
     this.undoButton = document.getElementById(
       'undoButton'
     ) as HTMLButtonElement;
+    this.undoButton.disabled = true;
     this.endTurnButton = document.getElementById(
       'endTurnButton'
     ) as HTMLButtonElement;
+    this.endTurnButton.disabled = true;
+    this.pickupSound = document.getElementById(
+      'pickupSound'
+    ) as HTMLMediaElement;
+    this.clickSound = document.getElementById('clickSound') as HTMLMediaElement;
+    this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
+    console.log(this.dropSound);
     this.undoMovesArr = [];
     this.createBoardSpaces(board);
+    // create initial influence token
+    const token = this.createElement('div', 'influenceToken', 'player1Token');
+    this.influenceTokenContainer.appendChild(token);
 
     // on dragstart, get all available spaces from the model
     document.addEventListener('dragstart', (event) => {
+      this.pickupSound.play();
       this.draggedElement = event.target as HTMLElement;
       if (this.draggedElement.classList.contains('card')) {
         if (this.getAvailCardSpaces) {
@@ -118,6 +136,8 @@ export class View {
           });
           //enable undo button
           this.undoButton.disabled = false;
+          // play can end turn after placing a card
+          this.endTurnButton.disabled = false;
           // or place a token
         } else if (this.draggedElement.classList.contains('influenceToken')) {
           this.draggedElement.parentNode.removeChild(this.draggedElement);
@@ -137,6 +157,7 @@ export class View {
     });
 
     document.addEventListener('dragend', () => {
+      this.dropSound.play();
       // remove all available spaces highlighting
       Array.from(this.gameBoard.children).forEach((space) => {
         space.classList.remove('playable-space');
@@ -144,6 +165,7 @@ export class View {
     });
 
     this.undoButton.addEventListener('click', () => {
+      this.pickupSound.play();
       if (this.undoMovesArr.length > 0) {
         const moveObj = this.undoMovesArr.pop()!;
         const cardOrTokenToUndo = moveObj.draggedEle;
@@ -161,6 +183,7 @@ export class View {
           this.enableCardHandDragging();
           this.disableAllTokenDragging();
           this.undoButton.disabled = true;
+          this.endTurnButton.disabled = true;
           // if it's a token, leave undo button active.
         } else if (cardOrTokenToUndo?.classList.contains('influenceToken')) {
           targetSpace.removeChild(cardOrTokenToUndo);
@@ -170,6 +193,24 @@ export class View {
           }
           this.enableTokenDragging();
         }
+      }
+    });
+
+    this.endTurnButton.addEventListener('click', () => {
+      this.clickSound.play();
+      if (this.computerTakeTurn) {
+        this.computerTakeTurn();
+      }
+      if (this.getCardDrawFromModel) {
+        this.getCardDrawFromModel();
+      }
+      this.addInfluenceTokenToHand();
+      this.enableCardHandDragging();
+      this.disableAllTokenDragging();
+      this.undoButton.disabled = true;
+      this.endTurnButton.disabled = true;
+      if (this.getAvailableTokensNumber) {
+        console.log(this.getAvailableTokensNumber());
       }
     });
   }
@@ -211,7 +252,7 @@ export class View {
     });
   }
 
-  createCard = (card: Card) => {
+  private createCard = (card: Card) => {
     // get the values from the card
     const id = card.getId();
     const suits = card.getAllSuits();
@@ -237,7 +278,24 @@ export class View {
     return cardDiv;
   };
 
-  enableCardHandDragging() {
+  private addInfluenceTokenToHand() {
+    // if there's already a token in hand, return
+    if (this.influenceTokenContainer.querySelector('.influenceToken')) {
+      return;
+    }
+    if (this.getAvailableTokensNumber) {
+      if (this.getAvailableTokensNumber() > 0) {
+        const token = this.createElement(
+          'div',
+          'influenceToken',
+          'player1Token'
+        );
+        this.influenceTokenContainer.appendChild(token);
+      }
+    }
+  }
+
+  private enableCardHandDragging() {
     const CardsArr = Array.from(
       this.playerHandContainer.querySelectorAll('.card')
     ) as HTMLElement[];
@@ -248,7 +306,7 @@ export class View {
     });
   }
 
-  disableAllCardDragging() {
+  private disableAllCardDragging() {
     const CardsArr = Array.from(
       document.querySelectorAll('.card')
     ) as HTMLElement[];
@@ -259,14 +317,14 @@ export class View {
     });
   }
 
-  enableTokenDragging() {
+  private enableTokenDragging() {
     const token = this.influenceTokenContainer.firstChild as HTMLElement;
     if (token) {
       token.draggable = true;
     }
   }
 
-  disableAllTokenDragging() {
+  private disableAllTokenDragging() {
     const tokenArr = Array.from(
       document.querySelectorAll('.influenceToken')
     ) as HTMLElement[];
@@ -277,31 +335,12 @@ export class View {
     });
   }
 
-  createToken = (playerID: PlayerID) => {
-    return this.createElement('div', `card-cell token ${playerID}`);
-  };
-
-  addCardToSpace = (cardDiv: HTMLElement, spaceID: string) => {
+  private addCardToSpace = (cardDiv: HTMLElement, spaceID: string) => {
     const boardSpace = document.getElementById(spaceID);
     boardSpace?.appendChild(cardDiv);
   };
 
-  addTokenToSpace = (playerID: PlayerID, spaceID: string) => {
-    const boardSpace = document.getElementById(spaceID);
-    boardSpace?.appendChild(this.createToken(playerID));
-  };
-
-  playerDrawCard = (card: Card) => {
-    const cardDiv = this.createCard(card);
-    cardDiv.draggable = true;
-    this.playerHandContainer?.appendChild(cardDiv);
-  };
-
-  // playerPlayCard(card: Card, boardSpace: BoardSpace) {
-  //   this.getElement;
-  // }
-
-  highlightAvailableSpaces = (
+  private highlightAvailableSpaces = (
     getAvailableSpacesCallback: () => BoardSpace[]
   ) => {
     const availableSpaces = getAvailableSpacesCallback();
@@ -331,9 +370,23 @@ export class View {
     }
   }
 
+  playerDrawCardCB = (card: Card) => {
+    const cardDiv = this.createCard(card);
+    cardDiv.draggable = true;
+    this.playerHandContainer?.appendChild(cardDiv);
+  };
+
   nonPlayerCardPlacementCB = (card: Card, boardSpace: BoardSpace) => {
     const cardDiv = this.createCard(card);
+    cardDiv.classList.add('roll-in-top');
     this.addCardToSpace(cardDiv, boardSpace.getID());
+  };
+
+  nonPlayerTokenPlacementCB = (boardSpace: BoardSpace) => {
+    const spaceID = boardSpace.getID();
+    const token = this.createElement('div', 'influenceToken', 'player2Token');
+    const spaceElement = document.getElementById(spaceID);
+    spaceElement?.appendChild(token);
   };
 
   bindGetAvailCardSpaces(availCardSpacesCB: () => BoardSpace[]) {
@@ -362,5 +415,17 @@ export class View {
 
   bindUndoPlaceToken(undoPlaceTokenCB: (spaceID: string) => void) {
     this.undoPlaceToken = undoPlaceTokenCB;
+  }
+
+  bindComputerTakeTurn(computerTurnCB: () => void) {
+    this.computerTakeTurn = computerTurnCB;
+  }
+
+  bindGetCardDrawFromModel(drawCardCB: () => void) {
+    this.getCardDrawFromModel = drawCardCB;
+  }
+
+  bindGetAvailableTokens(availTokensCB: () => number) {
+    this.getAvailableTokensNumber = availTokensCB;
   }
 }

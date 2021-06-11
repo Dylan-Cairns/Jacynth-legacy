@@ -10,6 +10,9 @@
   <title>Document</title>
 </head>
 <body>
+  <audio id="pickupSound" src="assets/rollover5.wav" preload="auto"></audio>
+  <audio id="dropSound" src="assets/switch8.wav" preload="auto"></audio>
+  <audio id="clickSound" src="assets/rollover5.wav" preload="auto"></audio>
   <div class="main-grid">
     <div class="menuBar">
       <div class="menuBar-item title">Jacynth</div>
@@ -19,20 +22,20 @@
     <div class="HUD-container enemyHUD">
       <div class="playerIcon"><img src="/assets/sailer_winning.png"></div>
       <div class="HUDText">
-        <div class="HUDelement name">COMPUTER</div>
+        <div class="HUDelement name enemy">COMPUTER</div>
         <div class="HUDelement">Score 44 Tokens 5</div>
       </div>
     </div>
     <div class="HUD-container playerHUD">
       <div class="playerIcon"><img src="/assets/penitent_winning.png"></div>
       <div class="HUDText">
-        <div class="HUDelement name">PLAYER</div>
+        <div class="HUDelement name player">PLAYER</div>
         <div class="HUDelement">Score 44 Tokens 5</div>
       </div>
     </div>
     <div class="player-hand-container">
       <div class="player-hand">
-        <div class="influenceTokenContainer"><div class="influenceToken"></div></div>
+        <div class="influenceTokenContainer"></div>
       </div>
       <div class="button-container">
         <button type="button" class="inGameButton" id="undoButton" disabled>undo</button>

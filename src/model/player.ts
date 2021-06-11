@@ -13,7 +13,7 @@ type AiMoveSearchResultsObj = {
 };
 
 export type SendCardDrawtoViewCB = (card: Card) => void;
-export type SendCardPlaytoViewCB = (card: Card, boardSpace: BoardSpace) => void;
+export type SendCardPlaytoViewCB = (card: Card, spaceID: BoardSpace) => void;
 export type SendTokenPlayToViewCB = (boardSpace: BoardSpace) => void;
 
 export type PlayerID = 'Player1' | 'Player2' | 'Computer';
@@ -82,16 +82,22 @@ export class Player {
   };
 
   placeToken = (spaceID: string) => {
-    return this.gameBoard.setPlayerToken(spaceID, this.playerID);
+    if (this.influenceTokens > 0) {
+      this.influenceTokens--;
+      return this.gameBoard.setPlayerToken(spaceID, this.playerID);
+    }
+    return false;
   };
 
   undoPlaceToken = (spaceID: string) => {
+    this.influenceTokens++;
+    console.log(`undoPlaceToken player method called on ${this.playerID}`);
     return this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
   };
 
-  getInfluenceTokensNo() {
+  getInfluenceTokensNo = () => {
     return this.influenceTokens;
-  }
+  };
 
   getCardFromHandByID(cardID: string): Card | undefined {
     return this.hand.filter((card) => card.getId() === cardID)[0];
@@ -103,6 +109,10 @@ export class Player {
 
   getHandSize() {
     return this.hand.length;
+  }
+
+  getScore() {
+    return this.gameBoard.getPlayerScore(this.playerID);
   }
 
   bindSendCardPlayToView(sendCardPlaytoView: SendCardPlaytoViewCB) {
@@ -204,7 +214,7 @@ export class ComputerPlayer extends Player {
     return resultsArr;
   }
 
-  computerTakeTurn() {
+  computerTakeTurn = () => {
     const allMoves = this.getAllAvailableMoves();
     const topCardOnlyMove = allMoves.sort((a, b) => {
       return a.cardOnlyScore - b.cardOnlyScore;
@@ -241,6 +251,12 @@ export class ComputerPlayer extends Player {
           finalChoice.spaceToPlaceCard.getID(),
           finalChoice.cardToPlay.getId()
         );
+        if (this.sendCardPlaytoView) {
+          this.sendCardPlaytoView(
+            finalChoice.cardToPlay,
+            finalChoice.spaceToPlaceCard
+          );
+        }
         console.log(
           `${
             this.playerID
@@ -249,6 +265,9 @@ export class ComputerPlayer extends Player {
         const spaceToPlaceToken = finalChoice.SpaceToPlaceToken;
         if (spaceToPlaceToken) {
           this.placeToken(spaceToPlaceToken.getID());
+          if (this.sendTokenPlayToView) {
+            this.sendTokenPlayToView(spaceToPlaceToken);
+          }
           console.log(
             `${
               this.playerID
@@ -260,6 +279,12 @@ export class ComputerPlayer extends Player {
           finalChoice.spaceToPlaceCard.getID(),
           finalChoice.cardToPlay.getId()
         );
+        if (this.sendCardPlaytoView) {
+          this.sendCardPlaytoView(
+            finalChoice.cardToPlay,
+            finalChoice.spaceToPlaceCard
+          );
+        }
         console.log(
           `${
             this.playerID
@@ -268,7 +293,7 @@ export class ComputerPlayer extends Player {
       }
     }
     this.drawCard();
-  }
+  };
 
   // helper fn to adjust requirements for placing an influence
   // token as the game progresses

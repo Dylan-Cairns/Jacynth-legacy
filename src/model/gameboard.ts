@@ -58,6 +58,7 @@ export class BoardSpace {
 
   removePlayerToken() {
     this.playerToken = undefined;
+    this.resetSuitsControlMap();
   }
 
   resetSuitsControlMap() {
@@ -113,11 +114,6 @@ export class GameBoard {
     this.resolveInfluenceConflicts(space);
     return true;
   }
-
-  // removeCard(spaceID: string) {
-  //   const space = this.getSpace(spaceID);
-  //   space?.removeCard();
-  // }
 
   getAdjacentSpaces(spaceID: string): BoardSpace[] {
     const x = parseInt(spaceID[1]);
@@ -223,7 +219,7 @@ export class GameBoard {
     return true;
   }
 
-  resolveInfluenceConflicts(boardSpace: BoardSpace) {
+  resolveInfluenceConflicts = (boardSpace: BoardSpace) => {
     const card = boardSpace.getCard();
     if (!card) throw new Error('no card on space');
     const suits = card.getAllSuits();
@@ -244,7 +240,7 @@ export class GameBoard {
         });
       }
     });
-  }
+  };
   // get all spaces which a player can place a token on.
   // A valid space must have a card, must not have a token already,
   // and must not be part of another players district in any suit.
@@ -290,13 +286,17 @@ export class GameBoard {
     return score;
   };
 
-  resolveInflunceForEntireBoard() {
+  resolveInflunceForEntireBoard = () => {
+    console.log('resolveInfluenceForEntireBoard called');
     this.spaces.forEach((space) => {
-      if (space.getPlayerToken()) {
+      space.resetSuitsControlMap();
+    });
+    this.spaces.forEach((space) => {
+      if (space.getCard()) {
         this.resolveInfluenceConflicts(space);
       }
     });
-  }
+  };
 
   removeCardAndResolveBoard = (spaceID: string) => {
     const space = this.spaces.get(spaceID);
@@ -308,6 +308,7 @@ export class GameBoard {
   };
 
   removePlayerTokenAndResolveBoard = (spaceID: string) => {
+    console.log('removePlayerTokenAndResolveBoard method called');
     this.spaces.get(spaceID)?.removePlayerToken();
     this.resolveInflunceForEntireBoard();
   };
