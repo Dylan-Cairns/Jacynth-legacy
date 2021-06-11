@@ -429,7 +429,6 @@ a:hover {
 
   .main-grid {
     grid-template-columns: auto auto;
-    align-content: center;
     grid-template-areas:
       'menuBar menuBar gameboard'
       'enemyHUD playerHUD gameboard'

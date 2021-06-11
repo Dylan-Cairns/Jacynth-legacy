@@ -84,11 +84,11 @@ export class GameBoard {
     return this.boardSize;
   }
 
-  getSpace(spaceID: string) {
+  getSpace = (spaceID: string) => {
     if (this.spaces.get(spaceID) !== undefined) {
       return this.spaces.get(spaceID);
     }
-  }
+  };
 
   getAllSpaces() {
     return this.spaces;
@@ -220,7 +220,6 @@ export class GameBoard {
         space.setControlbySuit(suit, spaceID);
       }
     }
-    console.log('player token set');
     return true;
   }
 
@@ -250,8 +249,6 @@ export class GameBoard {
   // A valid space must have a card, must not have a token already,
   // and must not be part of another players district in any suit.
   getAvailableTokenSpaces = (playerID: PlayerID): BoardSpace[] => {
-    console.log(this);
-    console.log(playerID);
     // for each space on the board
     const results = [] as BoardSpace[];
     for (const [id, space] of this.spaces) {
@@ -276,7 +273,6 @@ export class GameBoard {
         if (!ownedByOtherPlayer) results.push(space);
       }
     }
-    console.log(results);
     return results;
   };
 
@@ -316,34 +312,3 @@ export class GameBoard {
     this.resolveInflunceForEntireBoard();
   };
 }
-// const deck = new Decktet({ isBasicDeck: true });
-// const board = new GameBoard(6);
-
-// board.getAllSpaces().forEach((space) => {
-//   const id = space.getID();
-//   const card = deck.drawCard() as Card;
-//   board.setCard(id, card);
-// });
-// // console.log('x0y0', board.getSpace('x0y0')?.getCard()?.getAllSuits());
-// // console.log('x0y1', board.getSpace('x0y1')?.getCard()?.getAllSuits());
-// // console.log('x1y0', board.getSpace('x1y0')?.getCard()?.getAllSuits());
-// board.setPlayerToken('x0y0', 'player1');
-// board
-//   .getSpace('x0y0')
-//   ?.getCard()
-//   ?.getAllSuits()
-//   ?.forEach((suit) =>
-//     console.log(`district for ${suit}: `, board.getDistrict('x0y0', suit))
-//   );
-
-// const space1Suits = board.getCard('x0y0')?.getAllSuits() as Suit[];
-// space1Suits?.forEach((suit) => {
-//   const district = board.getDistrict('x0y0', suit);
-//   if (district.length > 1) {
-//     const space = district[district.length - 1];
-//     console.log(board.setPlayerToken(space.getID(), 'player2'));
-//   }
-// });
-
-// console.log(board.getAvailableTokenSpaces('player2').length);
-// console.log(board.getPlayerScore('player1'));

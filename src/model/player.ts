@@ -38,21 +38,17 @@ export class Player {
   }
 
   playCard = (spaceID: string, cardID: string) => {
-    console.log('play card method called');
-    console.log('cardID: ', cardID);
     const card = this.getCardFromHandByID(cardID);
-    console.log(card);
     if (!card) return false;
     if (!this.gameBoard.setCard(spaceID, card)) {
       return false;
     } else {
-      console.log('card set succesfully');
       this.hand = this.hand.filter((ele) => ele !== card);
       return true;
     }
   };
 
-  undoPlayCard(spaceID: string) {
+  undoPlayCard = (spaceID: string) => {
     const space = this.gameBoard.getSpace(spaceID);
     if (space) {
       const card = space.getCard();
@@ -61,13 +57,12 @@ export class Player {
         this.gameBoard.removeCardAndResolveBoard(spaceID);
       }
     }
-  }
+  };
 
   drawCard = () => {
     const newCard = this.deck.drawCard();
     if (newCard) {
       this.hand.push(newCard);
-      console.log(`${this.playerID} drawing card`);
       if (this.playerID !== 'Computer') {
         if (this.sendCardDrawtoView) {
           this.sendCardDrawtoView(newCard);

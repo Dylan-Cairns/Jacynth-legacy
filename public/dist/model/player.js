@@ -3,26 +3,31 @@ const PLAYER_HAND_SIZE = 3;
 export class Player {
     constructor(playerID, gameBoard, deck) {
         this.playCard = (spaceID, cardID) => {
-            console.log('play card method called');
-            console.log('cardID: ', cardID);
             const card = this.getCardFromHandByID(cardID);
-            console.log(card);
             if (!card)
                 return false;
             if (!this.gameBoard.setCard(spaceID, card)) {
                 return false;
             }
             else {
-                console.log('card set succesfully');
                 this.hand = this.hand.filter((ele) => ele !== card);
                 return true;
+            }
+        };
+        this.undoPlayCard = (spaceID) => {
+            const space = this.gameBoard.getSpace(spaceID);
+            if (space) {
+                const card = space.getCard();
+                if (card) {
+                    this.hand.push(card);
+                    this.gameBoard.removeCardAndResolveBoard(spaceID);
+                }
             }
         };
         this.drawCard = () => {
             const newCard = this.deck.drawCard();
             if (newCard) {
                 this.hand.push(newCard);
-                console.log(`${this.playerID} drawing card`);
                 if (this.playerID !== 'Computer') {
                     if (this.sendCardDrawtoView) {
                         this.sendCardDrawtoView(newCard);
@@ -45,16 +50,6 @@ export class Player {
         this.hand = [];
         this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
         console.log(`${this.playerID} created`);
-    }
-    undoPlayCard(spaceID) {
-        const space = this.gameBoard.getSpace(spaceID);
-        if (space) {
-            const card = space.getCard();
-            if (card) {
-                this.hand.push(card);
-                this.gameBoard.removeCardAndResolveBoard(spaceID);
-            }
-        }
     }
     drawStartingHand() {
         for (let i = 0; i < PLAYER_HAND_SIZE; i++) {

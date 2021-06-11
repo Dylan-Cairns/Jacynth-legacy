@@ -4,32 +4,174 @@ import { PlayerID } from '../model/player.js';
 
 export class View {
   app: Element;
-  gameBoard: Element;
-  drawDeck: Element;
-  playerHandContainer: Element;
+  gameBoard: HTMLElement;
+  playerHandContainer: HTMLElement;
+  influenceTokenContainer: HTMLElement;
   undoButton: HTMLButtonElement;
   endTurnButton: HTMLButtonElement;
+  draggedElement: HTMLElement | undefined;
+  undoMovesArr: {
+    draggedEle: HTMLElement;
+    targetSpace: HTMLElement;
+  }[];
+  getAvailCardSpaces: (() => BoardSpace[]) | undefined;
+  getAvailTokenSpaces: (() => BoardSpace[]) | undefined;
+  sendCardPlayToModel:
+    | ((cardID: string, spaceID: string) => boolean)
+    | undefined;
+  sendTokenPlayToModel: ((spaceID: string) => boolean) | undefined;
+  undoPlayCard: ((spaceID: string) => void) | undefined;
+  undoPlaceToken: ((spaceID: string) => void) | undefined;
 
   constructor(board: GameBoard) {
-    this.app = this.getElement('#root')!;
-    this.gameBoard = this.getElement('.gameboard')!;
-    this.drawDeck = this.getElement('drawDeck')!;
-    this.playerHandContainer = this.getElement('.player-hand')!;
+    this.app = document.querySelector('#root')! as HTMLElement;
+    this.gameBoard = document.querySelector('.gameboard')! as HTMLElement;
+    this.playerHandContainer = document.querySelector(
+      '.player-hand'
+    )! as HTMLElement;
+    this.influenceTokenContainer = document.querySelector(
+      '.influenceTokenContainer'
+    )!;
     this.undoButton = document.getElementById(
       'undoButton'
     ) as HTMLButtonElement;
-    console.log(this.undoButton);
     this.endTurnButton = document.getElementById(
       'endTurnButton'
     ) as HTMLButtonElement;
-
+    this.undoMovesArr = [];
     this.createBoardSpaces(board);
-  }
 
-  getElement(selector: string) {
-    const element = document.querySelector(selector);
+    // on dragstart, get all available spaces from the model
+    document.addEventListener('dragstart', (event) => {
+      this.draggedElement = event.target as HTMLElement;
+      if (this.draggedElement.classList.contains('card')) {
+        if (this.getAvailCardSpaces) {
+          this.highlightAvailableSpaces(this.getAvailCardSpaces);
+        }
+      } else if (this.draggedElement.classList.contains('influenceToken')) {
+        if (this.getAvailTokenSpaces) {
+          this.highlightAvailableSpaces(this.getAvailTokenSpaces);
+        }
+      }
+    });
 
-    return element;
+    document.addEventListener(
+      'dragover',
+      function (event) {
+        // prevent default to allow drop
+        event.preventDefault();
+      },
+      false
+    );
+
+    document.addEventListener(
+      'dragenter',
+      function (event) {
+        // highlight potential drop target when the draggable element enters it
+        const targetSpace = event.target as HTMLInputElement;
+        if (targetSpace.classList) {
+          targetSpace.classList.add('dragenter');
+        }
+      },
+      false
+    );
+
+    document.addEventListener(
+      'dragleave',
+      function (event) {
+        // remove highlighting
+        const targetSpace = event.target as HTMLInputElement;
+        if (targetSpace.classList) {
+          targetSpace.classList.remove('dragenter');
+        }
+      },
+      false
+    );
+
+    document.addEventListener('drop', (event) => {
+      event.preventDefault();
+      const targetSpace = event.target as HTMLInputElement;
+      targetSpace.classList.remove('dragenter');
+      // check space is playable & required attributes are defined
+      if (
+        targetSpace.classList.contains('playable-space') &&
+        this.draggedElement &&
+        this.draggedElement.parentNode &&
+        targetSpace
+      ) {
+        // if dragged item is a card, place the card,
+        // disable dragging of remaining cards and enable dragging token,
+        // and invoke playcard callback to trigger change in model
+        if (this.draggedElement.classList.contains('card')) {
+          this.disableAllCardDragging();
+          this.enableTokenDragging();
+
+          this.draggedElement.parentNode.removeChild(this.draggedElement);
+          targetSpace.appendChild(this.draggedElement);
+          if (this.sendCardPlayToModel) {
+            this.sendCardPlayToModel(targetSpace.id, this.draggedElement.id);
+          }
+          // save move information for undo
+          this.undoMovesArr.push({
+            draggedEle: this.draggedElement,
+            targetSpace: targetSpace
+          });
+          //enable undo button
+          this.undoButton.disabled = false;
+          // or place a token
+        } else if (this.draggedElement.classList.contains('influenceToken')) {
+          this.draggedElement.parentNode.removeChild(this.draggedElement);
+          targetSpace.appendChild(this.draggedElement);
+          this.disableAllTokenDragging();
+          if (this.sendTokenPlayToModel) {
+            this.sendTokenPlayToModel(targetSpace.id);
+          }
+          // save move information for undo
+          this.undoMovesArr.push({
+            draggedEle: this.draggedElement,
+            targetSpace: targetSpace
+          });
+          this.undoButton.disabled = false;
+        }
+      }
+    });
+
+    document.addEventListener('dragend', () => {
+      // remove all available spaces highlighting
+      Array.from(this.gameBoard.children).forEach((space) => {
+        space.classList.remove('playable-space');
+      });
+    });
+
+    this.undoButton.addEventListener('click', () => {
+      if (this.undoMovesArr.length > 0) {
+        const moveObj = this.undoMovesArr.pop()!;
+        const cardOrTokenToUndo = moveObj.draggedEle;
+        const targetSpace = moveObj.targetSpace;
+        // if first item in undo list is card,
+        // replace the card, invoke the model to reset board control,
+        // re-enable card dragging, disable token dragging
+        // & disable the undo button
+        if (cardOrTokenToUndo.classList.contains('card')) {
+          targetSpace.removeChild(cardOrTokenToUndo);
+          this.playerHandContainer.appendChild(cardOrTokenToUndo);
+          if (this.undoPlayCard) {
+            this.undoPlayCard(targetSpace.id);
+          }
+          this.enableCardHandDragging();
+          this.disableAllTokenDragging();
+          this.undoButton.disabled = true;
+          // if it's a token, leave undo button active.
+        } else if (cardOrTokenToUndo?.classList.contains('influenceToken')) {
+          targetSpace.removeChild(cardOrTokenToUndo);
+          this.influenceTokenContainer.appendChild(cardOrTokenToUndo);
+          if (this.undoPlaceToken) {
+            this.undoPlaceToken(targetSpace.id);
+          }
+          this.enableTokenDragging();
+        }
+      }
+    });
   }
 
   createElement(tag: string, ...classNames: string[]) {
@@ -95,6 +237,46 @@ export class View {
     return cardDiv;
   };
 
+  enableCardHandDragging() {
+    const CardsArr = Array.from(
+      this.playerHandContainer.querySelectorAll('.card')
+    ) as HTMLElement[];
+    CardsArr.forEach((ele) => {
+      if (ele.classList.contains('card')) {
+        ele.draggable = true;
+      }
+    });
+  }
+
+  disableAllCardDragging() {
+    const CardsArr = Array.from(
+      document.querySelectorAll('.card')
+    ) as HTMLElement[];
+    CardsArr.forEach((ele) => {
+      if (ele.classList.contains('card') && ele.draggable) {
+        ele.draggable = false;
+      }
+    });
+  }
+
+  enableTokenDragging() {
+    const token = this.influenceTokenContainer.firstChild as HTMLElement;
+    if (token) {
+      token.draggable = true;
+    }
+  }
+
+  disableAllTokenDragging() {
+    const tokenArr = Array.from(
+      document.querySelectorAll('.influenceToken')
+    ) as HTMLElement[];
+    tokenArr.forEach((ele) => {
+      if (ele.classList.contains('influenceToken') && ele.draggable) {
+        ele.draggable = false;
+      }
+    });
+  }
+
   createToken = (playerID: PlayerID) => {
     return this.createElement('div', `card-cell token ${playerID}`);
   };
@@ -105,7 +287,7 @@ export class View {
   };
 
   addTokenToSpace = (playerID: PlayerID, spaceID: string) => {
-    const boardSpace = this.getElement(spaceID);
+    const boardSpace = document.getElementById(spaceID);
     boardSpace?.appendChild(this.createToken(playerID));
   };
 
@@ -118,146 +300,6 @@ export class View {
   // playerPlayCard(card: Card, boardSpace: BoardSpace) {
   //   this.getElement;
   // }
-
-  nonPlayerCardPlacement = (card: Card, boardSpace: BoardSpace) => {
-    const cardDiv = this.createCard(card);
-    this.addCardToSpace(cardDiv, boardSpace.getID());
-  };
-
-  bindPlayerInterface = (
-    availCardSpacesCB: () => BoardSpace[],
-    availTokenSpacesCB: () => BoardSpace[],
-    sendCardPlayToModelCB: (cardID: string, spaceID: string) => boolean,
-    sendTokenPlaytoModelCB: (spaceID: string) => boolean,
-    undoPlayCardCB: (spaceID: string) => void,
-    undoPlaceTokenCB: (spaceID: string) => void
-  ) => {
-    let draggedElement: HTMLElement;
-    // arr of spaces where a card or token has been played, for undo
-    let undoMovesArr: { draggedEle: HTMLElement; targetSpace: HTMLElement }[];
-
-    // get all available spaces from the model
-    document.addEventListener('dragstart', (event) => {
-      draggedElement = event.target as HTMLElement;
-      if (draggedElement.classList.contains('card')) {
-        this.highlightAvailableSpaces(availCardSpacesCB);
-      } else if (draggedElement.classList.contains('influenceToken')) {
-        this.highlightAvailableSpaces(availTokenSpacesCB);
-      }
-    });
-
-    document.addEventListener(
-      'dragover',
-      function (event) {
-        // prevent default to allow drop
-        event.preventDefault();
-      },
-      false
-    );
-
-    document.addEventListener(
-      'dragenter',
-      function (event) {
-        // highlight potential drop target when the draggable element enters it
-        const targetSpace = event.target as HTMLInputElement;
-        if (targetSpace.classList) {
-          targetSpace.classList.add('dragenter');
-        }
-      },
-      false
-    );
-
-    document.addEventListener(
-      'dragleave',
-      function (event) {
-        // remove highlighting
-        const targetSpace = event.target as HTMLInputElement;
-        if (targetSpace.classList) {
-          targetSpace.classList.remove('dragenter');
-        }
-      },
-      false
-    );
-
-    document.addEventListener('drop', (event) => {
-      event.preventDefault();
-      const targetSpace = event.target as HTMLInputElement;
-      targetSpace.classList.remove('dragenter');
-      // check space is playable & required attributes are defined
-      if (
-        targetSpace.classList.contains('playable-space') &&
-        draggedElement.parentNode &&
-        targetSpace
-      ) {
-        // if dragged item is a card, place the card,
-        // disable dragging of remaining cards and enable dragging token,
-        // and invoke playcard callback to trigger change in model
-        if (draggedElement.classList.contains('card')) {
-          const playerCardsArr = Array.from(
-            draggedElement.parentNode.children
-          ) as HTMLElement[];
-          playerCardsArr.forEach((ele) => {
-            if (ele.classList.contains('card') && ele.draggable) {
-              ele.draggable = false;
-            } else if (ele.classList.contains('influenceTokenContainer')) {
-              const token = ele.firstElementChild as HTMLElement;
-              token.draggable = true;
-            }
-          });
-          draggedElement.parentNode.removeChild(draggedElement);
-          targetSpace.appendChild(draggedElement);
-          sendCardPlayToModelCB(targetSpace.id, draggedElement.id);
-          // save move information for undo
-          undoMovesArr.push({
-            draggedEle: draggedElement,
-            targetSpace: targetSpace
-          });
-          //enable undo button
-          this.undoButton.disabled = false;
-          // or place a token
-        } else if (draggedElement.classList.contains('influenceToken')) {
-          draggedElement.parentNode.removeChild(draggedElement);
-          targetSpace.appendChild(draggedElement);
-          draggedElement.draggable = false;
-          sendTokenPlaytoModelCB(targetSpace.id);
-          // save move information for undo
-          undoMovesArr.push({
-            draggedEle: draggedElement,
-            targetSpace: targetSpace
-          });
-          this.undoButton.disabled = false;
-        }
-      }
-    });
-
-    document.addEventListener('dragend', (event) => {
-      // remove all available spaces highlighting
-      const draggedCard = event.target as HTMLElement;
-      Array.from(this.gameBoard.children).forEach((space) => {
-        space.classList.remove('playable-space');
-      });
-    });
-
-    this.undoButton.addEventListener('click', () => {
-      if (undoMovesArr.length > 0) {
-        const moveObj = undoMovesArr.pop()!;
-        const cardOrTokenToUndo = moveObj.draggedEle;
-        const targetSpace = moveObj.targetSpace;
-
-        if (cardOrTokenToUndo.classList.contains('card')) {
-          this.playerHandContainer.appendChild(cardOrTokenToUndo);
-          targetSpace.removeChild(cardOrTokenToUndo);
-          undoPlayCardCB(targetSpace.id);
-          if (undoMovesArr.length === 0) this.undoButton.disabled = true;
-        } else if (cardOrTokenToUndo?.classList.contains('influenceToken')) {
-          this.playerHandContainer.appendChild(cardOrTokenToUndo);
-          targetSpace.removeChild(cardOrTokenToUndo);
-          undoPlaceTokenCB(targetSpace.id);
-          if (undoMovesArr.length === 0) this.undoButton.disabled = true;
-        }
-      }
-    });
-  };
 
   highlightAvailableSpaces = (
     getAvailableSpacesCallback: () => BoardSpace[]
@@ -287,5 +329,38 @@ export class View {
       default:
         return String(value);
     }
+  }
+
+  nonPlayerCardPlacementCB = (card: Card, boardSpace: BoardSpace) => {
+    const cardDiv = this.createCard(card);
+    this.addCardToSpace(cardDiv, boardSpace.getID());
+  };
+
+  bindGetAvailCardSpaces(availCardSpacesCB: () => BoardSpace[]) {
+    this.getAvailCardSpaces = availCardSpacesCB;
+  }
+
+  bindGetAvailTokenSpaces(availTokenSpacesCB: () => BoardSpace[]) {
+    this.getAvailTokenSpaces = availTokenSpacesCB;
+  }
+
+  bindSendCardPlayToModel(
+    sendCardPlayToModelCB: (cardID: string, spaceID: string) => boolean
+  ) {
+    this.sendCardPlayToModel = sendCardPlayToModelCB;
+  }
+
+  bindSendTokenPlayToModel(
+    sendTokenPlaytoModelCB: (spaceID: string) => boolean
+  ) {
+    this.sendTokenPlayToModel = sendTokenPlaytoModelCB;
+  }
+
+  bindUndoPlayCard(undoPlayCardCB: (spaceID: string) => void) {
+    this.undoPlayCard = undoPlayCardCB;
+  }
+
+  bindUndoPlaceToken(undoPlaceTokenCB: (spaceID: string) => void) {
+    this.undoPlaceToken = undoPlaceTokenCB;
   }
 }
