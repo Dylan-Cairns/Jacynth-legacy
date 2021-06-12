@@ -154,6 +154,7 @@ export class GameBoard {
                 space.removeCard();
                 space.resetSuitsControlMap();
             }
+            this.remainingSpaces++;
             this.resolveInflunceForEntireBoard();
         };
         this.removePlayerTokenAndResolveBoard = (spaceID) => {
@@ -162,6 +163,7 @@ export class GameBoard {
             this.resolveInflunceForEntireBoard();
         };
         this.boardSize = boardSize;
+        this.remainingSpaces = boardSize * boardSize;
         this.spaces = new Map();
         for (let y = 0; y < boardSize; y++) {
             for (let x = 0; x < boardSize; x++) {
@@ -189,12 +191,16 @@ export class GameBoard {
         var _a;
         return (_a = this.spaces.get(spaceID)) === null || _a === void 0 ? void 0 : _a.getControllingSpaceID(suit);
     }
+    getRemainingSpacesNumber() {
+        return this.remainingSpaces;
+    }
     setCard(spaceID, card) {
         const space = this.getSpace(spaceID);
         if (!space)
             return false;
         if (!space.setCard(card))
             return false;
+        this.remainingSpaces--;
         this.resolveInfluenceConflicts(space);
         return true;
     }

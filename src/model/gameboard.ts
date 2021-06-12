@@ -69,8 +69,10 @@ export class BoardSpace {
 export class GameBoard {
   private boardSize: number;
   private spaces: Map<string, BoardSpace>;
+  private remainingSpaces: number;
   constructor(boardSize: number) {
     this.boardSize = boardSize;
+    this.remainingSpaces = boardSize * boardSize;
     this.spaces = new Map();
     for (let y = 0; y < boardSize; y++) {
       for (let x = 0; x < boardSize; x++) {
@@ -107,10 +109,15 @@ export class GameBoard {
     return this.spaces.get(spaceID)?.getControllingSpaceID(suit);
   }
 
+  getRemainingSpacesNumber(): number {
+    return this.remainingSpaces;
+  }
+
   setCard(spaceID: string, card: Card): boolean {
     const space = this.getSpace(spaceID);
     if (!space) return false;
     if (!space.setCard(card)) return false;
+    this.remainingSpaces--;
     this.resolveInfluenceConflicts(space);
     return true;
   }
@@ -303,6 +310,7 @@ export class GameBoard {
       space.removeCard();
       space.resetSuitsControlMap();
     }
+    this.remainingSpaces++;
     this.resolveInflunceForEntireBoard();
   };
 

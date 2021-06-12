@@ -1,5 +1,8 @@
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
+// minimum values used in AI move analysis
+const CARD_VALUE_THRESHOLD = 5;
+const SCORE_INCREASE_THRESHOLD = 4;
 export class Player {
     constructor(playerID, gameBoard, deck) {
         this.playCard = (spaceID, cardID) => {
@@ -92,56 +95,32 @@ export class ComputerPlayer extends Player {
         this.computerTakeTurn = () => {
             var _a;
             const allMoves = this.getAllAvailableMoves();
-            console.log(allMoves);
-            const topCardOnlyMove = allMoves.sort((a, b) => {
-                return a.cardOnlyScore - b.cardOnlyScore;
-            })[0];
-            const topTokenMove = allMoves.sort((a, b) => {
-                // two undefined values should be treated as equal ( 0 )
-                if (typeof a.withTokenScore === 'undefined' &&
-                    typeof b.withTokenScore === 'undefined')
-                    return 0;
-                // if a is undefined and b isn't a should have a lower index in the array
-                else if (typeof a.withTokenScore === 'undefined')
-                    return 1;
-                // if b is undefined and a isn't a should have a higher index in the array
-                else if (typeof b.withTokenScore === 'undefined')
-                    return -1;
-                // if both numbers are defined compare as normal
-                else
-                    return a.withTokenScore - b.withTokenScore;
-            })[0];
-            let finalChoice = topCardOnlyMove;
-            // If the top score from placing a token is higher than from only placing a card,
-            // choose the move that places a token as well as a card.
-            // Otherwise only place a card. Minimum threshold for token placement
-            //  was already tested in getAllAvailableMoves method, no need to test again.
-            if (this.influenceTokens > 0) {
-                if ((topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.withTokenScore) &&
-                    (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.SpaceToPlaceToken) &&
-                    (topTokenMove === null || topTokenMove === void 0 ? void 0 : topTokenMove.withTokenScore) > topCardOnlyMove.cardOnlyScore) {
-                    finalChoice = topTokenMove;
-                    this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
-                    if (this.sendCardPlaytoView) {
-                        this.sendCardPlaytoView(finalChoice.cardToPlay, finalChoice.spaceToPlaceCard);
-                    }
-                    console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
-                    const spaceToPlaceToken = finalChoice.SpaceToPlaceToken;
-                    if (spaceToPlaceToken) {
-                        this.placeToken(spaceToPlaceToken.getID());
-                        if (this.sendTokenPlayToView) {
-                            this.sendTokenPlayToView(spaceToPlaceToken);
-                        }
-                        console.log(`${this.playerID} played a token to ${(_a = finalChoice.SpaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getID()}`);
-                    }
+            const cardOnlyMovesSorted = allMoves
+                .filter((ele) => !ele.withTokenScore)
+                .sort((a, b) => {
+                return b.cardOnlyScore - a.cardOnlyScore;
+            });
+            const topCardOnlyMove = cardOnlyMovesSorted[0];
+            const topCardOnlyScore = topCardOnlyMove.cardOnlyScore;
+            const tokenMoveArr = this.filterAndSortTokenScoreResults(topCardOnlyScore, allMoves);
+            console.log('tokenMoveArr', tokenMoveArr);
+            const topTokenMove = tokenMoveArr[0];
+            // if there is at least 1 item in the tokenmove list after filtering,
+            // that's our choice.
+            const finalChoice = topTokenMove ? topTokenMove : topCardOnlyMove;
+            // play card
+            this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
+            console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
+            if (this.sendCardPlaytoView) {
+                this.sendCardPlaytoView(finalChoice.cardToPlay, finalChoice.spaceToPlaceCard);
+            }
+            // if token play information exists, play token
+            if ((finalChoice === null || finalChoice === void 0 ? void 0 : finalChoice.withTokenScore) && (finalChoice === null || finalChoice === void 0 ? void 0 : finalChoice.spaceToPlaceToken)) {
+                this.placeToken(finalChoice.spaceToPlaceToken.getID());
+                if (this.sendTokenPlayToView) {
+                    this.sendTokenPlayToView(finalChoice.spaceToPlaceToken);
                 }
-                else {
-                    this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
-                    if (this.sendCardPlaytoView) {
-                        this.sendCardPlaytoView(finalChoice.cardToPlay, finalChoice.spaceToPlaceCard);
-                    }
-                    console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
-                }
+                console.log(`${this.playerID} played a token to ${(_a = finalChoice.spaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getID()}`);
             }
             this.drawCard();
         };
@@ -151,6 +130,8 @@ export class ComputerPlayer extends Player {
         const currentHumanScore = this.gameBoard.getPlayerScore(this.opponentID);
         const currentComputerScore = this.gameBoard.getPlayerScore(this.playerID);
         const resultsArr = [];
+        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
+        console.log('adjustedCardValueThreshold', adjustedCardValueThreshold);
         // sort cards in hand by value. If it's not possible to increase the
         // score this turn, then at least we will only play the lowest valued card
         const handArr = this.getHandArr().sort((a, b) => {
@@ -164,39 +145,45 @@ export class ComputerPlayer extends Player {
                 const changeInHumanScore = this.gameBoard.getPlayerScore(this.opponentID) - currentHumanScore;
                 const changeInComputerScore = this.gameBoard.getPlayerScore(this.playerID) - currentComputerScore;
                 const cardOnlyScore = changeInComputerScore - changeInHumanScore;
-                const resultsObj = {
+                const cardOnlyScoreObj = {
                     cardToPlay: card,
                     spaceToPlaceCard: availCardSpace,
                     cardOnlyScore: cardOnlyScore,
-                    SpaceToPlaceToken: undefined,
+                    spaceToPlaceToken: undefined,
+                    tokenSpaceCardValue: undefined,
                     withTokenScore: undefined
                 };
-                resultsArr.push(resultsObj);
+                resultsArr.push(cardOnlyScoreObj);
                 // then also check what the change in score will be when placing a token
-                // in any space meeting the minimum requirements
+                // in any space meeting the minimum card valuerequirements
                 if (this.influenceTokens > 0) {
                     this.gameBoard
                         .getAvailableTokenSpaces(this.playerID)
                         .forEach((availTokenSpace) => {
-                        var _a;
-                        const CARD_VALUE_THRESHOLD = 5;
-                        const SCORE_INCREASE_THRESHOLD = 3;
-                        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
-                        const cardValue = (_a = availTokenSpace.getCard()) === null || _a === void 0 ? void 0 : _a.getValue();
-                        if (cardValue && cardValue >= adjustedCardValueThreshold) {
-                            this.gameBoard.setPlayerToken(availTokenSpace.getID(), this.playerID);
-                            const tokenChangeInHumanScore = this.gameBoard.getPlayerScore(this.opponentID) -
-                                currentHumanScore;
-                            const tokenChangeInComputerScore = this.gameBoard.getPlayerScore(this.playerID) -
-                                currentComputerScore;
-                            const withTokenScore = tokenChangeInComputerScore - tokenChangeInHumanScore;
-                            const adjustedScoreThreshold = this.adjustMinThreshold(SCORE_INCREASE_THRESHOLD);
-                            if (withTokenScore >= cardOnlyScore + adjustedScoreThreshold) {
-                                resultsObj['SpaceToPlaceToken'] = availTokenSpace;
-                                resultsObj['withTokenScore'] = withTokenScore;
+                        const tokenSpaceCard = availTokenSpace.getCard();
+                        if (tokenSpaceCard) {
+                            // check whether the card value meets our mimnimum threshold
+                            const tokenSpaceCardValue = tokenSpaceCard.getValue();
+                            if (tokenSpaceCardValue >= adjustedCardValueThreshold) {
+                                //if it does, create a resultsObj and push to results.
+                                this.gameBoard.setPlayerToken(availTokenSpace.getID(), this.playerID);
+                                const tokenChangeInHumanScore = this.gameBoard.getPlayerScore(this.opponentID) -
+                                    currentHumanScore;
+                                const tokenChangeInComputerScore = this.gameBoard.getPlayerScore(this.playerID) -
+                                    currentComputerScore;
+                                const withTokenScore = tokenChangeInComputerScore - tokenChangeInHumanScore;
+                                const withTokenScoreObj = {
+                                    cardToPlay: card,
+                                    spaceToPlaceCard: availCardSpace,
+                                    cardOnlyScore: cardOnlyScore,
+                                    spaceToPlaceToken: availTokenSpace,
+                                    tokenSpaceCardValue: tokenSpaceCardValue,
+                                    withTokenScore: withTokenScore
+                                };
+                                resultsArr.push(withTokenScoreObj);
+                                // reset score after each token removal
+                                this.gameBoard.removePlayerTokenAndResolveBoard(availTokenSpace.getID());
                             }
-                            // reset score after each token removal
-                            this.gameBoard.removePlayerTokenAndResolveBoard(availTokenSpace.getID());
                         }
                     });
                 }
@@ -209,9 +196,27 @@ export class ComputerPlayer extends Player {
     // helper fn to adjust requirements for placing an influence
     // token as the game progresses
     adjustMinThreshold(hopedForAmt) {
-        const spaceLeft = this.gameBoard.getAvailableSpaces().length;
-        const sizeOfTheBoard = this.gameBoard.getBoardSize();
+        console.log('adjustminThreshold called');
+        const spaceLeft = this.gameBoard.getRemainingSpacesNumber();
+        console.log('spacesLeft', spaceLeft);
+        const sizeOfTheBoard = Math.pow(this.gameBoard.getBoardSize(), 2);
+        console.log('size of the board');
         const settledForNumber = Math.ceil(hopedForAmt * (spaceLeft / sizeOfTheBoard));
         return settledForNumber;
+    }
+    // helper fn to test wether a potential token placement meets minimum
+    filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
+        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
+        const adjustedScoreThreshold = this.adjustMinThreshold(SCORE_INCREASE_THRESHOLD);
+        console.log('adjustedScoreThreshold', adjustedScoreThreshold);
+        // check for withTokenScore to remove card-only results from the list.
+        // Then remove results which don't raise the score by the minimum threshold
+        // versus just playing a card
+        tokenScoreArr = tokenScoreArr.filter((ele) => ele.withTokenScore !== undefined &&
+            ele.withTokenScore - topCardScore >= adjustedScoreThreshold);
+        // sort the array first by score,
+        // then by the value of the card the token will be placed on
+        return tokenScoreArr.sort((a, b) => b.withTokenScore - a.withTokenScore ||
+            b.tokenSpaceCardValue - a.tokenSpaceCardValue);
     }
 }

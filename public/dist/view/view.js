@@ -64,6 +64,8 @@ export class View {
         this.undoButton.disabled = true;
         this.endTurnButton = document.getElementById('endTurnButton');
         this.endTurnButton.disabled = true;
+        this.player1Icon = document.getElementById('player1Icon');
+        this.player2Icon = document.getElementById('player2Icon');
         this.player1HUD = document.getElementById('player1HUD');
         this.player2HUD = document.getElementById('player2HUD');
         this.pickupSound = document.getElementById('pickupSound');
@@ -116,6 +118,7 @@ export class View {
                 this.draggedElement &&
                 this.draggedElement.parentNode &&
                 targetSpace) {
+                this.dropSound.play();
                 // if dragged item is a card, place the card,
                 // disable dragging of remaining cards and enable dragging token,
                 // and invoke playcard callback to trigger change in model
@@ -155,7 +158,6 @@ export class View {
             }
         });
         document.addEventListener('dragend', () => {
-            this.dropSound.play();
             // remove all available spaces highlighting
             Array.from(this.gameBoard.children).forEach((space) => {
                 space.classList.remove('playable-space');
@@ -255,6 +257,18 @@ export class View {
             const p2Tokens = this.getP2AvailableTokensNumber();
             this.player1HUD.textContent = `Score ${p1Score} Tokens ${p1Tokens}`;
             this.player2HUD.textContent = `Score ${p2Score} Tokens ${p2Tokens}`;
+            if (p1Score > p2Score) {
+                this.player1Icon.classList.remove('losing');
+                this.player1Icon.classList.add('winning');
+                this.player2Icon.classList.remove('winning');
+                this.player2Icon.classList.add('losing');
+            }
+            else if (p1Score < p2Score) {
+                this.player2Icon.classList.remove('losing');
+                this.player2Icon.classList.add('winning');
+                this.player1Icon.classList.remove('winning');
+                this.player1Icon.classList.add('losing');
+            }
         }
     }
     addInfluenceTokenToHand() {

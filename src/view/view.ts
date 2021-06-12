@@ -11,6 +11,8 @@ export class View {
   endTurnButton: HTMLButtonElement;
   player1HUD: HTMLElement;
   player2HUD: HTMLElement;
+  player1Icon: HTMLElement;
+  player2Icon: HTMLElement;
   pickupSound: HTMLMediaElement;
   dropSound: HTMLMediaElement;
   clickSound: HTMLMediaElement;
@@ -51,6 +53,8 @@ export class View {
       'endTurnButton'
     ) as HTMLButtonElement;
     this.endTurnButton.disabled = true;
+    this.player1Icon = document.getElementById('player1Icon') as HTMLElement;
+    this.player2Icon = document.getElementById('player2Icon') as HTMLElement;
     this.player1HUD = document.getElementById('player1HUD') as HTMLElement;
     this.player2HUD = document.getElementById('player2HUD') as HTMLElement;
     this.pickupSound = document.getElementById(
@@ -123,6 +127,7 @@ export class View {
         this.draggedElement.parentNode &&
         targetSpace
       ) {
+        this.dropSound.play();
         // if dragged item is a card, place the card,
         // disable dragging of remaining cards and enable dragging token,
         // and invoke playcard callback to trigger change in model
@@ -163,7 +168,6 @@ export class View {
     });
 
     document.addEventListener('dragend', () => {
-      this.dropSound.play();
       // remove all available spaces highlighting
       Array.from(this.gameBoard.children).forEach((space) => {
         space.classList.remove('playable-space');
@@ -295,6 +299,18 @@ export class View {
       const p2Tokens = this.getP2AvailableTokensNumber();
       this.player1HUD.textContent = `Score ${p1Score} Tokens ${p1Tokens}`;
       this.player2HUD.textContent = `Score ${p2Score} Tokens ${p2Tokens}`;
+
+      if (p1Score > p2Score) {
+        this.player1Icon.classList.remove('losing');
+        this.player1Icon.classList.add('winning');
+        this.player2Icon.classList.remove('winning');
+        this.player2Icon.classList.add('losing');
+      } else if (p1Score < p2Score) {
+        this.player2Icon.classList.remove('losing');
+        this.player2Icon.classList.add('winning');
+        this.player1Icon.classList.remove('winning');
+        this.player1Icon.classList.add('losing');
+      }
     }
   }
 
