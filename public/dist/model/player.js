@@ -63,7 +63,6 @@ export class Player {
         this.deck = deck;
         this.hand = [];
         this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
-        console.log(`${this.playerID} created`);
     }
     drawStartingHand() {
         for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
@@ -95,15 +94,18 @@ export class ComputerPlayer extends Player {
         this.computerTakeTurn = () => {
             var _a;
             const allMoves = this.getAllAvailableMoves();
+            // remove token moves, then sort by score, if same score then randomize
             const cardOnlyMovesSorted = allMoves
-                .filter((ele) => !ele.withTokenScore)
+                .filter((ele) => !ele.spaceToPlaceToken)
                 .sort((a, b) => {
-                return b.cardOnlyScore - a.cardOnlyScore;
+                const random = Math.random() > 0.5 ? 1 : -1;
+                return b.cardOnlyScore - a.cardOnlyScore || random;
             });
+            console.log('cardonlyMovesSorted', cardOnlyMovesSorted);
             const topCardOnlyMove = cardOnlyMovesSorted[0];
             const topCardOnlyScore = topCardOnlyMove.cardOnlyScore;
             const tokenMoveArr = this.filterAndSortTokenScoreResults(topCardOnlyScore, allMoves);
-            console.log('tokenMoveArr', tokenMoveArr);
+            console.log('tokenMovesSorted', tokenMoveArr);
             const topTokenMove = tokenMoveArr[0];
             // if there is at least 1 item in the tokenmove list after filtering,
             // that's our choice.
@@ -131,7 +133,6 @@ export class ComputerPlayer extends Player {
         const currentComputerScore = this.gameBoard.getPlayerScore(this.playerID);
         const resultsArr = [];
         const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
-        console.log('adjustedCardValueThreshold', adjustedCardValueThreshold);
         // sort cards in hand by value. If it's not possible to increase the
         // score this turn, then at least we will only play the lowest valued card
         const handArr = this.getHandArr().sort((a, b) => {
@@ -196,11 +197,8 @@ export class ComputerPlayer extends Player {
     // helper fn to adjust requirements for placing an influence
     // token as the game progresses
     adjustMinThreshold(hopedForAmt) {
-        console.log('adjustminThreshold called');
         const spaceLeft = this.gameBoard.getRemainingSpacesNumber();
-        console.log('spacesLeft', spaceLeft);
         const sizeOfTheBoard = Math.pow(this.gameBoard.getBoardSize(), 2);
-        console.log('size of the board');
         const settledForNumber = Math.ceil(hopedForAmt * (spaceLeft / sizeOfTheBoard));
         return settledForNumber;
     }
@@ -208,7 +206,6 @@ export class ComputerPlayer extends Player {
     filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
         const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
         const adjustedScoreThreshold = this.adjustMinThreshold(SCORE_INCREASE_THRESHOLD);
-        console.log('adjustedScoreThreshold', adjustedScoreThreshold);
         // check for withTokenScore to remove card-only results from the list.
         // Then remove results which don't raise the score by the minimum threshold
         // versus just playing a card
