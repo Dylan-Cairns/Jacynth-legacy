@@ -174,7 +174,7 @@ export class GameBoard {
   getDistrict(SpaceID: string, suit: Suit): BoardSpace[] {
     const results = [] as BoardSpace[];
     const currentSpace = this.getSpace(SpaceID);
-    if (!currentSpace || !suit) return results;
+    if (!currentSpace) return results;
     const currentCard = currentSpace.getCard();
     if (!currentCard || !currentCard.hasSuit(suit)) return results;
 
@@ -233,14 +233,12 @@ export class GameBoard {
     suits.forEach((suit) => {
       const district = this.getDistrict(boardSpace.getID(), suit);
       let spacesWithTokens = district.filter((space) => space.getPlayerToken());
-      if (spacesWithTokens.length >= 1) {
-        if (spacesWithTokens.length > 1) {
-          spacesWithTokens = spacesWithTokens.sort((a, b) => {
-            const ele1 = a.getCard()?.getValue() as number;
-            const ele2 = b.getCard()?.getValue() as number;
-            return ele1 - ele2;
-          });
-        }
+      if (spacesWithTokens.length) {
+        spacesWithTokens = spacesWithTokens.sort((a, b) => {
+          const ele1 = a.getCard()?.getValue() as number;
+          const ele2 = b.getCard()?.getValue() as number;
+          return ele2 - ele1;
+        });
         const controllingSpace = spacesWithTokens[0];
         district.forEach((space) => {
           space.setControlbySuit(suit, controllingSpace.getID());

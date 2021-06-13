@@ -1,3 +1,4 @@
+//
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 // minimum values used in AI move analysis
@@ -95,6 +96,8 @@ export class ComputerPlayer extends Player {
             var _a;
             const allMoves = this.getAllAvailableMoves();
             // remove token moves, then sort by score, if same score then randomize
+            // (otherwise the computer will fill spaces in the board from top
+            // left to bottom right sequentially)
             const cardOnlyMovesSorted = allMoves
                 .filter((ele) => !ele.spaceToPlaceToken)
                 .sort((a, b) => {

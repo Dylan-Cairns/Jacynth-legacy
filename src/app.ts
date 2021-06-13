@@ -1,3 +1,3 @@
 import { Controller } from './controller/controller.js';
 
-const controller = new Controller('vsAI', 'towers', 'basicDeck');
+const controller = new Controller('vsAI', 'oldcity', 'basicDeck');
