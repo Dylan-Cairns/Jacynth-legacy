@@ -1,11 +1,12 @@
 {
   "extends": "@tsconfig/node12/tsconfig.json",
   "compilerOptions": {
-    "outDir": "public/dist/",
+    "outDir": "dist/",
     "rootDir": "src/",
     "lib": ["dom"],
     "module": "esnext",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "declaration": true
   },
   "include": ["src/"]
 }

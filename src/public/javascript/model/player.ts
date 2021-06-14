@@ -1,6 +1,9 @@
+import { Socket } from 'socket.io-client';
+
 import { Card, Decktet } from './decktet.js';
 import { BoardSpace, GameBoard } from './gameboard.js';
-//
+
+// game variables that never change
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 // minimum values used in AI move analysis
@@ -26,16 +29,14 @@ export class Player {
   protected playerID: PlayerID;
   protected hand: Card[];
   protected gameBoard: GameBoard;
-  protected deck: Decktet;
   protected influenceTokens: number;
   protected sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
   protected sendCardDrawtoView: SendCardDrawtoViewCB | undefined;
   protected sendTokenPlayToView: SendTokenPlayToViewCB | undefined;
 
-  constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet) {
+  constructor(playerID: PlayerID, gameBoard: GameBoard) {
     this.playerID = playerID;
     this.gameBoard = gameBoard;
-    this.deck = deck;
     this.hand = [];
     this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
   }
@@ -61,24 +62,6 @@ export class Player {
       }
     }
   };
-
-  drawCard = () => {
-    const newCard = this.deck.drawCard();
-    if (newCard) {
-      this.hand.push(newCard);
-      if (this.playerID !== 'Computer') {
-        if (this.sendCardDrawtoView) {
-          this.sendCardDrawtoView(newCard);
-        }
-      }
-    }
-  };
-
-  drawStartingHand() {
-    for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
-      this.drawCard();
-    }
-  }
 
   getAvailableTokenSpaces = () => {
     return this.gameBoard.getAvailableTokenSpaces(this.playerID);
@@ -130,7 +113,62 @@ export class Player {
   }
 }
 
-export class ComputerPlayer extends Player {
+export class Player_MultiPlayer extends Player {
+  socket: Socket;
+  constructor(playerID: PlayerID, gameBoard: GameBoard, socket: Socket) {
+    super(playerID, gameBoard);
+    this.socket = socket;
+
+    socket.on('recieveCardDraw', (newCard: Card | undefined) => {
+      if (newCard) {
+        this.hand.push(newCard);
+        if (this.playerID !== 'Computer') {
+          if (this.sendCardDrawtoView) {
+            this.sendCardDrawtoView(newCard);
+          }
+        }
+      }
+    });
+  }
+
+  drawCard = () => {
+    this.socket.emit('drawCard');
+  };
+
+  drawStartingHand() {
+    for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
+      this.drawCard();
+    }
+  }
+}
+
+export class Player_SinglePlayer extends Player {
+  deck: Decktet;
+  constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet) {
+    super(playerID, gameBoard);
+    this.deck = deck;
+  }
+
+  drawCard = () => {
+    const newCard = this.deck.drawCard();
+    if (newCard) {
+      this.hand.push(newCard);
+      if (this.playerID !== 'Computer') {
+        if (this.sendCardDrawtoView) {
+          this.sendCardDrawtoView(newCard);
+        }
+      }
+    }
+  };
+
+  drawStartingHand() {
+    for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
+      this.drawCard();
+    }
+  }
+}
+
+export class Player_ComputerPlayer extends Player_SinglePlayer {
   opponentID: PlayerID;
   constructor(
     playerID: PlayerID,
