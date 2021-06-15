@@ -4,13 +4,13 @@ import { Player_MultiPlayer, Player_SinglePlayer, Player_ComputerPlayer, SendCar
 import { Socket } from 'socket.io-client';
 export declare type GameType = 'multiPlayer' | 'singlePlayer' | 'solitaire';
 export declare type Layout = 'razeway' | 'towers' | 'oldcity' | 'solitaire';
-export declare class Game {
+export declare class GameModel {
     board: GameBoard;
     sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
     constructor(gameType: GameType, layout: Layout, deckType: DeckType);
     bindSendCardPlayToView(sendCardPlaytoView: SendCardPlaytoViewCB): void;
 }
-export declare class SinglePlayerGameModel extends Game {
+export declare class SinglePlayerGameModel extends GameModel {
     deck: Decktet;
     player1: Player_SinglePlayer;
     player2: Player_ComputerPlayer;
@@ -18,7 +18,7 @@ export declare class SinglePlayerGameModel extends Game {
     createGame(layout: Layout): void;
     private createLayout;
 }
-export declare class MultiplayerGameModel extends Game {
+export declare class MultiplayerGameModel extends GameModel {
     socket: Socket;
     player1: Player_MultiPlayer;
     player2: Player_MultiPlayer;

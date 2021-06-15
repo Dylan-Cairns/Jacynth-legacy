@@ -76,15 +76,17 @@ export class Player_MultiPlayer extends Player {
     constructor(playerID, gameBoard, socket) {
         super(playerID, gameBoard);
         this.drawCard = () => {
-            this.socket.emit('drawCard');
+            this.socket.emit('drawCard', this.playerID);
         };
         this.socket = socket;
-        socket.on('recieveCardDraw', (newCard) => {
-            if (newCard) {
-                this.hand.push(newCard);
-                if (this.playerID !== 'Computer') {
-                    if (this.sendCardDrawtoView) {
-                        this.sendCardDrawtoView(newCard);
+        socket.on('recieveCardDraw', (newCard, playerID) => {
+            if (playerID === this.playerID) {
+                if (newCard) {
+                    this.hand.push(newCard);
+                    if (this.playerID !== 'Computer') {
+                        if (this.sendCardDrawtoView) {
+                            this.sendCardDrawtoView(newCard);
+                        }
                     }
                 }
             }

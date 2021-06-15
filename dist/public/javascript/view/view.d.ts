@@ -1,5 +1,6 @@
 import { BoardSpace, GameBoard } from '../model/gameboard.js';
 import { Card } from '../model/decktet.js';
+import { Socket } from 'socket.io-client';
 export declare class View {
     app: Element;
     gameBoard: HTMLElement;
@@ -32,18 +33,19 @@ export declare class View {
     getPlayer1Score: (() => void) | undefined;
     getPlayer2Score: (() => void) | undefined;
     constructor(board: GameBoard);
+    endTurnButtonCB: () => void;
     createElement(tag: string, ...classNames: string[]): HTMLElement;
     createBoardSpaces(board: GameBoard): void;
-    private createCard;
-    private updateHUD;
-    private addInfluenceTokenToHand;
-    private enableCardHandDragging;
-    private disableAllCardDragging;
-    private enableTokenDragging;
-    private disableAllTokenDragging;
-    private addCardToSpace;
-    private highlightAvailableSpaces;
-    private prepareValueForDisplay;
+    protected createCard: (card: Card) => HTMLElement;
+    protected updateHUD(): void;
+    protected addInfluenceTokenToHand(): void;
+    protected enableCardHandDragging(): void;
+    protected disableAllCardDragging(): void;
+    protected enableTokenDragging(): void;
+    protected disableAllTokenDragging(): void;
+    protected addCardToSpace: (cardDiv: HTMLElement, spaceID: string) => void;
+    protected highlightAvailableSpaces: (getAvailableSpacesCallback: () => BoardSpace[]) => void;
+    protected prepareValueForDisplay(value: number): string;
     playerDrawCardCB: (card: Card) => void;
     nonPlayerCardPlacementCB: (card: Card, boardSpace: BoardSpace) => void;
     nonPlayerTokenPlacementCB: (boardSpace: BoardSpace) => void;
@@ -64,5 +66,7 @@ export declare class SinglePlayerView extends View {
     constructor(board: GameBoard);
 }
 export declare class MultiPlayerView extends View {
-    constructor(board: GameBoard);
+    socket: Socket;
+    constructor(board: GameBoard, socket: Socket);
+    endTurnButtonCB: () => void;
 }

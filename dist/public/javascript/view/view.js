@@ -1,5 +1,21 @@
 export class View {
     constructor(board) {
+        //this method is over-ridden in the multiplayer class
+        this.endTurnButtonCB = () => {
+            this.clickSound.play();
+            if (this.computerTakeTurn) {
+                this.computerTakeTurn();
+            }
+            if (this.getCardDrawFromModel) {
+                this.getCardDrawFromModel();
+            }
+            this.addInfluenceTokenToHand();
+            this.enableCardHandDragging();
+            this.disableAllTokenDragging();
+            this.undoButton.disabled = true;
+            this.endTurnButton.disabled = true;
+            this.updateHUD();
+        };
         this.createCard = (card) => {
             // get the values from the card
             const id = card.getId();
@@ -195,21 +211,7 @@ export class View {
                 }
             }
         });
-        this.endTurnButton.addEventListener('click', () => {
-            this.clickSound.play();
-            if (this.computerTakeTurn) {
-                this.computerTakeTurn();
-            }
-            if (this.getCardDrawFromModel) {
-                this.getCardDrawFromModel();
-            }
-            this.addInfluenceTokenToHand();
-            this.enableCardHandDragging();
-            this.disableAllTokenDragging();
-            this.undoButton.disabled = true;
-            this.endTurnButton.disabled = true;
-            this.updateHUD();
-        });
+        this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
     }
     createElement(tag, ...classNames) {
         const element = document.createElement(tag);
@@ -372,7 +374,26 @@ export class SinglePlayerView extends View {
     }
 }
 export class MultiPlayerView extends View {
-    constructor(board) {
+    constructor(board, socket) {
         super(board);
+        this.endTurnButtonCB = () => {
+            this.clickSound.play();
+            if (this.computerTakeTurn) {
+                this.computerTakeTurn();
+            }
+            if (this.getCardDrawFromModel) {
+                this.getCardDrawFromModel();
+            }
+            this.addInfluenceTokenToHand();
+            this.enableCardHandDragging();
+            this.disableAllTokenDragging();
+            this.undoButton.disabled = true;
+            this.endTurnButton.disabled = true;
+            this.updateHUD();
+        };
+        this.socket = socket;
+        // socket.on('opponentPlayCard', (cardID: string, spaceID: string) => {
+        //   this.nonPlayerCardPlacementCB(cardID, spaceID);
+        // });
     }
 }

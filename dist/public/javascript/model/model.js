@@ -9,7 +9,7 @@ const BOARD_LAYOUTS = {
     oldcity: ['x2y0', 'x4y1', 'x0y2', 'x5y3', 'x1y4', 'x3y5'],
     solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
-export class Game {
+export class GameModel {
     constructor(gameType, layout, deckType) {
         const dimensions = layout === 'solitaire'
             ? SOLITAIRE_BOARD_DIMENSIONS
@@ -20,7 +20,7 @@ export class Game {
         this.sendCardPlaytoView = sendCardPlaytoView;
     }
 }
-export class SinglePlayerGameModel extends Game {
+export class SinglePlayerGameModel extends GameModel {
     constructor(gameType, layout, deckType) {
         super(gameType, layout, deckType);
         this.deck = new Decktet(deckType);
@@ -58,7 +58,7 @@ export class SinglePlayerGameModel extends Game {
         }
     }
 }
-export class MultiplayerGameModel extends Game {
+export class MultiplayerGameModel extends GameModel {
     constructor(gameType, layout, deckType, socket) {
         super(gameType, layout, deckType);
         this.socket = socket;

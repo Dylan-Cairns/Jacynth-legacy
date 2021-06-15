@@ -1,2 +1,2 @@
-import { Controller } from './controller/controller.js';
-const controller = new Controller('singlePlayer', 'oldcity', 'basicDeck');
+import { SinglePlayerController } from './controller/controller.js';
+const controller = new SinglePlayerController('singlePlayer', 'oldcity', 'basicDeck');

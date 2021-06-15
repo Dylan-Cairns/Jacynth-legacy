@@ -2,7 +2,7 @@ import { Socket } from 'socket.io-client';
 import { Card, Decktet } from './decktet.js';
 import { BoardSpace, GameBoard } from './gameboard.js';
 export declare type SendCardDrawtoViewCB = (card: Card) => void;
-export declare type SendCardPlaytoViewCB = (card: Card, spaceID: BoardSpace) => void;
+export declare type SendCardPlaytoViewCB = (card: Card, boardSpace: BoardSpace) => void;
 export declare type SendTokenPlayToViewCB = (boardSpace: BoardSpace) => void;
 export declare type PlayerID = 'Player1' | 'Player2' | 'Computer';
 export declare class Player {

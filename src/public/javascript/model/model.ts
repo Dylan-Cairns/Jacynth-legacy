@@ -1,7 +1,7 @@
 import { GameBoard } from './gameboard.js';
 import { Card, Decktet, DeckType } from './decktet.js';
 import {
-  Player,
+  PlayerID,
   Player_MultiPlayer,
   Player_SinglePlayer,
   Player_ComputerPlayer,
@@ -97,18 +97,21 @@ export class SinglePlayerGameModel extends GameModel {
 
 export class MultiplayerGameModel extends GameModel {
   socket: Socket;
-  player1: Player_MultiPlayer;
-  player2: Player_MultiPlayer;
+  currPlyr: Player_MultiPlayer;
+  opposPlyr: Player_MultiPlayer;
   initialCards: Card[];
+  currPlyrID: PlayerID;
   constructor(
     gameType: GameType,
     layout: Layout,
     deckType: DeckType,
-    socket: Socket
+    socket: Socket,
+    currPlyrID: PlayerID
   ) {
     super(gameType, layout, deckType);
     this.socket = socket;
     this.initialCards = [];
+    this.currPlyrID = currPlyrID;
     const dimensions =
       layout === 'solitaire'
         ? SOLITAIRE_BOARD_DIMENSIONS
@@ -121,14 +124,21 @@ export class MultiplayerGameModel extends GameModel {
       }
     });
 
-    this.player1 = new Player_MultiPlayer('Player1', this.board, this.socket);
-    this.player2 = new Player_MultiPlayer('Player2', this.board, this.socket);
+    this.currPlyr = new Player_MultiPlayer(currPlyrID, this.board, this.socket);
+
+    const opposingPlyr = currPlyrID === 'Player1' ? 'Player2' : 'Player1';
+
+    this.opposPlyr = new Player_MultiPlayer(
+      opposingPlyr,
+      this.board,
+      this.socket
+    );
     this.createGame(layout);
   }
 
   private createGame(layout: Layout) {
-    this.player1.drawStartingHand();
-    this.player2.drawStartingHand();
+    this.currPlyr.drawStartingHand();
+    this.opposPlyr.drawStartingHand();
   }
 
   public createLayout(board: GameBoard, deck: Decktet, layout: Layout) {
