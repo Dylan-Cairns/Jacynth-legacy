@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io-client';
 import { Card, Decktet } from './decktet.js';
 import { BoardSpace, GameBoard } from './gameboard.js';
 export declare type SendCardDrawtoViewCB = (card: Card) => void;
@@ -8,16 +9,13 @@ export declare class Player {
     protected playerID: PlayerID;
     protected hand: Card[];
     protected gameBoard: GameBoard;
-    protected deck: Decktet;
     protected influenceTokens: number;
     protected sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
     protected sendCardDrawtoView: SendCardDrawtoViewCB | undefined;
     protected sendTokenPlayToView: SendTokenPlayToViewCB | undefined;
-    constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet);
+    constructor(playerID: PlayerID, gameBoard: GameBoard);
     playCard: (spaceID: string, cardID: string) => boolean;
     undoPlayCard: (spaceID: string) => void;
-    drawCard: () => void;
-    drawStartingHand(): void;
     getAvailableTokenSpaces: () => BoardSpace[];
     placeToken: (spaceID: string) => boolean;
     undoPlaceToken: (spaceID: string) => void;
@@ -30,7 +28,19 @@ export declare class Player {
     bindSendTokenPlayToView(sendTokenPlayToViewCB: SendTokenPlayToViewCB): void;
     bindDrawCard(sendCardDrawtoView: SendCardDrawtoViewCB): void;
 }
-export declare class ComputerPlayer extends Player {
+export declare class Player_MultiPlayer extends Player {
+    socket: Socket;
+    constructor(playerID: PlayerID, gameBoard: GameBoard, socket: Socket);
+    drawCard: () => void;
+    drawStartingHand(): void;
+}
+export declare class Player_SinglePlayer extends Player {
+    deck: Decktet;
+    constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet);
+    drawCard: () => void;
+    drawStartingHand(): void;
+}
+export declare class Player_ComputerPlayer extends Player_SinglePlayer {
     opponentID: PlayerID;
     constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet, opponentID: PlayerID);
     private getAllAvailableMoves;

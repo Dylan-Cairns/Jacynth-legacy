@@ -21,7 +21,7 @@ const BOARD_LAYOUTS = {
   solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
 
-export class Game {
+export class GameModel {
   board: GameBoard;
   sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
 
@@ -30,7 +30,6 @@ export class Game {
       layout === 'solitaire'
         ? SOLITAIRE_BOARD_DIMENSIONS
         : TWOPLAYER_BOARD_DIMENSIONS;
-
     this.board = new GameBoard(dimensions);
   }
 
@@ -39,7 +38,7 @@ export class Game {
   }
 }
 
-export class SinglePlayer extends Game {
+export class SinglePlayerGameModel extends GameModel {
   deck: Decktet;
   player1: Player_SinglePlayer;
   player2: Player_ComputerPlayer;
@@ -47,12 +46,6 @@ export class SinglePlayer extends Game {
     super(gameType, layout, deckType);
     this.deck = new Decktet(deckType);
 
-    const dimensions =
-      layout === 'solitaire'
-        ? SOLITAIRE_BOARD_DIMENSIONS
-        : TWOPLAYER_BOARD_DIMENSIONS;
-
-    this.board = new GameBoard(dimensions);
     this.player1 = new Player_SinglePlayer('Player1', this.board, this.deck);
     this.player2 = new Player_ComputerPlayer(
       'Computer',
@@ -60,7 +53,6 @@ export class SinglePlayer extends Game {
       this.deck,
       'Player1'
     );
-    this.createGame(layout);
   }
 
   public createGame(layout: Layout) {
@@ -69,11 +61,13 @@ export class SinglePlayer extends Game {
     this.player2.drawStartingHand();
   }
 
-  private createLayout(board: GameBoard, drawCardCB: Decktet, layout: Layout) {
+  private createLayout(board: GameBoard, deck: Decktet, layout: Layout) {
     const handleInitialPlacement = (spaceID: string) => {
-      const card = drawCardCB.drawCard()!;
+      const card = deck.drawCard()!;
+      console.log('card', card);
       const space = this.board.getSpace(spaceID)!;
       board.setCard(spaceID, card);
+      console.log('boardspace', space);
       if (this.sendCardPlaytoView) this.sendCardPlaytoView(card, space);
     };
     switch (layout) {
@@ -101,7 +95,7 @@ export class SinglePlayer extends Game {
   }
 }
 
-export class Multiplayer extends Game {
+export class MultiplayerGameModel extends GameModel {
   socket: Socket;
   player1: Player_MultiPlayer;
   player2: Player_MultiPlayer;
@@ -132,25 +126,14 @@ export class Multiplayer extends Game {
     this.createGame(layout);
   }
 
-  private getLayoutCard() {
-    this.socket.emit('getInitialCard');
-  }
-
-  private getAllLayoutCards(layout: Layout) {
-    BOARD_LAYOUTS[layout].forEach((ele) => {
-      this.getLayoutCard();
-    });
-  }
-
   private createGame(layout: Layout) {
-    this.createLayout(this.board, this.initialCards, layout);
     this.player1.drawStartingHand();
     this.player2.drawStartingHand();
   }
 
-  private createLayout(board: GameBoard, cardsArr: Card[], layout: Layout) {
+  public createLayout(board: GameBoard, deck: Decktet, layout: Layout) {
     const handleInitialPlacement = (spaceID: string) => {
-      const card = cardsArr.pop()!;
+      const card = deck.drawCard()!;
       const space = this.board.getSpace(spaceID)!;
       board.setCard(spaceID, card);
       if (this.sendCardPlaytoView) this.sendCardPlaytoView(card, space);

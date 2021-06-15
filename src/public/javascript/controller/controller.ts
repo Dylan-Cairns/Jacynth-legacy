@@ -1,14 +1,22 @@
-import { Game, GameType, Layout, SinglePlayer } from '../model/model.js';
+import {
+  GameModel,
+  GameType,
+  Layout,
+  MultiplayerGameModel,
+  SinglePlayerGameModel
+} from '../model/model.js';
 import { DeckType } from '../model/decktet.js';
 import { View } from '../view/view.js';
 import { io, Socket } from 'socket.io-client';
 
-export class Controller {
-  model: SinglePlayer;
-  view: View;
+export class Controller {}
 
+export class SinglePlayerController {
+  model: SinglePlayerGameModel;
+  view: View;
   constructor(gameType: GameType, layout: Layout, deckType: DeckType) {
-    this.model = new SinglePlayer(gameType, layout, deckType);
+    this.model = new SinglePlayerGameModel(gameType, layout, deckType);
+
     this.view = new View(this.model.board);
 
     this.model.player1.bindDrawCard(this.view.playerDrawCardCB);

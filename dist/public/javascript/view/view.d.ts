@@ -60,3 +60,9 @@ export declare class View {
     bindGetPlayer1Score(getPlayer1ScoreCB: () => void): void;
     bindGetPlayer2Score(getPlayer2ScoreCB: () => void): void;
 }
+export declare class SinglePlayerView extends View {
+    constructor(board: GameBoard);
+}
+export declare class MultiPlayerView extends View {
+    constructor(board: GameBoard);
+}

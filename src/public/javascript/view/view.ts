@@ -1,6 +1,7 @@
 import { BoardSpace, GameBoard } from '../model/gameboard.js';
 import { Card } from '../model/decktet.js';
 import { PlayerID } from '../model/player.js';
+import { Socket } from 'socket.io-client';
 
 export class View {
   app: Element;
@@ -206,22 +207,25 @@ export class View {
       }
     });
 
-    this.endTurnButton.addEventListener('click', () => {
-      this.clickSound.play();
-      if (this.computerTakeTurn) {
-        this.computerTakeTurn();
-      }
-      if (this.getCardDrawFromModel) {
-        this.getCardDrawFromModel();
-      }
-      this.addInfluenceTokenToHand();
-      this.enableCardHandDragging();
-      this.disableAllTokenDragging();
-      this.undoButton.disabled = true;
-      this.endTurnButton.disabled = true;
-      this.updateHUD();
-    });
+    this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
   }
+
+  //this method is over-ridden in the multiplayer class
+  endTurnButtonCB = () => {
+    this.clickSound.play();
+    if (this.computerTakeTurn) {
+      this.computerTakeTurn();
+    }
+    if (this.getCardDrawFromModel) {
+      this.getCardDrawFromModel();
+    }
+    this.addInfluenceTokenToHand();
+    this.enableCardHandDragging();
+    this.disableAllTokenDragging();
+    this.undoButton.disabled = true;
+    this.endTurnButton.disabled = true;
+    this.updateHUD();
+  };
 
   createElement(tag: string, ...classNames: string[]) {
     const element = document.createElement(tag);
@@ -260,7 +264,7 @@ export class View {
     });
   }
 
-  private createCard = (card: Card) => {
+  protected createCard = (card: Card) => {
     // get the values from the card
     const id = card.getId();
     const suits = card.getAllSuits();
@@ -286,7 +290,7 @@ export class View {
     return cardDiv;
   };
 
-  private updateHUD() {
+  protected updateHUD() {
     if (
       this.getPlayer1Score &&
       this.getPlayer2Score &&
@@ -314,7 +318,7 @@ export class View {
     }
   }
 
-  private addInfluenceTokenToHand() {
+  protected addInfluenceTokenToHand() {
     // if there's already a token in hand, return
     if (this.influenceTokenContainer.querySelector('.influenceToken')) {
       return;
@@ -331,7 +335,7 @@ export class View {
     }
   }
 
-  private enableCardHandDragging() {
+  protected enableCardHandDragging() {
     const CardsArr = Array.from(
       this.playerHandContainer.querySelectorAll('.card')
     ) as HTMLElement[];
@@ -342,7 +346,7 @@ export class View {
     });
   }
 
-  private disableAllCardDragging() {
+  protected disableAllCardDragging() {
     const CardsArr = Array.from(
       document.querySelectorAll('.card')
     ) as HTMLElement[];
@@ -353,14 +357,14 @@ export class View {
     });
   }
 
-  private enableTokenDragging() {
+  protected enableTokenDragging() {
     const token = this.influenceTokenContainer.firstChild as HTMLElement;
     if (token) {
       token.draggable = true;
     }
   }
 
-  private disableAllTokenDragging() {
+  protected disableAllTokenDragging() {
     const tokenArr = Array.from(
       document.querySelectorAll('.influenceToken')
     ) as HTMLElement[];
@@ -371,12 +375,12 @@ export class View {
     });
   }
 
-  private addCardToSpace = (cardDiv: HTMLElement, spaceID: string) => {
+  protected addCardToSpace = (cardDiv: HTMLElement, spaceID: string) => {
     const boardSpace = document.getElementById(spaceID);
     boardSpace?.appendChild(cardDiv);
   };
 
-  private highlightAvailableSpaces = (
+  protected highlightAvailableSpaces = (
     getAvailableSpacesCallback: () => BoardSpace[]
   ) => {
     const availableSpaces = getAvailableSpacesCallback();
@@ -389,7 +393,7 @@ export class View {
     });
   };
 
-  private prepareValueForDisplay(value: number) {
+  protected prepareValueForDisplay(value: number) {
     switch (value) {
       case 0:
         return '.';
@@ -475,5 +479,45 @@ export class View {
 
   bindGetPlayer2Score(getPlayer2ScoreCB: () => void) {
     this.getPlayer2Score = getPlayer2ScoreCB;
+  }
+}
+
+export class SinglePlayerView extends View {
+  constructor(board: GameBoard) {
+    super(board);
+  }
+}
+
+export class MultiPlayerView extends View {
+  socket: Socket;
+  constructor(board: GameBoard, socket: Socket) {
+    super(board);
+    this.socket = socket;
+
+    socket.on('opponentPlayCard', (cardID: string, spaceID: string) => {
+      this.nonPlayerCardPlacementCB(cardID, spaceID);
+    });
+  }
+
+  endTurnButtonCB = () => {
+    this.clickSound.play();
+    if (this.computerTakeTurn) {
+      this.computerTakeTurn();
+    }
+    if (this.getCardDrawFromModel) {
+      this.getCardDrawFromModel();
+    }
+    this.addInfluenceTokenToHand();
+    this.enableCardHandDragging();
+    this.disableAllTokenDragging();
+    this.undoButton.disabled = true;
+    this.endTurnButton.disabled = true;
+    this.updateHUD();
+  };
+
+  sendMoveToOpponent() {
+    const cardID = this.undoMovesArr[0].draggedEle.id;
+    const spaceID = this.undoMovesArr[0].targetSpace.id;
+    const;
   }
 }

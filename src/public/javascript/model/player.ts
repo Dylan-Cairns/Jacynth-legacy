@@ -20,7 +20,7 @@ type AiMoveSearchResultsObj = {
 };
 
 export type SendCardDrawtoViewCB = (card: Card) => void;
-export type SendCardPlaytoViewCB = (card: Card, spaceID: BoardSpace) => void;
+export type SendCardPlaytoViewCB = (card: Card, boardSpace: BoardSpace) => void;
 export type SendTokenPlayToViewCB = (boardSpace: BoardSpace) => void;
 
 export type PlayerID = 'Player1' | 'Player2' | 'Computer';
@@ -119,20 +119,25 @@ export class Player_MultiPlayer extends Player {
     super(playerID, gameBoard);
     this.socket = socket;
 
-    socket.on('recieveCardDraw', (newCard: Card | undefined) => {
-      if (newCard) {
-        this.hand.push(newCard);
-        if (this.playerID !== 'Computer') {
-          if (this.sendCardDrawtoView) {
-            this.sendCardDrawtoView(newCard);
+    socket.on(
+      'recieveCardDraw',
+      (newCard: Card | undefined, playerID: string) => {
+        if (playerID === this.playerID) {
+          if (newCard) {
+            this.hand.push(newCard);
+            if (this.playerID !== 'Computer') {
+              if (this.sendCardDrawtoView) {
+                this.sendCardDrawtoView(newCard);
+              }
+            }
           }
         }
       }
-    });
+    );
   }
 
   drawCard = () => {
-    this.socket.emit('drawCard');
+    this.socket.emit('drawCard', this.playerID);
   };
 
   drawStartingHand() {

@@ -53,9 +53,9 @@ io.on('connection', (socket) => {
 
   roomsGameData[currRoomNo].cardDeck = new Decktet('basicDeck');
 
-  socket.on('drawCard', () => {
+  socket.on('drawCard', (playerID: string) => {
     const card = roomsGameData[currRoomNo].cardDeck.drawCard();
-    socket.emit('recieveCardDraw', card);
+    io.to('room-' + currRoomNo).emit('recieveCardDraw', card, playerID);
   });
 
   socket.on('getInitialCard', () => {

@@ -366,3 +366,13 @@ export class View {
         this.getPlayer2Score = getPlayer2ScoreCB;
     }
 }
+export class SinglePlayerView extends View {
+    constructor(board) {
+        super(board);
+    }
+}
+export class MultiPlayerView extends View {
+    constructor(board) {
+        super(board);
+    }
+}

@@ -4,6 +4,7 @@ import http from 'http';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
+import { Decktet } from './public/javascript/model/decktet.js';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -19,8 +20,8 @@ app.get('/', (req, res) => {
 });
 const MAX_ROOMS = 10;
 const PLAYERS_PER_ROOM = 2;
-const roomDataArray = [];
-let currRoomNo = 1;
+const roomsGameData = [];
+let currRoomNo = 0;
 io.on('connection', (socket) => {
     console.log('a user connected');
     //Increase currRoomNo if current room is full.
@@ -32,11 +33,17 @@ io.on('connection', (socket) => {
     io.sockets
         .in('room-' + currRoomNo)
         .emit('connectToRoom', 'You are in room no. ' + currRoomNo);
+    roomsGameData[currRoomNo].cardDeck = new Decktet('basicDeck');
+    socket.on('drawCard', () => {
+        const card = roomsGameData[currRoomNo].cardDeck.drawCard();
+        socket.emit('recieveCardDraw', card);
+    });
+    socket.on('getInitialCard', () => {
+        const card = roomsGameData[currRoomNo].cardDeck.drawCard();
+        io.to('room-' + currRoomNo).emit('recieveInitialCard', card);
+    });
     socket.on('disconnect', () => {
         console.log('user disconnected');
-    });
-    socket.on('drawCard', () => {
-        console.log('drawCard method called');
     });
 });
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
