@@ -7,18 +7,18 @@ import {
 } from '../model/model.js';
 import { DeckType } from '../model/decktet.js';
 import { PlayerID } from '../model/player.js';
-import { MultiPlayerView, View } from '../view/view.js';
+import { MultiPlayerView, SinglePlayerView, View } from '../view/view.js';
 import { io, Socket } from 'socket.io-client';
 
 export class Controller {}
 
 export class SinglePlayerController {
   model: SinglePlayerGameModel;
-  view: View;
+  view: SinglePlayerView;
   constructor(layout: Layout, deckType: DeckType) {
     this.model = new SinglePlayerGameModel(layout, deckType);
 
-    this.view = new View(this.model.board);
+    this.view = new SinglePlayerView(this.model.board);
 
     this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
     this.model.opposPlyr.bindSendCardPlayToView(

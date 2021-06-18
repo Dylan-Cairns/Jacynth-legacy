@@ -43,6 +43,7 @@ export class View {
             var _a;
             const cardDiv = this.createCard(card);
             (_a = this.playerHandContainer) === null || _a === void 0 ? void 0 : _a.appendChild(cardDiv);
+            cardDiv.draggable = false;
         };
         this.nonPlayerCardPlacementCB = (card, boardSpace) => {
             const cardDiv = this.createCard(card);
@@ -68,10 +69,12 @@ export class View {
         this.undoButton.disabled = true;
         this.endTurnButton = document.getElementById('endTurnButton');
         this.endTurnButton.disabled = true;
-        this.currPlyrIcon = document.getElementById('player1Icon');
-        this.opponentIcon = document.getElementById('player2Icon');
-        this.currPlyrHUD = document.getElementById('player1HUD');
-        this.opponentHUD = document.getElementById('player2HUD');
+        this.currPlyrIcon = document.getElementById('playerIcon');
+        this.opponentIcon = document.getElementById('enemyIcon');
+        this.currPlyrHUD = document.getElementById('playerHUD');
+        this.opponentHUD = document.getElementById('enemyHUD');
+        this.currPlyrHUDID = document.getElementById('playerID');
+        this.opponentHUDID = document.getElementById('enemyID');
         this.pickupSound = document.getElementById('pickupSound');
         this.clickSound = document.getElementById('clickSound');
         this.dropSound = document.getElementById('dropSound');
@@ -235,7 +238,7 @@ export class View {
             this.gameBoard.appendChild(spaceDiv);
         });
     }
-    updateHUD() {
+    updateScore() {
         if (this.getCurrPlyrScore &&
             this.getOpponentScore &&
             this.getCurrPlyrAvailTokens &&
@@ -358,23 +361,28 @@ export class View {
 export class SinglePlayerView extends View {
     constructor(board) {
         super(board);
+        this.endTurnButtonCB = () => {
+            this.clickSound.play();
+            if (this.computerTakeTurn) {
+                this.computerTakeTurn();
+            }
+            if (this.getCardDrawFromModel) {
+                this.getCardDrawFromModel();
+            }
+            this.addInfluenceTokenToHand();
+            this.enableCardHandDragging();
+            this.disableAllTokenDragging();
+            this.undoButton.disabled = true;
+            this.endTurnButton.disabled = true;
+            this.updateScore();
+        };
+        this.currPlyrHUDID.innerHTML = `PLAYER`;
+        this.opponentHUDID.innerHTML = `COMPUTER`;
+        this.currPlyrIcon.classList.add('player1Icon');
+        this.opponentIcon.classList.add('player2Icon');
+        this.currPlyrIcon.classList.add('losing');
+        this.opponentIcon.classList.add('losing');
         this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
-    }
-    endTurnButtonCB() {
-        console.log('base end turn method called');
-        this.clickSound.play();
-        if (this.computerTakeTurn) {
-            this.computerTakeTurn();
-        }
-        if (this.getCardDrawFromModel) {
-            this.getCardDrawFromModel();
-        }
-        this.addInfluenceTokenToHand();
-        this.enableCardHandDragging();
-        this.disableAllTokenDragging();
-        this.undoButton.disabled = true;
-        this.endTurnButton.disabled = true;
-        this.updateHUD();
     }
 }
 export class MultiPlayerView extends View {
@@ -387,32 +395,57 @@ export class MultiPlayerView extends View {
             }
             this.addInfluenceTokenToHand();
             this.disableAllTokenDragging();
+            this.disableAllCardDragging();
             this.undoButton.disabled = true;
             this.endTurnButton.disabled = true;
-            this.updateHUD();
+            this.updateScore();
             this.sendMoveToOpponent();
             // reset moves array
             this.movesArr = [];
+            this.currPlyrIcon.classList.remove('active');
+            this.opponentIcon.classList.add('active');
         };
         this.socket = socket;
         this.currPlyrID = currPlyrID;
-        // disable  card movement for player 2
-        console.log('currplyrID', currPlyrID);
-        if (currPlyrID === 'Player2') {
-            console.log('call disable all card dragging');
-            this.disableAllCardDragging();
+        if (this.currPlyrID === 'Player1') {
+            this.currPlyrHUDID.innerHTML = 'Player 1';
+            this.currPlyrIcon.classList.add('player1Icon');
+            this.currPlyrIcon.classList.add('losing');
+            this.currPlyrIcon.classList.add('active');
+        }
+        else {
+            this.currPlyrHUDID.innerHTML = 'Player 2';
+            this.opponentHUDID.innerHTML = 'Player 1';
+            this.opponentIcon.classList.add('player1Icon');
+            this.opponentIcon.classList.add('losing');
+            this.opponentIcon.classList.add('active');
+            this.currPlyrIcon.classList.add('player2Icon');
+            this.currPlyrIcon.classList.add('losing');
         }
         this.roomNumber = document.getElementById('roomNumber');
         this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
         this.socket.on('connectToRoom', (roomNumber) => {
-            this.roomNumber.innerHTML = `Joined game room ${roomNumber}`;
+            this.roomNumber.innerHTML = `In game room ${roomNumber} as ${this.currPlyrID}`;
+        });
+        this.socket.on('p2Ready', () => {
+            console.log('p2ready method recieved from server');
+            if (this.currPlyrID === 'Player2')
+                return;
+            this.opponentHUDID.innerHTML = 'Player 2';
+            this.opponentIcon.classList.add('player2Icon');
+            this.opponentIcon.classList.add('losing');
         });
         this.socket.on('enableP1CardDragging', () => {
             if (this.currPlyrID === 'Player1')
-                this.enableCardHandDragging;
+                this.enableCardHandDragging();
         });
-        this.socket.on('beginNextTurn', (roomNumber) => {
-            this.updateHUD;
+        this.socket.on('beginNextTurn', (player) => {
+            if (this.currPlyrID !== player)
+                return;
+            console.log('begin next turn method called');
+            this.updateScore();
+            this.currPlyrIcon.classList.add('active');
+            this.opponentIcon.classList.remove('active');
             this.enableCardHandDragging();
         });
     }

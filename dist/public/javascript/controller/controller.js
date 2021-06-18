@@ -1,11 +1,11 @@
 import { MultiplayerGameModel, SinglePlayerGameModel } from '../model/model.js';
-import { MultiPlayerView, View } from '../view/view.js';
+import { MultiPlayerView, SinglePlayerView } from '../view/view.js';
 export class Controller {
 }
 export class SinglePlayerController {
     constructor(layout, deckType) {
         this.model = new SinglePlayerGameModel(layout, deckType);
-        this.view = new View(this.model.board);
+        this.view = new SinglePlayerView(this.model.board);
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
         this.model.opposPlyr.bindSendTokenPlayToView(this.view.nonPlayerTokenPlacementCB);

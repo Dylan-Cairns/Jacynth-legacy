@@ -11,7 +11,9 @@ export class View {
   undoButton: HTMLButtonElement;
   endTurnButton: HTMLButtonElement;
   currPlyrHUD: HTMLElement;
+  currPlyrHUDID: HTMLElement;
   opponentHUD: HTMLElement;
+  opponentHUDID: HTMLElement;
   currPlyrIcon: HTMLElement;
   opponentIcon: HTMLElement;
   pickupSound: HTMLMediaElement;
@@ -54,10 +56,12 @@ export class View {
       'endTurnButton'
     ) as HTMLButtonElement;
     this.endTurnButton.disabled = true;
-    this.currPlyrIcon = document.getElementById('player1Icon') as HTMLElement;
-    this.opponentIcon = document.getElementById('player2Icon') as HTMLElement;
-    this.currPlyrHUD = document.getElementById('player1HUD') as HTMLElement;
-    this.opponentHUD = document.getElementById('player2HUD') as HTMLElement;
+    this.currPlyrIcon = document.getElementById('playerIcon') as HTMLElement;
+    this.opponentIcon = document.getElementById('enemyIcon') as HTMLElement;
+    this.currPlyrHUD = document.getElementById('playerHUD') as HTMLElement;
+    this.opponentHUD = document.getElementById('enemyHUD') as HTMLElement;
+    this.currPlyrHUDID = document.getElementById('playerID') as HTMLElement;
+    this.opponentHUDID = document.getElementById('enemyID') as HTMLElement;
     this.pickupSound = document.getElementById(
       'pickupSound'
     ) as HTMLMediaElement;
@@ -271,7 +275,7 @@ export class View {
     return cardDiv;
   };
 
-  protected updateHUD() {
+  protected updateScore() {
     if (
       this.getCurrPlyrScore &&
       this.getOpponentScore &&
@@ -394,6 +398,7 @@ export class View {
   playerDrawCardCB = (card: Card) => {
     const cardDiv = this.createCard(card);
     this.playerHandContainer?.appendChild(cardDiv);
+    cardDiv.draggable = false;
   };
 
   nonPlayerCardPlacementCB = (card: Card, boardSpace: BoardSpace) => {
@@ -470,12 +475,17 @@ export class View {
 export class SinglePlayerView extends View {
   constructor(board: GameBoard) {
     super(board);
+    this.currPlyrHUDID.innerHTML = `PLAYER`;
+    this.opponentHUDID.innerHTML = `COMPUTER`;
+    this.currPlyrIcon.classList.add('player1Icon');
+    this.opponentIcon.classList.add('player2Icon');
+    this.currPlyrIcon.classList.add('losing');
+    this.opponentIcon.classList.add('losing');
 
     this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
   }
 
-  endTurnButtonCB() {
-    console.log('base end turn method called');
+  endTurnButtonCB = () => {
     this.clickSound.play();
     if (this.computerTakeTurn) {
       this.computerTakeTurn();
@@ -488,8 +498,8 @@ export class SinglePlayerView extends View {
     this.disableAllTokenDragging();
     this.undoButton.disabled = true;
     this.endTurnButton.disabled = true;
-    this.updateHUD();
-  }
+    this.updateScore();
+  };
 }
 
 export class MultiPlayerView extends View {
@@ -500,12 +510,22 @@ export class MultiPlayerView extends View {
     super(board);
     this.socket = socket;
     this.currPlyrID = currPlyrID;
-    // disable  card movement for player 2
-    console.log('currplyrID', currPlyrID);
-    if (currPlyrID === 'Player2') {
-      console.log('call disable all card dragging');
-      this.disableAllCardDragging();
+
+    if (this.currPlyrID === 'Player1') {
+      this.currPlyrHUDID.innerHTML = 'Player 1';
+      this.currPlyrIcon.classList.add('player1Icon');
+      this.currPlyrIcon.classList.add('losing');
+      this.currPlyrIcon.classList.add('active');
+    } else {
+      this.currPlyrHUDID.innerHTML = 'Player 2';
+      this.opponentHUDID.innerHTML = 'Player 1';
+      this.opponentIcon.classList.add('player1Icon');
+      this.opponentIcon.classList.add('losing');
+      this.opponentIcon.classList.add('active');
+      this.currPlyrIcon.classList.add('player2Icon');
+      this.currPlyrIcon.classList.add('losing');
     }
+
     this.roomNumber = document.getElementById(
       'roomNumber'
     ) as HTMLButtonElement;
@@ -513,15 +533,27 @@ export class MultiPlayerView extends View {
     this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
 
     this.socket.on('connectToRoom', (roomNumber) => {
-      this.roomNumber.innerHTML = `Joined game room ${roomNumber}`;
+      this.roomNumber.innerHTML = `In game room ${roomNumber} as ${this.currPlyrID}`;
+    });
+
+    this.socket.on('p2Ready', () => {
+      console.log('p2ready method recieved from server');
+      if (this.currPlyrID === 'Player2') return;
+      this.opponentHUDID.innerHTML = 'Player 2';
+      this.opponentIcon.classList.add('player2Icon');
+      this.opponentIcon.classList.add('losing');
     });
 
     this.socket.on('enableP1CardDragging', () => {
-      if (this.currPlyrID === 'Player1') this.enableCardHandDragging;
+      if (this.currPlyrID === 'Player1') this.enableCardHandDragging();
     });
 
-    this.socket.on('beginNextTurn', (roomNumber) => {
-      this.updateHUD;
+    this.socket.on('beginNextTurn', (player) => {
+      if (this.currPlyrID !== player) return;
+      console.log('begin next turn method called');
+      this.updateScore();
+      this.currPlyrIcon.classList.add('active');
+      this.opponentIcon.classList.remove('active');
       this.enableCardHandDragging();
     });
   }
@@ -533,12 +565,15 @@ export class MultiPlayerView extends View {
     }
     this.addInfluenceTokenToHand();
     this.disableAllTokenDragging();
+    this.disableAllCardDragging();
     this.undoButton.disabled = true;
     this.endTurnButton.disabled = true;
-    this.updateHUD();
+    this.updateScore();
     this.sendMoveToOpponent();
     // reset moves array
     this.movesArr = [];
+    this.currPlyrIcon.classList.remove('active');
+    this.opponentIcon.classList.add('active');
   };
 
   sendMoveToOpponent() {

@@ -14,7 +14,7 @@
   <audio id="dropSound" src="assets/switch8.wav" preload="auto"></audio>
   <audio id="clickSound" src="assets/rollover5.wav" preload="auto"></audio>
   <button type="button" class="" id="singlePlayerBttn">Single Player</button>
-      <button type="button" class="" id="multiPlayerBttn">Multiplayer</button>
+  <button type="button" class="" id="multiPlayerBttn">Multiplayer</button>
   <div class="main-grid">
     <div class="menuBar">
       <div class="menuBar-item title">Jacynth</div>
@@ -23,17 +23,17 @@
     </div>
     <div class="gameboard"></div>
     <div class="HUD-container enemyHUD">
-      <div id="player2Icon" class="playerIcon losing"></div>
+      <div id="enemyIcon" class="playerIcon"></div>
       <div class="HUDText">
-        <div class="HUDelement name enemy">COMPUTER</div>
-        <div class="HUDelement" id="player2HUD">Score 0 Tokens 4</div>
+        <div class="HUDelement name enemy" id="enemyID">waiting</div>
+        <div class="HUDelement" id="enemyHUD">Score 0 Tokens 4</div>
       </div>
     </div>
     <div class="HUD-container playerHUD">
-      <div id="player1Icon" class="playerIcon losing active"></div>
+      <div id="playerIcon" class="playerIcon"></div>
       <div class="HUDText">
-        <div class="HUDelement name player">PLAYER</div>
-        <div class="HUDelement" id="player1HUD">Score 0 Tokens 4</div>
+        <div class="HUDelement name player" id="playerID">waiting</div>
+        <div class="HUDelement" id="playerHUD">Score 0 Tokens 4</div>
       </div>
     </div>
     <div class="player-hand-container">

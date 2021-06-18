@@ -127,26 +127,26 @@ body {
   bottom: 0em;
 }
 
-#player1Icon.losing {
+.player1Icon.losing {
   background-image: url('../assets/penitent_losing.png');
 }
 
-#player1Icon.winning {
+.player1Icon.winning {
   background-image: url('../assets/penitent_winning.png');
 }
 
-#player2Icon.losing {
+.player2Icon.losing {
   background-image: url('../assets/sailer_losing.png');
 }
 
-#player2Icon.winning {
+.player2Icon.winning {
   background-image: url('../assets/sailer_winning.png');
 }
 
 .menuBar {
   grid-area: menuBar;
   display: grid;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: auto auto auto;
   align-items: center;
   align-content: start;
   justify-items: center;

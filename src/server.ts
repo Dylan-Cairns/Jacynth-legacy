@@ -76,9 +76,6 @@ io.on('connection', (socket) => {
   const deck = new Decktet('basicDeck');
 
   socket.on('getPlayerID', () => {
-    console.log(roomsGameData[currRoomNo]);
-    console.log('room variable: ', room);
-    console.log('socket.rooms', socket.rooms);
     if (!roomsGameData[currRoomNo] || (room && room.size === 1)) {
       playerID = 'Player1';
       // if the game data obj doesn't exist create it. Or overwrite the existing
@@ -155,8 +152,9 @@ io.on('connection', (socket) => {
       );
       // draw 3 cards for each player
       [0, 0, 0].forEach((ele) => drawCardCB('Player1'));
-      io.to(`room-${currRoomNo}`).emit('enableP1CardDragging');
       [0, 0, 0].forEach((ele) => drawCardCB('Player2'));
+      io.to(`room-${currRoomNo}`).emit('enableP1CardDragging');
+      io.to(`room-${currRoomNo}`).emit('p2Ready');
     }
   });
 
@@ -166,6 +164,9 @@ io.on('connection', (socket) => {
     socket
       .to(`room-${currRoomNo}`)
       .emit('recievePlayerMove', playerID, cardID, SpaceID, TokenSpaceID);
+    // next player start turn
+    const nextPlayer = playerID === 'Player1' ? 'Player2' : 'Player1';
+    socket.to(`room-${currRoomNo}`).emit('beginNextTurn', nextPlayer);
   });
 
   socket.on('disconnect', () => {

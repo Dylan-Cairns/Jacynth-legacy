@@ -10,7 +10,9 @@ export declare class View {
     undoButton: HTMLButtonElement;
     endTurnButton: HTMLButtonElement;
     currPlyrHUD: HTMLElement;
+    currPlyrHUDID: HTMLElement;
     opponentHUD: HTMLElement;
+    opponentHUDID: HTMLElement;
     currPlyrIcon: HTMLElement;
     opponentIcon: HTMLElement;
     pickupSound: HTMLMediaElement;
@@ -37,7 +39,7 @@ export declare class View {
     createElement(tag: string, ...classNames: string[]): HTMLElement;
     createBoardSpaces(board: GameBoard): void;
     protected createCard: (card: Card) => HTMLElement;
-    protected updateHUD(): void;
+    protected updateScore(): void;
     protected addInfluenceTokenToHand(): void;
     enableCardHandDragging(): void;
     protected disableAllCardDragging(): void;
@@ -64,7 +66,7 @@ export declare class View {
 }
 export declare class SinglePlayerView extends View {
     constructor(board: GameBoard);
-    endTurnButtonCB(): void;
+    endTurnButtonCB: () => void;
 }
 export declare class MultiPlayerView extends View {
     socket: Socket;
