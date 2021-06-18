@@ -501,4 +501,8 @@ export class Decktet {
       this.cards[idx] = oldValue;
     }
   }
+
+  getCardByID(cardID: string): Card | undefined {
+    return this.cards.filter((card) => card.getId() === cardID)[0];
+  }
 }

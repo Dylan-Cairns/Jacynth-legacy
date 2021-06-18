@@ -18,7 +18,7 @@ export class View {
   dropSound: HTMLMediaElement;
   clickSound: HTMLMediaElement;
   draggedElement: HTMLElement | undefined;
-  undoMovesArr: {
+  movesArr: {
     draggedEle: HTMLElement;
     targetSpace: HTMLElement;
   }[];
@@ -63,7 +63,7 @@ export class View {
     ) as HTMLMediaElement;
     this.clickSound = document.getElementById('clickSound') as HTMLMediaElement;
     this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
-    this.undoMovesArr = [];
+    this.movesArr = [];
     this.createBoardSpaces(board);
     // create initial influence token
     const token = this.createElement('div', 'influenceToken', 'player1Token');
@@ -142,7 +142,7 @@ export class View {
             this.sendCardPlayToModel(targetSpace.id, this.draggedElement.id);
           }
           // save move information for undo
-          this.undoMovesArr.push({
+          this.movesArr.push({
             draggedEle: this.draggedElement,
             targetSpace: targetSpace
           });
@@ -159,7 +159,7 @@ export class View {
             this.sendTokenPlayToModel(targetSpace.id);
           }
           // save move information for undo
-          this.undoMovesArr.push({
+          this.movesArr.push({
             draggedEle: this.draggedElement,
             targetSpace: targetSpace
           });
@@ -177,8 +177,8 @@ export class View {
 
     this.undoButton.addEventListener('click', () => {
       this.pickupSound.play();
-      if (this.undoMovesArr.length > 0) {
-        const moveObj = this.undoMovesArr.pop()!;
+      if (this.movesArr.length > 0) {
+        const moveObj = this.movesArr.pop()!;
         const cardOrTokenToUndo = moveObj.draggedEle;
         const targetSpace = moveObj.targetSpace;
         // if first item in undo list is card,
@@ -206,26 +206,7 @@ export class View {
         }
       }
     });
-
-    this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
   }
-
-  //this method is over-ridden in the multiplayer class
-  endTurnButtonCB = () => {
-    this.clickSound.play();
-    if (this.computerTakeTurn) {
-      this.computerTakeTurn();
-    }
-    if (this.getCardDrawFromModel) {
-      this.getCardDrawFromModel();
-    }
-    this.addInfluenceTokenToHand();
-    this.enableCardHandDragging();
-    this.disableAllTokenDragging();
-    this.undoButton.disabled = true;
-    this.endTurnButton.disabled = true;
-    this.updateHUD();
-  };
 
   createElement(tag: string, ...classNames: string[]) {
     const element = document.createElement(tag);
@@ -335,7 +316,7 @@ export class View {
     }
   }
 
-  protected enableCardHandDragging() {
+  public enableCardHandDragging() {
     const CardsArr = Array.from(
       this.playerHandContainer.querySelectorAll('.card')
     ) as HTMLElement[];
@@ -412,7 +393,6 @@ export class View {
 
   playerDrawCardCB = (card: Card) => {
     const cardDiv = this.createCard(card);
-    cardDiv.draggable = true;
     this.playerHandContainer?.appendChild(cardDiv);
   };
 
@@ -420,6 +400,11 @@ export class View {
     const cardDiv = this.createCard(card);
     cardDiv.classList.add('roll-in-top');
     this.addCardToSpace(cardDiv, boardSpace.getID());
+    // in multiplayer, nonPlayerCardPlacement
+    // occuring means the other player has taken their turn.
+    // re-enable card dragging to allow player to take next turn.
+    // has no effect in singleplayer mode
+    this.enableCardHandDragging();
   };
 
   nonPlayerTokenPlacementCB = (boardSpace: BoardSpace) => {
@@ -485,21 +470,12 @@ export class View {
 export class SinglePlayerView extends View {
   constructor(board: GameBoard) {
     super(board);
-  }
-}
 
-export class MultiPlayerView extends View {
-  socket: Socket;
-  constructor(board: GameBoard, socket: Socket) {
-    super(board);
-    this.socket = socket;
-
-    // socket.on('opponentPlayCard', (cardID: string, spaceID: string) => {
-    //   this.nonPlayerCardPlacementCB(cardID, spaceID);
-    // });
+    this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
   }
 
-  endTurnButtonCB = () => {
+  endTurnButtonCB() {
+    console.log('base end turn method called');
     this.clickSound.play();
     if (this.computerTakeTurn) {
       this.computerTakeTurn();
@@ -513,11 +489,71 @@ export class MultiPlayerView extends View {
     this.undoButton.disabled = true;
     this.endTurnButton.disabled = true;
     this.updateHUD();
+  }
+}
+
+export class MultiPlayerView extends View {
+  socket: Socket;
+  currPlyrID: PlayerID;
+  roomNumber: HTMLElement;
+  constructor(board: GameBoard, socket: Socket, currPlyrID: PlayerID) {
+    super(board);
+    this.socket = socket;
+    this.currPlyrID = currPlyrID;
+    // disable  card movement for player 2
+    console.log('currplyrID', currPlyrID);
+    if (currPlyrID === 'Player2') {
+      console.log('call disable all card dragging');
+      this.disableAllCardDragging();
+    }
+    this.roomNumber = document.getElementById(
+      'roomNumber'
+    ) as HTMLButtonElement;
+
+    this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
+
+    this.socket.on('connectToRoom', (roomNumber) => {
+      this.roomNumber.innerHTML = `Joined game room ${roomNumber}`;
+    });
+
+    this.socket.on('enableP1CardDragging', () => {
+      if (this.currPlyrID === 'Player1') this.enableCardHandDragging;
+    });
+
+    this.socket.on('beginNextTurn', (roomNumber) => {
+      this.updateHUD;
+      this.enableCardHandDragging();
+    });
+  }
+
+  endTurnButtonCB = () => {
+    this.clickSound.play();
+    if (this.getCardDrawFromModel) {
+      this.getCardDrawFromModel();
+    }
+    this.addInfluenceTokenToHand();
+    this.disableAllTokenDragging();
+    this.undoButton.disabled = true;
+    this.endTurnButton.disabled = true;
+    this.updateHUD();
+    this.sendMoveToOpponent();
+    // reset moves array
+    this.movesArr = [];
   };
 
-  // sendMoveToOpponent() {
-  //   const cardID = this.undoMovesArr[0].draggedEle.id;
-  //   const spaceID = this.undoMovesArr[0].targetSpace.id;
-  //   const;
-  // }
+  sendMoveToOpponent() {
+    const cardID = this.movesArr[0].draggedEle.id;
+    const spaceID = this.movesArr[0].targetSpace.id;
+    let tokenMove;
+    if (this.movesArr.length > 1) {
+      tokenMove = this.movesArr[1].targetSpace.id;
+    }
+    this.socket.emit(
+      'sendPlayerMove',
+      this.currPlyrID,
+      cardID,
+      spaceID,
+      tokenMove
+    );
+  }
 }

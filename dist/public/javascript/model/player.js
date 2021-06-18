@@ -1,11 +1,11 @@
 // game variables that never change
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
-// minimum values used in AI move analysis
-const CARD_VALUE_THRESHOLD = 5;
+// initial minimum values used in AI move selection
+const CARD_VALUE_THRESHOLD = 6;
 const SCORE_INCREASE_THRESHOLD = 4;
 export class Player {
-    constructor(playerID, gameBoard) {
+    constructor(playerID, gameBoard, deck) {
         this.playCard = (spaceID, cardID) => {
             const card = this.getCardFromHandByID(cardID);
             if (!card)
@@ -50,6 +50,7 @@ export class Player {
         };
         this.playerID = playerID;
         this.gameBoard = gameBoard;
+        this.deck = deck;
         this.hand = [];
         this.influenceTokens = PLAYER_INFLUENCE_TOKENS;
     }
@@ -73,23 +74,43 @@ export class Player {
     }
 }
 export class Player_MultiPlayer extends Player {
-    constructor(playerID, gameBoard, socket) {
-        super(playerID, gameBoard);
+    constructor(playerID, gameBoard, deck, socket) {
+        super(playerID, gameBoard, deck);
         this.drawCard = () => {
             this.socket.emit('drawCard', this.playerID);
         };
         this.socket = socket;
-        socket.on('recieveCardDraw', (newCard, playerID) => {
-            if (playerID === this.playerID) {
-                if (newCard) {
-                    this.hand.push(newCard);
-                    if (this.playerID !== 'Computer') {
-                        if (this.sendCardDrawtoView) {
-                            this.sendCardDrawtoView(newCard);
-                        }
-                    }
-                }
-            }
+        console.log(this.playerID);
+        socket.on('recieveCardDraw', (cardID, playerID) => {
+            if (playerID !== this.playerID || !cardID)
+                return;
+            const card = this.deck.getCardByID(cardID);
+            if (card)
+                this.hand.push(card);
+            console.log('cardDraw, cardID, playerID, handArr', card === null || card === void 0 ? void 0 : card.getId(), this.playerID, this.hand);
+            if (!card || !this.sendCardDrawtoView)
+                return;
+            this.sendCardDrawtoView(card);
+        });
+        socket.on('recievePlayerMove', (playerID, cardID, spaceID, TokenSpaceID) => {
+            console.log(`${this.playerID} recievePlayerMove method`);
+            console.log('recieved playerid, cardid, spaceID: ', playerID, cardID, spaceID);
+            console.log('sendCardplaytoMoveCB?', this.sendCardPlaytoView);
+            if (playerID !== this.playerID)
+                return;
+            if (!this.sendCardPlaytoView)
+                return;
+            const card = this.getCardFromHandByID(cardID);
+            const space = this.gameBoard.getSpace(spaceID);
+            console.log('card from hand by id, spaceID', card === null || card === void 0 ? void 0 : card.getId(), space === null || space === void 0 ? void 0 : space.getID());
+            console.log('hand arr', this.hand);
+            if (!card || !space)
+                return;
+            this.playCard(spaceID, cardID);
+            this.sendCardPlaytoView(card, space);
+            if (!TokenSpaceID || !this.sendTokenPlayToView)
+                return;
+            this.sendTokenPlayToView(space);
         });
     }
     drawStartingHand() {
@@ -100,7 +121,7 @@ export class Player_MultiPlayer extends Player {
 }
 export class Player_SinglePlayer extends Player {
     constructor(playerID, gameBoard, deck) {
-        super(playerID, gameBoard);
+        super(playerID, gameBoard, deck);
         this.drawCard = () => {
             const newCard = this.deck.drawCard();
             if (newCard) {
@@ -112,7 +133,6 @@ export class Player_SinglePlayer extends Player {
                 }
             }
         };
-        this.deck = deck;
     }
     drawStartingHand() {
         for (let i = 0; i < PLAYER_HAND_SIZE; i++) {

@@ -8,12 +8,13 @@ export declare type PlayerID = 'Player1' | 'Player2' | 'Computer';
 export declare class Player {
     protected playerID: PlayerID;
     protected hand: Card[];
+    protected deck: Decktet;
     protected gameBoard: GameBoard;
     protected influenceTokens: number;
     protected sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
     protected sendCardDrawtoView: SendCardDrawtoViewCB | undefined;
     protected sendTokenPlayToView: SendTokenPlayToViewCB | undefined;
-    constructor(playerID: PlayerID, gameBoard: GameBoard);
+    constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet);
     playCard: (spaceID: string, cardID: string) => boolean;
     undoPlayCard: (spaceID: string) => void;
     getAvailableTokenSpaces: () => BoardSpace[];
@@ -30,12 +31,11 @@ export declare class Player {
 }
 export declare class Player_MultiPlayer extends Player {
     socket: Socket;
-    constructor(playerID: PlayerID, gameBoard: GameBoard, socket: Socket);
+    constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet, socket: Socket);
     drawCard: () => void;
     drawStartingHand(): void;
 }
 export declare class Player_SinglePlayer extends Player {
-    deck: Decktet;
     constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet);
     drawCard: () => void;
     drawStartingHand(): void;

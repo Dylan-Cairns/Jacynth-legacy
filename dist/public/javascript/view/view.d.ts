@@ -1,5 +1,6 @@
 import { BoardSpace, GameBoard } from '../model/gameboard.js';
 import { Card } from '../model/decktet.js';
+import { PlayerID } from '../model/player.js';
 import { Socket } from 'socket.io-client';
 export declare class View {
     app: Element;
@@ -8,15 +9,15 @@ export declare class View {
     influenceTokenContainer: HTMLElement;
     undoButton: HTMLButtonElement;
     endTurnButton: HTMLButtonElement;
-    player1HUD: HTMLElement;
-    player2HUD: HTMLElement;
-    player1Icon: HTMLElement;
-    player2Icon: HTMLElement;
+    currPlyrHUD: HTMLElement;
+    opponentHUD: HTMLElement;
+    currPlyrIcon: HTMLElement;
+    opponentIcon: HTMLElement;
     pickupSound: HTMLMediaElement;
     dropSound: HTMLMediaElement;
     clickSound: HTMLMediaElement;
     draggedElement: HTMLElement | undefined;
-    undoMovesArr: {
+    movesArr: {
         draggedEle: HTMLElement;
         targetSpace: HTMLElement;
     }[];
@@ -28,18 +29,17 @@ export declare class View {
     undoPlaceToken: ((spaceID: string) => void) | undefined;
     computerTakeTurn: (() => void) | undefined;
     getCardDrawFromModel: (() => void) | undefined;
-    getP1AvailableTokensNumber: (() => number) | undefined;
-    getP2AvailableTokensNumber: (() => number) | undefined;
-    getPlayer1Score: (() => void) | undefined;
-    getPlayer2Score: (() => void) | undefined;
+    getCurrPlyrAvailTokens: (() => number) | undefined;
+    getOpponAvailTokens: (() => number) | undefined;
+    getCurrPlyrScore: (() => void) | undefined;
+    getOpponentScore: (() => void) | undefined;
     constructor(board: GameBoard);
-    endTurnButtonCB: () => void;
     createElement(tag: string, ...classNames: string[]): HTMLElement;
     createBoardSpaces(board: GameBoard): void;
     protected createCard: (card: Card) => HTMLElement;
     protected updateHUD(): void;
     protected addInfluenceTokenToHand(): void;
-    protected enableCardHandDragging(): void;
+    enableCardHandDragging(): void;
     protected disableAllCardDragging(): void;
     protected enableTokenDragging(): void;
     protected disableAllTokenDragging(): void;
@@ -57,16 +57,20 @@ export declare class View {
     bindUndoPlaceToken(undoPlaceTokenCB: (spaceID: string) => void): void;
     bindComputerTakeTurn(computerTurnCB: () => void): void;
     bindGetCardDrawFromModel(drawCardCB: () => void): void;
-    bindGetP1AvailableTokens(availTokensCB: () => number): void;
-    bindGetP2AvailableTokens(availTokensCB: () => number): void;
-    bindGetPlayer1Score(getPlayer1ScoreCB: () => void): void;
-    bindGetPlayer2Score(getPlayer2ScoreCB: () => void): void;
+    bindGetCurrPlyrAvailTokens(availTokensCB: () => number): void;
+    bindGetOpponAvailTokens(availTokensCB: () => number): void;
+    bindGetCurrPlyrScore(getCurrPlyrScoreCB: () => void): void;
+    bindGetOpponentScore(getOpponentScoreCB: () => void): void;
 }
 export declare class SinglePlayerView extends View {
     constructor(board: GameBoard);
+    endTurnButtonCB(): void;
 }
 export declare class MultiPlayerView extends View {
     socket: Socket;
-    constructor(board: GameBoard, socket: Socket);
+    currPlyrID: PlayerID;
+    roomNumber: HTMLElement;
+    constructor(board: GameBoard, socket: Socket, currPlyrID: PlayerID);
     endTurnButtonCB: () => void;
+    sendMoveToOpponent(): void;
 }

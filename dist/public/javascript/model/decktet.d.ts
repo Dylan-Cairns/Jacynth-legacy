@@ -30,5 +30,6 @@ export declare class Decktet {
     drawCard(): Card | undefined;
     getRemainingCards(): number;
     shuffle(): void;
+    getCardByID(cardID: string): Card | undefined;
 }
 export {};

@@ -146,8 +146,8 @@ body {
 .menuBar {
   grid-area: menuBar;
   display: grid;
-  grid-template-columns: auto auto;
-  align-items: start;
+  grid-template-columns: auto auto auto auto;
+  align-items: center;
   align-content: start;
   justify-items: center;
   justify-content: space-between;
@@ -159,6 +159,10 @@ body {
   padding: 0.2em;
   font-size: 2em;
   text-align: center;
+}
+
+#roomNumber {
+  font-size: 1em;
 }
 
 .player-hand-container {

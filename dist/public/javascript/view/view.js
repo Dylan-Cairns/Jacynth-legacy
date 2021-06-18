@@ -1,21 +1,5 @@
 export class View {
     constructor(board) {
-        //this method is over-ridden in the multiplayer class
-        this.endTurnButtonCB = () => {
-            this.clickSound.play();
-            if (this.computerTakeTurn) {
-                this.computerTakeTurn();
-            }
-            if (this.getCardDrawFromModel) {
-                this.getCardDrawFromModel();
-            }
-            this.addInfluenceTokenToHand();
-            this.enableCardHandDragging();
-            this.disableAllTokenDragging();
-            this.undoButton.disabled = true;
-            this.endTurnButton.disabled = true;
-            this.updateHUD();
-        };
         this.createCard = (card) => {
             // get the values from the card
             const id = card.getId();
@@ -58,13 +42,17 @@ export class View {
         this.playerDrawCardCB = (card) => {
             var _a;
             const cardDiv = this.createCard(card);
-            cardDiv.draggable = true;
             (_a = this.playerHandContainer) === null || _a === void 0 ? void 0 : _a.appendChild(cardDiv);
         };
         this.nonPlayerCardPlacementCB = (card, boardSpace) => {
             const cardDiv = this.createCard(card);
             cardDiv.classList.add('roll-in-top');
             this.addCardToSpace(cardDiv, boardSpace.getID());
+            // in multiplayer, nonPlayerCardPlacement
+            // occuring means the other player has taken their turn.
+            // re-enable card dragging to allow player to take next turn.
+            // has no effect in singleplayer mode
+            this.enableCardHandDragging();
         };
         this.nonPlayerTokenPlacementCB = (boardSpace) => {
             const spaceID = boardSpace.getID();
@@ -80,14 +68,14 @@ export class View {
         this.undoButton.disabled = true;
         this.endTurnButton = document.getElementById('endTurnButton');
         this.endTurnButton.disabled = true;
-        this.player1Icon = document.getElementById('player1Icon');
-        this.player2Icon = document.getElementById('player2Icon');
-        this.player1HUD = document.getElementById('player1HUD');
-        this.player2HUD = document.getElementById('player2HUD');
+        this.currPlyrIcon = document.getElementById('player1Icon');
+        this.opponentIcon = document.getElementById('player2Icon');
+        this.currPlyrHUD = document.getElementById('player1HUD');
+        this.opponentHUD = document.getElementById('player2HUD');
         this.pickupSound = document.getElementById('pickupSound');
         this.clickSound = document.getElementById('clickSound');
         this.dropSound = document.getElementById('dropSound');
-        this.undoMovesArr = [];
+        this.movesArr = [];
         this.createBoardSpaces(board);
         // create initial influence token
         const token = this.createElement('div', 'influenceToken', 'player1Token');
@@ -147,7 +135,7 @@ export class View {
                         this.sendCardPlayToModel(targetSpace.id, this.draggedElement.id);
                     }
                     // save move information for undo
-                    this.undoMovesArr.push({
+                    this.movesArr.push({
                         draggedEle: this.draggedElement,
                         targetSpace: targetSpace
                     });
@@ -165,7 +153,7 @@ export class View {
                         this.sendTokenPlayToModel(targetSpace.id);
                     }
                     // save move information for undo
-                    this.undoMovesArr.push({
+                    this.movesArr.push({
                         draggedEle: this.draggedElement,
                         targetSpace: targetSpace
                     });
@@ -181,8 +169,8 @@ export class View {
         });
         this.undoButton.addEventListener('click', () => {
             this.pickupSound.play();
-            if (this.undoMovesArr.length > 0) {
-                const moveObj = this.undoMovesArr.pop();
+            if (this.movesArr.length > 0) {
+                const moveObj = this.movesArr.pop();
                 const cardOrTokenToUndo = moveObj.draggedEle;
                 const targetSpace = moveObj.targetSpace;
                 // if first item in undo list is card,
@@ -211,7 +199,6 @@ export class View {
                 }
             }
         });
-        this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
     }
     createElement(tag, ...classNames) {
         const element = document.createElement(tag);
@@ -249,27 +236,27 @@ export class View {
         });
     }
     updateHUD() {
-        if (this.getPlayer1Score &&
-            this.getPlayer2Score &&
-            this.getP1AvailableTokensNumber &&
-            this.getP2AvailableTokensNumber) {
-            const p1Score = this.getPlayer1Score();
-            const p2Score = this.getPlayer2Score();
-            const p1Tokens = this.getP1AvailableTokensNumber();
-            const p2Tokens = this.getP2AvailableTokensNumber();
-            this.player1HUD.textContent = `Score ${p1Score} Tokens ${p1Tokens}`;
-            this.player2HUD.textContent = `Score ${p2Score} Tokens ${p2Tokens}`;
-            if (p1Score > p2Score) {
-                this.player1Icon.classList.remove('losing');
-                this.player1Icon.classList.add('winning');
-                this.player2Icon.classList.remove('winning');
-                this.player2Icon.classList.add('losing');
+        if (this.getCurrPlyrScore &&
+            this.getOpponentScore &&
+            this.getCurrPlyrAvailTokens &&
+            this.getOpponAvailTokens) {
+            const currPlyrScore = this.getCurrPlyrScore();
+            const opponentScore = this.getOpponentScore();
+            const currPlyrTokens = this.getCurrPlyrAvailTokens();
+            const opponentTokens = this.getOpponAvailTokens();
+            this.currPlyrHUD.textContent = `Score ${currPlyrScore} Tokens ${currPlyrTokens}`;
+            this.opponentHUD.textContent = `Score ${opponentScore} Tokens ${opponentTokens}`;
+            if (currPlyrScore > opponentScore) {
+                this.currPlyrIcon.classList.remove('losing');
+                this.currPlyrIcon.classList.add('winning');
+                this.opponentIcon.classList.remove('winning');
+                this.opponentIcon.classList.add('losing');
             }
-            else if (p1Score < p2Score) {
-                this.player2Icon.classList.remove('losing');
-                this.player2Icon.classList.add('winning');
-                this.player1Icon.classList.remove('winning');
-                this.player1Icon.classList.add('losing');
+            else if (currPlyrScore < opponentScore) {
+                this.opponentIcon.classList.remove('losing');
+                this.opponentIcon.classList.add('winning');
+                this.currPlyrIcon.classList.remove('winning');
+                this.currPlyrIcon.classList.add('losing');
             }
         }
     }
@@ -278,8 +265,8 @@ export class View {
         if (this.influenceTokenContainer.querySelector('.influenceToken')) {
             return;
         }
-        if (this.getP1AvailableTokensNumber) {
-            if (this.getP1AvailableTokensNumber() > 0) {
+        if (this.getCurrPlyrAvailTokens) {
+            if (this.getCurrPlyrAvailTokens() > 0) {
                 const token = this.createElement('div', 'influenceToken', 'player1Token');
                 this.influenceTokenContainer.appendChild(token);
             }
@@ -355,45 +342,87 @@ export class View {
     bindGetCardDrawFromModel(drawCardCB) {
         this.getCardDrawFromModel = drawCardCB;
     }
-    bindGetP1AvailableTokens(availTokensCB) {
-        this.getP1AvailableTokensNumber = availTokensCB;
+    bindGetCurrPlyrAvailTokens(availTokensCB) {
+        this.getCurrPlyrAvailTokens = availTokensCB;
     }
-    bindGetP2AvailableTokens(availTokensCB) {
-        this.getP2AvailableTokensNumber = availTokensCB;
+    bindGetOpponAvailTokens(availTokensCB) {
+        this.getOpponAvailTokens = availTokensCB;
     }
-    bindGetPlayer1Score(getPlayer1ScoreCB) {
-        this.getPlayer1Score = getPlayer1ScoreCB;
+    bindGetCurrPlyrScore(getCurrPlyrScoreCB) {
+        this.getCurrPlyrScore = getCurrPlyrScoreCB;
     }
-    bindGetPlayer2Score(getPlayer2ScoreCB) {
-        this.getPlayer2Score = getPlayer2ScoreCB;
+    bindGetOpponentScore(getOpponentScoreCB) {
+        this.getOpponentScore = getOpponentScoreCB;
     }
 }
 export class SinglePlayerView extends View {
     constructor(board) {
         super(board);
+        this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
+    }
+    endTurnButtonCB() {
+        console.log('base end turn method called');
+        this.clickSound.play();
+        if (this.computerTakeTurn) {
+            this.computerTakeTurn();
+        }
+        if (this.getCardDrawFromModel) {
+            this.getCardDrawFromModel();
+        }
+        this.addInfluenceTokenToHand();
+        this.enableCardHandDragging();
+        this.disableAllTokenDragging();
+        this.undoButton.disabled = true;
+        this.endTurnButton.disabled = true;
+        this.updateHUD();
     }
 }
 export class MultiPlayerView extends View {
-    constructor(board, socket) {
+    constructor(board, socket, currPlyrID) {
         super(board);
         this.endTurnButtonCB = () => {
             this.clickSound.play();
-            if (this.computerTakeTurn) {
-                this.computerTakeTurn();
-            }
             if (this.getCardDrawFromModel) {
                 this.getCardDrawFromModel();
             }
             this.addInfluenceTokenToHand();
-            this.enableCardHandDragging();
             this.disableAllTokenDragging();
             this.undoButton.disabled = true;
             this.endTurnButton.disabled = true;
             this.updateHUD();
+            this.sendMoveToOpponent();
+            // reset moves array
+            this.movesArr = [];
         };
         this.socket = socket;
-        // socket.on('opponentPlayCard', (cardID: string, spaceID: string) => {
-        //   this.nonPlayerCardPlacementCB(cardID, spaceID);
-        // });
+        this.currPlyrID = currPlyrID;
+        // disable  card movement for player 2
+        console.log('currplyrID', currPlyrID);
+        if (currPlyrID === 'Player2') {
+            console.log('call disable all card dragging');
+            this.disableAllCardDragging();
+        }
+        this.roomNumber = document.getElementById('roomNumber');
+        this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
+        this.socket.on('connectToRoom', (roomNumber) => {
+            this.roomNumber.innerHTML = `Joined game room ${roomNumber}`;
+        });
+        this.socket.on('enableP1CardDragging', () => {
+            if (this.currPlyrID === 'Player1')
+                this.enableCardHandDragging;
+        });
+        this.socket.on('beginNextTurn', (roomNumber) => {
+            this.updateHUD;
+            this.enableCardHandDragging();
+        });
+    }
+    sendMoveToOpponent() {
+        const cardID = this.movesArr[0].draggedEle.id;
+        const spaceID = this.movesArr[0].targetSpace.id;
+        let tokenMove;
+        if (this.movesArr.length > 1) {
+            tokenMove = this.movesArr[1].targetSpace.id;
+        }
+        this.socket.emit('sendPlayerMove', this.currPlyrID, cardID, spaceID, tokenMove);
     }
 }
