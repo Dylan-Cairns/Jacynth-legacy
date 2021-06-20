@@ -92,9 +92,9 @@ export class Player_MultiPlayer extends Player {
                 return;
             this.sendCardDrawtoView(card);
         });
-        socket.on('recievePlayerMove', (playerID, cardID, spaceID, TokenSpaceID) => {
+        socket.on('recievePlayerMove', (playerID, cardID, spaceID, tokenSpaceID) => {
             console.log(`${this.playerID} recievePlayerMove method`);
-            console.log('recieved playerid, cardid, spaceID: ', playerID, cardID, spaceID);
+            console.log('recieved playerid, cardid, spaceID, tokenSpaceID: ', playerID, cardID, spaceID);
             console.log('sendCardplaytoMoveCB?', this.sendCardPlaytoView);
             if (playerID !== this.playerID)
                 return;
@@ -108,9 +108,12 @@ export class Player_MultiPlayer extends Player {
                 return;
             this.playCard(spaceID, cardID);
             this.sendCardPlaytoView(card, space);
-            if (!TokenSpaceID || !this.sendTokenPlayToView)
+            if (!tokenSpaceID || !this.sendTokenPlayToView)
                 return;
-            this.sendTokenPlayToView(space);
+            this.placeToken(tokenSpaceID);
+            const tokenSpace = this.gameBoard.getSpace(tokenSpaceID);
+            if (tokenSpace)
+                this.sendTokenPlayToView(tokenSpace);
         });
     }
     drawStartingHand() {

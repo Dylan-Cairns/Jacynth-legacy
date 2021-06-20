@@ -4,6 +4,7 @@ import { PlayerID } from '../model/player.js';
 import { Socket } from 'socket.io-client';
 
 export class View {
+  currPlyrID: PlayerID;
   app: Element;
   gameBoard: HTMLElement;
   playerHandContainer: HTMLElement;
@@ -16,9 +17,11 @@ export class View {
   opponentHUDID: HTMLElement;
   currPlyrIcon: HTMLElement;
   opponentIcon: HTMLElement;
+  gameOverBox: HTMLElement;
+  winnerText: HTMLElement;
+  disconnectedAlert: HTMLElement;
   pickupSound: HTMLMediaElement;
   dropSound: HTMLMediaElement;
-  clickSound: HTMLMediaElement;
   draggedElement: HTMLElement | undefined;
   movesArr: {
     draggedEle: HTMLElement;
@@ -39,7 +42,8 @@ export class View {
   getCurrPlyrScore: (() => void) | undefined;
   getOpponentScore: (() => void) | undefined;
 
-  constructor(board: GameBoard) {
+  constructor(board: GameBoard, currPlyrID: PlayerID) {
+    this.currPlyrID = currPlyrID;
     this.app = document.querySelector('#root')! as HTMLElement;
     this.gameBoard = document.querySelector('.gameboard')! as HTMLElement;
     this.playerHandContainer = document.querySelector(
@@ -62,15 +66,19 @@ export class View {
     this.opponentHUD = document.getElementById('enemyHUD') as HTMLElement;
     this.currPlyrHUDID = document.getElementById('playerID') as HTMLElement;
     this.opponentHUDID = document.getElementById('enemyID') as HTMLElement;
+    this.gameOverBox = document.getElementById('gameOverBox') as HTMLElement;
+    this.disconnectedAlert = document.getElementById(
+      'disconnectedBox'
+    ) as HTMLElement;
+    this.winnerText = document.getElementById('winnerText') as HTMLElement;
     this.pickupSound = document.getElementById(
       'pickupSound'
     ) as HTMLMediaElement;
-    this.clickSound = document.getElementById('clickSound') as HTMLMediaElement;
     this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
     this.movesArr = [];
     this.createBoardSpaces(board);
     // create initial influence token
-    const token = this.createElement('div', 'influenceToken', 'player1Token');
+    const token = this.createPlayerToken();
     this.influenceTokenContainer.appendChild(token);
 
     // on dragstart, get all available spaces from the model
@@ -275,6 +283,21 @@ export class View {
     return cardDiv;
   };
 
+  protected createPlayerToken() {
+    const tokenID = this.currPlyrID === 'Player 1' ? 'Player1' : 'Player2';
+    return this.createElement('div', 'influenceToken', `${tokenID}token`);
+  }
+
+  protected createEnemyToken() {
+    const tokenID = this.currPlyrID === 'Player 1' ? 'Player2' : 'Player1';
+    return this.createElement(
+      'div',
+      'influenceToken',
+      `${tokenID}token`,
+      'enemyToken'
+    );
+  }
+
   protected updateScore() {
     if (
       this.getCurrPlyrScore &&
@@ -283,7 +306,9 @@ export class View {
       this.getOpponAvailTokens
     ) {
       const currPlyrScore = this.getCurrPlyrScore();
+      console.log('currPlyrScore', currPlyrScore);
       const opponentScore = this.getOpponentScore();
+      console.log('opponentScore', opponentScore);
       const currPlyrTokens = this.getCurrPlyrAvailTokens();
       const opponentTokens = this.getOpponAvailTokens();
       this.currPlyrHUD.textContent = `Score ${currPlyrScore} Tokens ${currPlyrTokens}`;
@@ -303,6 +328,34 @@ export class View {
     }
   }
 
+  protected checkForGameEnd = () => {
+    if (
+      !this.getAvailCardSpaces ||
+      !this.getCurrPlyrScore ||
+      !this.getOpponentScore ||
+      !this.getCurrPlyrAvailTokens ||
+      !this.getOpponAvailTokens
+    )
+      return;
+    if (this.getAvailCardSpaces().length === 0) {
+      this.disableAllCardDragging();
+      this.disableAllTokenDragging();
+      this.opponentIcon.classList.remove('active');
+      this.currPlyrIcon.classList.remove('active');
+      const currPlyrScore = this.getCurrPlyrScore();
+      const opponentScore = this.getOpponentScore();
+      if (currPlyrScore > opponentScore) {
+        this.winnerText.innerHTML = `${this.currPlyrID} wins`;
+      } else if (opponentScore > currPlyrScore) {
+        this.winnerText.innerHTML =
+          this.winnerText.innerHTML = `${this.opponentHUDID.innerText} wins`;
+      } else {
+        this.winnerText.innerHTML = "It's a tie!";
+      }
+      this.gameOverBox.style.visibility = 'visible';
+    }
+  };
+
   protected addInfluenceTokenToHand() {
     // if there's already a token in hand, return
     if (this.influenceTokenContainer.querySelector('.influenceToken')) {
@@ -310,11 +363,7 @@ export class View {
     }
     if (this.getCurrPlyrAvailTokens) {
       if (this.getCurrPlyrAvailTokens() > 0) {
-        const token = this.createElement(
-          'div',
-          'influenceToken',
-          'player1Token'
-        );
+        const token = this.createPlayerToken();
         this.influenceTokenContainer.appendChild(token);
       }
     }
@@ -405,16 +454,12 @@ export class View {
     const cardDiv = this.createCard(card);
     cardDiv.classList.add('roll-in-top');
     this.addCardToSpace(cardDiv, boardSpace.getID());
-    // in multiplayer, nonPlayerCardPlacement
-    // occuring means the other player has taken their turn.
-    // re-enable card dragging to allow player to take next turn.
-    // has no effect in singleplayer mode
-    this.enableCardHandDragging();
+    this.checkForGameEnd();
   };
 
   nonPlayerTokenPlacementCB = (boardSpace: BoardSpace) => {
     const spaceID = boardSpace.getID();
-    const token = this.createElement('div', 'influenceToken', 'player2Token');
+    const token = this.createEnemyToken();
     const spaceElement = document.getElementById(spaceID);
     spaceElement?.appendChild(token);
   };
@@ -473,10 +518,10 @@ export class View {
 }
 
 export class SinglePlayerView extends View {
-  constructor(board: GameBoard) {
-    super(board);
-    this.currPlyrHUDID.innerHTML = `PLAYER`;
-    this.opponentHUDID.innerHTML = `COMPUTER`;
+  constructor(board: GameBoard, currPlyrID: PlayerID) {
+    super(board, currPlyrID);
+    this.currPlyrHUDID.innerHTML = `Player`;
+    this.opponentHUDID.innerHTML = `Computer`;
     this.currPlyrIcon.classList.add('player1Icon');
     this.opponentIcon.classList.add('player2Icon');
     this.currPlyrIcon.classList.add('losing');
@@ -486,7 +531,7 @@ export class SinglePlayerView extends View {
   }
 
   endTurnButtonCB = () => {
-    this.clickSound.play();
+    this.pickupSound.play();
     if (this.computerTakeTurn) {
       this.computerTakeTurn();
     }
@@ -499,19 +544,19 @@ export class SinglePlayerView extends View {
     this.undoButton.disabled = true;
     this.endTurnButton.disabled = true;
     this.updateScore();
+    this.checkForGameEnd();
   };
 }
 
 export class MultiPlayerView extends View {
   socket: Socket;
-  currPlyrID: PlayerID;
   roomNumber: HTMLElement;
   constructor(board: GameBoard, socket: Socket, currPlyrID: PlayerID) {
-    super(board);
+    super(board, currPlyrID);
     this.socket = socket;
     this.currPlyrID = currPlyrID;
 
-    if (this.currPlyrID === 'Player1') {
+    if (this.currPlyrID === 'Player 1') {
       this.currPlyrHUDID.innerHTML = 'Player 1';
       this.currPlyrIcon.classList.add('player1Icon');
       this.currPlyrIcon.classList.add('losing');
@@ -538,14 +583,14 @@ export class MultiPlayerView extends View {
 
     this.socket.on('p2Ready', () => {
       console.log('p2ready method recieved from server');
-      if (this.currPlyrID === 'Player2') return;
+      if (this.currPlyrID === 'Player 2') return;
       this.opponentHUDID.innerHTML = 'Player 2';
       this.opponentIcon.classList.add('player2Icon');
       this.opponentIcon.classList.add('losing');
     });
 
     this.socket.on('enableP1CardDragging', () => {
-      if (this.currPlyrID === 'Player1') this.enableCardHandDragging();
+      if (this.currPlyrID === 'Player 1') this.enableCardHandDragging();
     });
 
     this.socket.on('beginNextTurn', (player) => {
@@ -555,11 +600,16 @@ export class MultiPlayerView extends View {
       this.currPlyrIcon.classList.add('active');
       this.opponentIcon.classList.remove('active');
       this.enableCardHandDragging();
+      this.checkForGameEnd();
+    });
+
+    socket.on('disconnect', () => {
+      this.disconnectedAlert.style.visibility = 'visible';
     });
   }
 
   endTurnButtonCB = () => {
-    this.clickSound.play();
+    this.pickupSound.play();
     if (this.getCardDrawFromModel) {
       this.getCardDrawFromModel();
     }
@@ -574,6 +624,7 @@ export class MultiPlayerView extends View {
     this.movesArr = [];
     this.currPlyrIcon.classList.remove('active');
     this.opponentIcon.classList.add('active');
+    this.checkForGameEnd();
   };
 
   sendMoveToOpponent() {

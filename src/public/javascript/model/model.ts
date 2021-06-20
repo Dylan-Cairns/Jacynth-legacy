@@ -46,12 +46,12 @@ export class SinglePlayerGameModel extends GameModel {
   constructor(layout: Layout, deckType: DeckType) {
     super(layout, deckType);
 
-    this.currPlyr = new Player_SinglePlayer('Player1', this.board, this.deck);
+    this.currPlyr = new Player_SinglePlayer('Player 1', this.board, this.deck);
     this.opposPlyr = new Player_ComputerPlayer(
       'Computer',
       this.board,
       this.deck,
-      'Player1'
+      'Player 1'
     );
   }
 
@@ -110,7 +110,7 @@ export class MultiplayerGameModel extends GameModel {
       this.socket
     );
 
-    const opposingPlyr = currPlyrID === 'Player1' ? 'Player2' : 'Player1';
+    const opposingPlyr = currPlyrID === 'Player 1' ? 'Player 2' : 'Player 1';
 
     this.opposPlyr = new Player_MultiPlayer(
       opposingPlyr,

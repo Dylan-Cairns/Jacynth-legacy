@@ -12,11 +12,19 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 // middleware
 app.use(express.static(path.join(__dirname, 'public')));
 // routes
 app.get('/', (req, res) => {
-    res.sendFile('/public/game.html', { root: __dirname });
+    res.render('home');
+});
+app.get('/singleplayer', (req, res) => {
+    res.render('game', { gameType: 'singleplayer' });
+});
+app.get('/multiplayer', (req, res) => {
+    res.render('game', { gameType: 'multiplayer' });
 });
 const roomsGameData = [];
 io.on('connection', (socket) => {
@@ -51,7 +59,7 @@ io.on('connection', (socket) => {
     const deck = new Decktet('basicDeck');
     socket.on('getPlayerID', () => {
         if (!roomsGameData[currRoomNo] || (room && room.size === 1)) {
-            playerID = 'Player1';
+            playerID = 'Player 1';
             // if the game data obj doesn't exist create it. Or overwrite the existing
             // object if we are the first player in the game room.
             roomsGameData[currRoomNo] = {
@@ -66,7 +74,7 @@ io.on('connection', (socket) => {
             };
         }
         else {
-            playerID = 'Player2';
+            playerID = 'Player 2';
             roomsGameData[currRoomNo].p2Connected = true;
         }
         socket.emit('recievePlayerID', playerID);
@@ -103,7 +111,7 @@ io.on('connection', (socket) => {
         var _a;
         // Send players the current room number to display in the UI
         io.to(`room-${currRoomNo}`).emit('connectToRoom', currRoomNo);
-        if (currPlyrID === 'Player1') {
+        if (currPlyrID === 'Player 1') {
             roomsGameData[currRoomNo].p1ready = true;
         }
         else {
@@ -122,8 +130,8 @@ io.on('connection', (socket) => {
                 io.to(`room-${currRoomNo}`).emit('recieveLayoutCard', card.getId(), spaceID);
             });
             // draw 3 cards for each player
-            [0, 0, 0].forEach((ele) => drawCardCB('Player1'));
-            [0, 0, 0].forEach((ele) => drawCardCB('Player2'));
+            [0, 0, 0].forEach((ele) => drawCardCB('Player 1'));
+            [0, 0, 0].forEach((ele) => drawCardCB('Player 2'));
             io.to(`room-${currRoomNo}`).emit('enableP1CardDragging');
             io.to(`room-${currRoomNo}`).emit('p2Ready');
         }
@@ -135,11 +143,12 @@ io.on('connection', (socket) => {
             .to(`room-${currRoomNo}`)
             .emit('recievePlayerMove', playerID, cardID, SpaceID, TokenSpaceID);
         // next player start turn
-        const nextPlayer = playerID === 'Player1' ? 'Player2' : 'Player1';
+        const nextPlayer = playerID === 'Player 1' ? 'Player 2' : 'Player 1';
         socket.to(`room-${currRoomNo}`).emit('beginNextTurn', nextPlayer);
     });
     socket.on('disconnect', () => {
         console.log(`${playerID} disconnected`);
+        io.in(`room-${currRoomNo}`).disconnectSockets(true);
     });
 });
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

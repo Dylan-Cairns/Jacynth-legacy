@@ -1,0 +1,53 @@
+include header.pug
+audio#pickupSound(src='assets/rollover5.wav' preload='auto')
+audio#dropSound(src='assets/switch8.wav' preload='auto')
+  
+script.
+    const gameType = JSON.parse('!{JSON.stringify(gameType)}');
+
+.main-grid
+  .menuBar
+    .menuBar-item.title Jacynth
+    #roomNumber.menuBar-item
+    .menuBar-item
+      button#menuButton
+        span.mdi.mdi-menu
+  .gameboard
+  .HUD-container.enemyHUD
+    #enemyIcon.playerIcon
+    .HUDText
+      #enemyID.HUDelement.name.enemy waiting
+      #enemyHUD.HUDelement Score 0 Tokens 4
+  .HUD-container.playerHUD
+    #playerIcon.playerIcon
+    .HUDText
+      #playerID.HUDelement.name.player waiting
+      #playerHUD.HUDelement Score 0 Tokens 4
+  .player-hand-container
+    #gameOverBox
+      span Game Over
+      span#winnerText
+    #disconnectedBox
+      span Disconnected
+      span#disconnectedInfo Game aborted. Yourself or the opponent disconnected.
+    .player-hand
+      .influenceTokenContainer
+    .button-container
+      button#undoButton.inGameButton(type='button' disabled='') undo
+      button#endTurnButton.inGameButton(type='button' disabled='')
+        | end
+        br
+        | turn
+#overlay
+#menu-popup.menu-popup.modal
+  button#closeMenuButton.close(href='#') &times;
+  .menu-header Jacynth
+  #singlePlayerBttn.menu-button
+    a(href='/singleplayer') New Singleplayer Game
+  #multiPlayerBttn.menu-button
+    a(href='/multiplayer') New Multiplayer Game
+  #rulesButton.menu-button
+    button(href='#') Rules &amp; Credits
+include rules.pug
+script(src='/socket.io/socket.io.js')
+script(type='module' src='/javascript/app.js')

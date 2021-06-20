@@ -23,7 +23,7 @@ export type SendCardDrawtoViewCB = (card: Card) => void;
 export type SendCardPlaytoViewCB = (card: Card, boardSpace: BoardSpace) => void;
 export type SendTokenPlayToViewCB = (boardSpace: BoardSpace) => void;
 
-export type PlayerID = 'Player1' | 'Player2' | 'Computer';
+export type PlayerID = 'Player 1' | 'Player 2' | 'Computer';
 
 export class Player {
   protected playerID: PlayerID;
@@ -146,10 +146,10 @@ export class Player_MultiPlayer extends Player {
 
     socket.on(
       'recievePlayerMove',
-      (playerID, cardID, spaceID, TokenSpaceID) => {
+      (playerID, cardID, spaceID, tokenSpaceID) => {
         console.log(`${this.playerID} recievePlayerMove method`);
         console.log(
-          'recieved playerid, cardid, spaceID: ',
+          'recieved playerid, cardid, spaceID, tokenSpaceID: ',
           playerID,
           cardID,
           spaceID
@@ -171,9 +171,10 @@ export class Player_MultiPlayer extends Player {
         this.playCard(spaceID, cardID);
         this.sendCardPlaytoView(card, space);
 
-        if (!TokenSpaceID || !this.sendTokenPlayToView) return;
-
-        this.sendTokenPlayToView(space);
+        if (!tokenSpaceID || !this.sendTokenPlayToView) return;
+        this.placeToken(tokenSpaceID);
+        const tokenSpace = this.gameBoard.getSpace(tokenSpaceID);
+        if (tokenSpace) this.sendTokenPlayToView(tokenSpace);
       }
     );
   }

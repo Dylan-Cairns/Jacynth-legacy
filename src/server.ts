@@ -15,13 +15,24 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
 // middleware
 app.use(express.static(path.join(__dirname, 'public')));
 
 // routes
 
 app.get('/', (req, res) => {
-  res.sendFile('/public/game.html', { root: __dirname });
+  res.render('home');
+});
+
+app.get('/singleplayer', (req, res) => {
+  res.render('game', { gameType: 'singleplayer' });
+});
+
+app.get('/multiplayer', (req, res) => {
+  res.render('game', { gameType: 'multiplayer' });
 });
 
 // socket.io
@@ -71,13 +82,13 @@ io.on('connection', (socket) => {
   socket.join(`room-${currRoomNo}`);
   room = io.sockets.adapter.rooms.get(`room-${currRoomNo}`);
 
-  let playerID: 'Player1' | 'Player2';
+  let playerID: 'Player 1' | 'Player 2';
 
   const deck = new Decktet('basicDeck');
 
   socket.on('getPlayerID', () => {
     if (!roomsGameData[currRoomNo] || (room && room.size === 1)) {
-      playerID = 'Player1';
+      playerID = 'Player 1';
       // if the game data obj doesn't exist create it. Or overwrite the existing
       // object if we are the first player in the game room.
       roomsGameData[currRoomNo] = {
@@ -91,7 +102,7 @@ io.on('connection', (socket) => {
         cardDeck: deck
       };
     } else {
-      playerID = 'Player2';
+      playerID = 'Player 2';
       roomsGameData[currRoomNo].p2Connected = true;
     }
     socket.emit('recievePlayerID', playerID);
@@ -114,7 +125,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  const drawCardCB = (playerID: 'Player1' | 'Player2') => {
+  const drawCardCB = (playerID: 'Player 1' | 'Player 2') => {
     console.log('drawCard called');
     const card = roomsGameData[currRoomNo].cardDeck?.drawCard();
     if (!card) return;
@@ -124,10 +135,10 @@ io.on('connection', (socket) => {
   // respond to player request to draw a card
   socket.on('drawCard', drawCardCB);
 
-  socket.on('playerReady', (currPlyrID: 'Player1' | 'Player2') => {
+  socket.on('playerReady', (currPlyrID: 'Player 1' | 'Player 2') => {
     // Send players the current room number to display in the UI
     io.to(`room-${currRoomNo}`).emit('connectToRoom', currRoomNo);
-    if (currPlyrID === 'Player1') {
+    if (currPlyrID === 'Player 1') {
       roomsGameData[currRoomNo].p1ready = true;
     } else {
       roomsGameData[currRoomNo].p2ready = true;
@@ -151,8 +162,8 @@ io.on('connection', (socket) => {
         }
       );
       // draw 3 cards for each player
-      [0, 0, 0].forEach((ele) => drawCardCB('Player1'));
-      [0, 0, 0].forEach((ele) => drawCardCB('Player2'));
+      [0, 0, 0].forEach((ele) => drawCardCB('Player 1'));
+      [0, 0, 0].forEach((ele) => drawCardCB('Player 2'));
       io.to(`room-${currRoomNo}`).emit('enableP1CardDragging');
       io.to(`room-${currRoomNo}`).emit('p2Ready');
     }
@@ -165,12 +176,13 @@ io.on('connection', (socket) => {
       .to(`room-${currRoomNo}`)
       .emit('recievePlayerMove', playerID, cardID, SpaceID, TokenSpaceID);
     // next player start turn
-    const nextPlayer = playerID === 'Player1' ? 'Player2' : 'Player1';
+    const nextPlayer = playerID === 'Player 1' ? 'Player 2' : 'Player 1';
     socket.to(`room-${currRoomNo}`).emit('beginNextTurn', nextPlayer);
   });
 
   socket.on('disconnect', () => {
     console.log(`${playerID} disconnected`);
+    io.in(`room-${currRoomNo}`).disconnectSockets(true);
   });
 });
 

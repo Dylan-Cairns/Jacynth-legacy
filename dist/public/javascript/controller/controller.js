@@ -5,7 +5,7 @@ export class Controller {
 export class SinglePlayerController {
     constructor(layout, deckType) {
         this.model = new SinglePlayerGameModel(layout, deckType);
-        this.view = new SinglePlayerView(this.model.board);
+        this.view = new SinglePlayerView(this.model.board, 'Player 1');
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
         this.model.opposPlyr.bindSendTokenPlayToView(this.view.nonPlayerTokenPlacementCB);

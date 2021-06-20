@@ -1,5 +1,5 @@
 export class View {
-    constructor(board) {
+    constructor(board, currPlyrID) {
         this.createCard = (card) => {
             // get the values from the card
             const id = card.getId();
@@ -25,6 +25,33 @@ export class View {
             });
             return cardDiv;
         };
+        this.checkForGameEnd = () => {
+            if (!this.getAvailCardSpaces ||
+                !this.getCurrPlyrScore ||
+                !this.getOpponentScore ||
+                !this.getCurrPlyrAvailTokens ||
+                !this.getOpponAvailTokens)
+                return;
+            if (this.getAvailCardSpaces().length === 0) {
+                this.disableAllCardDragging();
+                this.disableAllTokenDragging();
+                this.opponentIcon.classList.remove('active');
+                this.currPlyrIcon.classList.remove('active');
+                const currPlyrScore = this.getCurrPlyrScore();
+                const opponentScore = this.getOpponentScore();
+                if (currPlyrScore > opponentScore) {
+                    this.winnerText.innerHTML = `${this.currPlyrID} wins`;
+                }
+                else if (opponentScore > currPlyrScore) {
+                    this.winnerText.innerHTML =
+                        this.winnerText.innerHTML = `${this.opponentHUDID.innerText} wins`;
+                }
+                else {
+                    this.winnerText.innerHTML = "It's a tie!";
+                }
+                this.gameOverBox.style.visibility = 'visible';
+            }
+        };
         this.addCardToSpace = (cardDiv, spaceID) => {
             const boardSpace = document.getElementById(spaceID);
             boardSpace === null || boardSpace === void 0 ? void 0 : boardSpace.appendChild(cardDiv);
@@ -49,18 +76,15 @@ export class View {
             const cardDiv = this.createCard(card);
             cardDiv.classList.add('roll-in-top');
             this.addCardToSpace(cardDiv, boardSpace.getID());
-            // in multiplayer, nonPlayerCardPlacement
-            // occuring means the other player has taken their turn.
-            // re-enable card dragging to allow player to take next turn.
-            // has no effect in singleplayer mode
-            this.enableCardHandDragging();
+            this.checkForGameEnd();
         };
         this.nonPlayerTokenPlacementCB = (boardSpace) => {
             const spaceID = boardSpace.getID();
-            const token = this.createElement('div', 'influenceToken', 'player2Token');
+            const token = this.createEnemyToken();
             const spaceElement = document.getElementById(spaceID);
             spaceElement === null || spaceElement === void 0 ? void 0 : spaceElement.appendChild(token);
         };
+        this.currPlyrID = currPlyrID;
         this.app = document.querySelector('#root');
         this.gameBoard = document.querySelector('.gameboard');
         this.playerHandContainer = document.querySelector('.player-hand');
@@ -75,13 +99,16 @@ export class View {
         this.opponentHUD = document.getElementById('enemyHUD');
         this.currPlyrHUDID = document.getElementById('playerID');
         this.opponentHUDID = document.getElementById('enemyID');
+        this.gameOverBox = document.getElementById('gameOverBox');
+        this.disconnectedAlert = document.getElementById('disconnectedBox');
+        this.winnerText = document.getElementById('winnerText');
         this.pickupSound = document.getElementById('pickupSound');
         this.clickSound = document.getElementById('clickSound');
         this.dropSound = document.getElementById('dropSound');
         this.movesArr = [];
         this.createBoardSpaces(board);
         // create initial influence token
-        const token = this.createElement('div', 'influenceToken', 'player1Token');
+        const token = this.createPlayerToken();
         this.influenceTokenContainer.appendChild(token);
         // on dragstart, get all available spaces from the model
         document.addEventListener('dragstart', (event) => {
@@ -238,13 +265,23 @@ export class View {
             this.gameBoard.appendChild(spaceDiv);
         });
     }
+    createPlayerToken() {
+        const tokenID = this.currPlyrID === 'Player 1' ? 'Player1' : 'Player2';
+        return this.createElement('div', 'influenceToken', `${tokenID}token`);
+    }
+    createEnemyToken() {
+        const tokenID = this.currPlyrID === 'Player 1' ? 'Player2' : 'Player1';
+        return this.createElement('div', 'influenceToken', `${tokenID}token`, 'enemyToken');
+    }
     updateScore() {
         if (this.getCurrPlyrScore &&
             this.getOpponentScore &&
             this.getCurrPlyrAvailTokens &&
             this.getOpponAvailTokens) {
             const currPlyrScore = this.getCurrPlyrScore();
+            console.log('currPlyrScore', currPlyrScore);
             const opponentScore = this.getOpponentScore();
+            console.log('opponentScore', opponentScore);
             const currPlyrTokens = this.getCurrPlyrAvailTokens();
             const opponentTokens = this.getOpponAvailTokens();
             this.currPlyrHUD.textContent = `Score ${currPlyrScore} Tokens ${currPlyrTokens}`;
@@ -270,7 +307,7 @@ export class View {
         }
         if (this.getCurrPlyrAvailTokens) {
             if (this.getCurrPlyrAvailTokens() > 0) {
-                const token = this.createElement('div', 'influenceToken', 'player1Token');
+                const token = this.createPlayerToken();
                 this.influenceTokenContainer.appendChild(token);
             }
         }
@@ -359,8 +396,8 @@ export class View {
     }
 }
 export class SinglePlayerView extends View {
-    constructor(board) {
-        super(board);
+    constructor(board, currPlyrID) {
+        super(board, currPlyrID);
         this.endTurnButtonCB = () => {
             this.clickSound.play();
             if (this.computerTakeTurn) {
@@ -375,9 +412,10 @@ export class SinglePlayerView extends View {
             this.undoButton.disabled = true;
             this.endTurnButton.disabled = true;
             this.updateScore();
+            this.checkForGameEnd();
         };
-        this.currPlyrHUDID.innerHTML = `PLAYER`;
-        this.opponentHUDID.innerHTML = `COMPUTER`;
+        this.currPlyrHUDID.innerHTML = `Player`;
+        this.opponentHUDID.innerHTML = `Computer`;
         this.currPlyrIcon.classList.add('player1Icon');
         this.opponentIcon.classList.add('player2Icon');
         this.currPlyrIcon.classList.add('losing');
@@ -387,7 +425,7 @@ export class SinglePlayerView extends View {
 }
 export class MultiPlayerView extends View {
     constructor(board, socket, currPlyrID) {
-        super(board);
+        super(board, currPlyrID);
         this.endTurnButtonCB = () => {
             this.clickSound.play();
             if (this.getCardDrawFromModel) {
@@ -404,10 +442,11 @@ export class MultiPlayerView extends View {
             this.movesArr = [];
             this.currPlyrIcon.classList.remove('active');
             this.opponentIcon.classList.add('active');
+            this.checkForGameEnd();
         };
         this.socket = socket;
         this.currPlyrID = currPlyrID;
-        if (this.currPlyrID === 'Player1') {
+        if (this.currPlyrID === 'Player 1') {
             this.currPlyrHUDID.innerHTML = 'Player 1';
             this.currPlyrIcon.classList.add('player1Icon');
             this.currPlyrIcon.classList.add('losing');
@@ -429,14 +468,14 @@ export class MultiPlayerView extends View {
         });
         this.socket.on('p2Ready', () => {
             console.log('p2ready method recieved from server');
-            if (this.currPlyrID === 'Player2')
+            if (this.currPlyrID === 'Player 2')
                 return;
             this.opponentHUDID.innerHTML = 'Player 2';
             this.opponentIcon.classList.add('player2Icon');
             this.opponentIcon.classList.add('losing');
         });
         this.socket.on('enableP1CardDragging', () => {
-            if (this.currPlyrID === 'Player1')
+            if (this.currPlyrID === 'Player 1')
                 this.enableCardHandDragging();
         });
         this.socket.on('beginNextTurn', (player) => {
@@ -447,6 +486,10 @@ export class MultiPlayerView extends View {
             this.currPlyrIcon.classList.add('active');
             this.opponentIcon.classList.remove('active');
             this.enableCardHandDragging();
+            this.checkForGameEnd();
+        });
+        socket.on('disconnect', () => {
+            this.disconnectedAlert.style.visibility = 'visible';
         });
     }
     sendMoveToOpponent() {

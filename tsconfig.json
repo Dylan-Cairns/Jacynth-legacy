@@ -5,8 +5,7 @@
     "rootDir": "src/",
     "lib": ["dom"],
     "module": "esnext",
-    "moduleResolution": "node",
-    "declaration": true
+    "moduleResolution": "node"
   },
   "include": ["src/"]
 }
