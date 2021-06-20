@@ -1,16 +1,12 @@
 import { SinglePlayerController, MultiPlayerController } from './controller/controller.js';
-// page menu buttons
-const menuButton = document.getElementById('menuButton');
-const closeMenuButton = document.getElementById('closeMenuButton');
-const menu = document.getElementById('menu-popup');
-const rulesButton = document.getElementById('rulesButton');
-const closeRulesButton = document.getElementById('closeRulesButton');
-const rules = document.getElementById('rules');
-const overlay = document.getElementById('overlay');
+const chooseLayoutOverlay = document.getElementById('chooseLayoutOverlay');
 const chooseLayout = document.getElementById('chooseLayout');
 const layoutButtons = document.querySelectorAll('.layoutButton');
+let controller;
 if (gameType === 'singleplayer') {
+    controller = new SinglePlayerController('basicDeck');
     chooseLayout.classList.add('active');
+    chooseLayoutOverlay.classList.add('active');
 }
 if (gameType === 'multiplayer') {
     const socket = io();
@@ -25,55 +21,21 @@ if (gameType === 'multiplayer') {
     socket.on('beginGame', (layout) => {
         if (!currPlyrID)
             return;
-        const controller = new MultiPlayerController(layout, 'basicDeck', currPlyrID, socket);
+        const controller = new MultiPlayerController('basicDeck', currPlyrID, socket);
     });
 }
 layoutButtons.forEach((button) => {
     button.addEventListener('click', () => {
         chooseLayout.classList.remove('active');
-        const layout = button.dataset.layout;
-        if (!layout)
+        chooseLayoutOverlay.classList.remove('active');
+        const layoutChoice = button.dataset.layout;
+        if (!layoutChoice)
             return;
         if (gameType === 'singleplayer') {
-            const controller = new SinglePlayerController(layout, 'basicDeck');
+            controller.startGame(layoutChoice);
         }
         else {
-            socket.emit('chooseLayout', layout);
+            socket.emit('chooseLayout', layoutChoice);
         }
     });
 });
-menuButton.addEventListener('click', () => {
-    openModal(menu);
-});
-closeMenuButton.addEventListener('click', () => {
-    closeModal(menu);
-});
-overlay.addEventListener('click', () => {
-    const modals = document.querySelectorAll('.modal.active');
-    modals.forEach((modal) => {
-        closeModal(modal);
-    });
-});
-rulesButton.addEventListener('click', () => {
-    openModal(rules);
-});
-closeRulesButton.addEventListener('click', () => {
-    rules.classList.remove('active');
-});
-rules.addEventListener('click', (event) => {
-    if (event.target === rules) {
-        rules.classList.remove('active');
-    }
-});
-function openModal(modal) {
-    if (modal == null)
-        return;
-    modal.classList.add('active');
-    overlay.classList.add('active');
-}
-function closeModal(modal) {
-    if (modal == null)
-        return;
-    modal.classList.remove('active');
-    overlay.classList.remove('active');
-}

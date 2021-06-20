@@ -3,8 +3,8 @@ import { MultiPlayerView, SinglePlayerView } from '../view/view.js';
 export class Controller {
 }
 export class SinglePlayerController {
-    constructor(layout, deckType) {
-        this.model = new SinglePlayerGameModel(layout, deckType);
+    constructor(deckType) {
+        this.model = new SinglePlayerGameModel(deckType);
         this.view = new SinglePlayerView(this.model.board, 'Player 1');
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
@@ -22,15 +22,17 @@ export class SinglePlayerController {
         this.view.bindGetOpponAvailTokens(this.model.opposPlyr.getInfluenceTokensNo);
         this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
+    }
+    startGame(layout) {
         this.model.startGame(layout);
         this.view.enableCardHandDragging();
     }
 }
 export class MultiPlayerController {
-    constructor(layout, deckType, currentPlayer, socket) {
+    constructor(deckType, currentPlayer, socket) {
         this.currentPlayer = currentPlayer;
         this.socket = socket;
-        this.model = new MultiplayerGameModel(layout, deckType, socket, currentPlayer);
+        this.model = new MultiplayerGameModel(deckType, socket, currentPlayer);
         this.view = new MultiPlayerView(this.model.board, socket, currentPlayer);
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
@@ -47,6 +49,7 @@ export class MultiPlayerController {
         this.view.bindGetOpponAvailTokens(this.model.opposPlyr.getInfluenceTokensNo);
         this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
-        socket.emit('playerReady', currentPlayer);
+        if (this.currentPlayer === 'Player 1')
+            socket.emit('playerReady', currentPlayer);
     }
 }

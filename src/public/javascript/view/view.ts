@@ -22,6 +22,16 @@ export class View {
   disconnectedAlert: HTMLElement;
   pickupSound: HTMLMediaElement;
   dropSound: HTMLMediaElement;
+  menuButton: HTMLButtonElement;
+  closeMenuButton: HTMLButtonElement;
+  menu: HTMLElement;
+  rulesButton: HTMLButtonElement;
+  closeRulesButton: HTMLButtonElement;
+  rules: HTMLElement;
+  overlay: HTMLElement;
+  chooseLayoutOverlay: HTMLElement;
+  chooseLayout: HTMLElement;
+  layoutButtons: NodeListOf<HTMLButtonElement>;
   draggedElement: HTMLElement | undefined;
   movesArr: {
     draggedEle: HTMLElement;
@@ -75,6 +85,44 @@ export class View {
       'pickupSound'
     ) as HTMLMediaElement;
     this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
+    this.menuButton = document.getElementById(
+      'menuButton'
+    ) as HTMLButtonElement;
+    this.closeMenuButton = document.getElementById(
+      'closeMenuButton'
+    ) as HTMLButtonElement;
+    this.menu = document.getElementById('menu-popup') as HTMLElement;
+    this.rulesButton = document.getElementById(
+      'rulesButton'
+    ) as HTMLButtonElement;
+    this.closeRulesButton = document.getElementById(
+      'closeRulesButton'
+    ) as HTMLButtonElement;
+    this.rules = document.getElementById('rules') as HTMLElement;
+    this.overlay = document.getElementById('overlay') as HTMLElement;
+    this.chooseLayoutOverlay = document.getElementById(
+      'chooseLayoutOverlay'
+    ) as HTMLElement;
+    this.chooseLayout = document.getElementById('chooseLayout') as HTMLElement;
+    this.layoutButtons = document.querySelectorAll(
+      '.layoutButton'
+    ) as NodeListOf<HTMLButtonElement>;
+
+    // make sure board and hand are empty
+    while (this.gameBoard.firstChild) {
+      this.gameBoard.removeChild(this.gameBoard.firstChild);
+    }
+    const oldCards = this.playerHandContainer.getElementsByClassName('card');
+    while (oldCards.length > 0) {
+      if (oldCards[0].parentNode)
+        oldCards[0].parentNode.removeChild(oldCards[0]);
+    }
+    while (this.influenceTokenContainer.firstChild) {
+      this.influenceTokenContainer.removeChild(
+        this.influenceTokenContainer.firstChild
+      );
+    }
+
     this.movesArr = [];
     this.createBoardSpaces(board);
     // create initial influence token
@@ -216,6 +264,36 @@ export class View {
           }
           this.enableTokenDragging();
         }
+      }
+    });
+
+    // menu modals and buttons
+    this.menuButton.addEventListener('click', () => {
+      this.openModal(menu);
+    });
+
+    this.closeMenuButton.addEventListener('click', () => {
+      this.closeModal(menu);
+    });
+
+    this.overlay.addEventListener('click', () => {
+      const modals = document.querySelectorAll('.modal.active');
+      modals.forEach((modal) => {
+        this.closeModal(modal);
+      });
+    });
+
+    this.rulesButton.addEventListener('click', () => {
+      this.openModal(rules);
+    });
+
+    this.closeRulesButton.addEventListener('click', () => {
+      rules.classList.remove('active');
+    });
+
+    this.rules.addEventListener('click', (event) => {
+      if (event.target === rules) {
+        rules.classList.remove('active');
       }
     });
   }
@@ -442,6 +520,18 @@ export class View {
       default:
         return String(value);
     }
+  }
+
+  protected openModal(modal: Element | HTMLElement) {
+    if (modal == null) return;
+    modal.classList.add('active');
+    this.overlay.classList.add('active');
+  }
+
+  protected closeModal(modal: Element | HTMLElement) {
+    if (modal == null) return;
+    modal.classList.remove('active');
+    this.overlay.classList.remove('active');
   }
 
   playerDrawCardCB = (card: Card) => {

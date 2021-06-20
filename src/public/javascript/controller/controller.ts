@@ -15,8 +15,8 @@ export class Controller {}
 export class SinglePlayerController {
   model: SinglePlayerGameModel;
   view: SinglePlayerView;
-  constructor(layout: Layout, deckType: DeckType) {
-    this.model = new SinglePlayerGameModel(layout, deckType);
+  constructor(deckType: DeckType) {
+    this.model = new SinglePlayerGameModel(deckType);
 
     this.view = new SinglePlayerView(this.model.board, 'Player 1');
 
@@ -47,9 +47,10 @@ export class SinglePlayerController {
     );
     this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
     this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
+  }
 
+  startGame(layout: Layout) {
     this.model.startGame(layout);
-
     this.view.enableCardHandDragging();
   }
 }
@@ -59,20 +60,10 @@ export class MultiPlayerController {
   view: View;
   currentPlayer: PlayerID;
   socket: Socket;
-  constructor(
-    layout: Layout,
-    deckType: DeckType,
-    currentPlayer: PlayerID,
-    socket: Socket
-  ) {
+  constructor(deckType: DeckType, currentPlayer: PlayerID, socket: Socket) {
     this.currentPlayer = currentPlayer;
     this.socket = socket;
-    this.model = new MultiplayerGameModel(
-      layout,
-      deckType,
-      socket,
-      currentPlayer
-    );
+    this.model = new MultiplayerGameModel(deckType, socket, currentPlayer);
 
     this.view = new MultiPlayerView(this.model.board, socket, currentPlayer);
 
@@ -103,6 +94,7 @@ export class MultiPlayerController {
     this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
     this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
 
-    socket.emit('playerReady', currentPlayer);
+    if (this.currentPlayer === 'Player 1')
+      socket.emit('playerReady', currentPlayer);
   }
 }

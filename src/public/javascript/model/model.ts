@@ -26,12 +26,8 @@ export class GameModel {
   deck: Decktet;
   sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
 
-  constructor(layout: Layout, deckType: DeckType) {
-    const dimensions =
-      layout === 'solitaire'
-        ? SOLITAIRE_BOARD_DIMENSIONS
-        : TWOPLAYER_BOARD_DIMENSIONS;
-    this.board = new GameBoard(dimensions);
+  constructor(deckType: DeckType) {
+    this.board = new GameBoard(TWOPLAYER_BOARD_DIMENSIONS);
     this.deck = new Decktet(deckType);
   }
 
@@ -43,8 +39,8 @@ export class GameModel {
 export class SinglePlayerGameModel extends GameModel {
   currPlyr: Player_SinglePlayer;
   opposPlyr: Player_ComputerPlayer;
-  constructor(layout: Layout, deckType: DeckType) {
-    super(layout, deckType);
+  constructor(deckType: DeckType) {
+    super(deckType);
 
     this.currPlyr = new Player_SinglePlayer('Player 1', this.board, this.deck);
     this.opposPlyr = new Player_ComputerPlayer(
@@ -78,20 +74,9 @@ export class MultiplayerGameModel extends GameModel {
   socket: Socket;
   currPlyr: Player_MultiPlayer;
   opposPlyr: Player_MultiPlayer;
-  constructor(
-    layout: Layout,
-    deckType: DeckType,
-    socket: Socket,
-    currPlyrID: PlayerID
-  ) {
-    super(layout, deckType);
+  constructor(deckType: DeckType, socket: Socket, currPlyrID: PlayerID) {
+    super(deckType);
     this.socket = socket;
-    const dimensions =
-      layout === 'solitaire'
-        ? SOLITAIRE_BOARD_DIMENSIONS
-        : TWOPLAYER_BOARD_DIMENSIONS;
-    this.board = new GameBoard(dimensions);
-    this.deck = new Decktet(deckType);
 
     socket.on('recieveLayoutCard', (cardID, spaceID) => {
       console.log('cardid', cardID);

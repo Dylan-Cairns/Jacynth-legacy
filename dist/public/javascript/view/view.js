@@ -104,6 +104,28 @@ export class View {
         this.winnerText = document.getElementById('winnerText');
         this.pickupSound = document.getElementById('pickupSound');
         this.dropSound = document.getElementById('dropSound');
+        this.menuButton = document.getElementById('menuButton');
+        this.closeMenuButton = document.getElementById('closeMenuButton');
+        this.menu = document.getElementById('menu-popup');
+        this.rulesButton = document.getElementById('rulesButton');
+        this.closeRulesButton = document.getElementById('closeRulesButton');
+        this.rules = document.getElementById('rules');
+        this.overlay = document.getElementById('overlay');
+        this.chooseLayoutOverlay = document.getElementById('chooseLayoutOverlay');
+        this.chooseLayout = document.getElementById('chooseLayout');
+        this.layoutButtons = document.querySelectorAll('.layoutButton');
+        // make sure board and hand are empty
+        while (this.gameBoard.firstChild) {
+            this.gameBoard.removeChild(this.gameBoard.firstChild);
+        }
+        const oldCards = this.playerHandContainer.getElementsByClassName('card');
+        while (oldCards.length > 0) {
+            if (oldCards[0].parentNode)
+                oldCards[0].parentNode.removeChild(oldCards[0]);
+        }
+        while (this.influenceTokenContainer.firstChild) {
+            this.influenceTokenContainer.removeChild(this.influenceTokenContainer.firstChild);
+        }
         this.movesArr = [];
         this.createBoardSpaces(board);
         // create initial influence token
@@ -226,6 +248,30 @@ export class View {
                     }
                     this.enableTokenDragging();
                 }
+            }
+        });
+        // menu modals and buttons
+        this.menuButton.addEventListener('click', () => {
+            this.openModal(menu);
+        });
+        this.closeMenuButton.addEventListener('click', () => {
+            this.closeModal(menu);
+        });
+        this.overlay.addEventListener('click', () => {
+            const modals = document.querySelectorAll('.modal.active');
+            modals.forEach((modal) => {
+                this.closeModal(modal);
+            });
+        });
+        this.rulesButton.addEventListener('click', () => {
+            this.openModal(rules);
+        });
+        this.closeRulesButton.addEventListener('click', () => {
+            rules.classList.remove('active');
+        });
+        this.rules.addEventListener('click', (event) => {
+            if (event.target === rules) {
+                rules.classList.remove('active');
             }
         });
     }
@@ -356,6 +402,18 @@ export class View {
             default:
                 return String(value);
         }
+    }
+    openModal(modal) {
+        if (modal == null)
+            return;
+        modal.classList.add('active');
+        this.overlay.classList.add('active');
+    }
+    closeModal(modal) {
+        if (modal == null)
+            return;
+        modal.classList.remove('active');
+        this.overlay.classList.remove('active');
     }
     bindGetAvailCardSpaces(availCardSpacesCB) {
         this.getAvailCardSpaces = availCardSpacesCB;
