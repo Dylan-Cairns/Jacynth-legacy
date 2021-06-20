@@ -3,35 +3,7 @@ import {
   MultiPlayerController
 } from './controller/controller.js';
 import { Layout, BOARD_LAYOUTS } from './model/model.js';
-import { io } from 'socket.io-client';
-
-// gametype variable passed in by express route
-declare const gameType: 'singleplayer' | 'multiplayer';
-
-// Start the game
-
-if (gameType === 'singleplayer') {
-  const controller = new SinglePlayerController('oldcity', 'basicDeck');
-} else {
-  const socket = io();
-  let currPlyrID;
-
-  socket.emit('getPlayerID');
-
-  socket.on('recievePlayerID', (playerID) => {
-    console.log('recieved player id', playerID);
-    currPlyrID = playerID;
-
-    if (currPlyrID) {
-      const controller = new MultiPlayerController(
-        'oldcity',
-        'basicDeck',
-        currPlyrID,
-        socket
-      );
-    }
-  });
-}
+import { PlayerID } from './model/player.js';
 
 // page menu buttons
 const menuButton = document.getElementById('menuButton') as HTMLButtonElement;
@@ -45,6 +17,59 @@ const closeRulesButton = document.getElementById(
 ) as HTMLButtonElement;
 const rules = document.getElementById('rules') as HTMLElement;
 const overlay = document.getElementById('overlay') as HTMLElement;
+const chooseLayout = document.getElementById('chooseLayout') as HTMLElement;
+const layoutButtons = document.querySelectorAll(
+  '.layoutButton'
+) as NodeListOf<HTMLButtonElement>;
+
+// TODO: resolve import error when using 'import' on client side.
+// For now, declare the socket variables here.
+declare const socket: any;
+declare const io: any;
+
+// gametype variable passed in by express route
+declare const gameType: 'singleplayer' | 'multiplayer';
+
+if (gameType === 'singleplayer') {
+  chooseLayout.classList.add('active');
+}
+
+if (gameType === 'multiplayer') {
+  const socket = io();
+  let currPlyrID: PlayerID;
+
+  socket.emit('getPlayerID');
+
+  socket.on('recievePlayerID', (playerID: PlayerID) => {
+    console.log('recieved player id', playerID);
+    currPlyrID = playerID;
+
+    if (currPlyrID === 'Player 2') chooseLayout.classList.add('active');
+  });
+
+  socket.on('beginGame', (layout: Layout) => {
+    if (!currPlyrID) return;
+    const controller = new MultiPlayerController(
+      layout,
+      'basicDeck',
+      currPlyrID,
+      socket
+    );
+  });
+}
+
+layoutButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    chooseLayout.classList.remove('active');
+    const layout = button.dataset.layout as Layout;
+    if (!layout) return;
+    if (gameType === 'singleplayer') {
+      const controller = new SinglePlayerController(layout, 'basicDeck');
+    } else {
+      socket.emit('chooseLayout', layout);
+    }
+  });
+});
 
 menuButton.addEventListener('click', () => {
   openModal(menu);

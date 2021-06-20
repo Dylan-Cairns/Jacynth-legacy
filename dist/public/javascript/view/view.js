@@ -103,7 +103,6 @@ export class View {
         this.disconnectedAlert = document.getElementById('disconnectedBox');
         this.winnerText = document.getElementById('winnerText');
         this.pickupSound = document.getElementById('pickupSound');
-        this.clickSound = document.getElementById('clickSound');
         this.dropSound = document.getElementById('dropSound');
         this.movesArr = [];
         this.createBoardSpaces(board);
@@ -399,7 +398,7 @@ export class SinglePlayerView extends View {
     constructor(board, currPlyrID) {
         super(board, currPlyrID);
         this.endTurnButtonCB = () => {
-            this.clickSound.play();
+            this.pickupSound.play();
             if (this.computerTakeTurn) {
                 this.computerTakeTurn();
             }
@@ -427,7 +426,7 @@ export class MultiPlayerView extends View {
     constructor(board, socket, currPlyrID) {
         super(board, currPlyrID);
         this.endTurnButtonCB = () => {
-            this.clickSound.play();
+            this.pickupSound.play();
             if (this.getCardDrawFromModel) {
                 this.getCardDrawFromModel();
             }

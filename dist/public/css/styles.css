@@ -539,6 +539,18 @@ a:hover {
   color: var(--icon-text-color);
 }
 
+.layoutButton {
+  width: calc(0.25 * var(--gameboard-width));
+}
+
+.layoutButton:hover {
+  background-color: var(--icon-text-color);
+}
+
+.layoutButton img {
+  width: 100%;
+}
+
 #rules {
   z-index: 20;
   position: fixed;

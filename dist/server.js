@@ -79,6 +79,9 @@ io.on('connection', (socket) => {
         }
         socket.emit('recievePlayerID', playerID);
     });
+    socket.on('chooseLayout', (layout) => {
+        io.to(`room-${currRoomNo}`).emit('beginGame', layout);
+    });
     // draw cards for the starting layout. they will be sent later once the
     // playerReady command is recieved from both players
     socket.on('createStartingLayout', (layoutArr) => {

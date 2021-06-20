@@ -47,7 +47,18 @@ script.
   #multiPlayerBttn.menu-button
     a(href='/multiplayer') New Multiplayer Game
   #rulesButton.menu-button
-    button(href='#') Rules &amp; Credits
+    button Rules &amp; Credits
+#chooseLayout.menu-popup.modal
+  .menu-header Choose starting layout
+  #razeway.menu-button
+    button.layoutButton(data-layout="razeway")
+      img(src="./assets/razeway.png")
+  #twotowers.menu-button
+    button.layoutButton(data-layout="towers")
+      img(src="./assets/towers.png")
+  #oldcity.menu-button
+    button.layoutButton(data-layout="oldcity")
+      img(src="./assets/oldcity.png")
 include rules.pug
 script(src='/socket.io/socket.io.js')
 script(type='module' src='/javascript/app.js')
