@@ -293,6 +293,24 @@ export class View {
     });
   }
 
+  protected dragstart_handler = (event: any) => {
+    if (!event.dataTransfer) return;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.dropeffect = 'move';
+    event.dataTransfer.setData('text/plain', event.target.id);
+    this.draggedElement = event.target as HTMLElement;
+    if (this.draggedElement.classList.contains('card')) {
+      if (this.getAvailCardSpaces) {
+        this.highlightAvailableSpaces(this.getAvailCardSpaces);
+      }
+    } else if (this.draggedElement.classList.contains('influenceToken')) {
+      if (this.getAvailTokenSpaces) {
+        this.highlightAvailableSpaces(this.getAvailTokenSpaces);
+      }
+    }
+    this.pickupSound.play();
+  };
+
   createElement(tag: string, ...classNames: string[]) {
     const element = document.createElement(tag);
     if (classNames) element.classList.add(...classNames);
@@ -329,20 +347,6 @@ export class View {
       this.gameBoard.appendChild(spaceDiv);
     });
   }
-
-  protected dragstart_handler = (event: MouseEvent) => {
-    this.pickupSound.play();
-    this.draggedElement = event.target as HTMLElement;
-    if (this.draggedElement.classList.contains('card')) {
-      if (this.getAvailCardSpaces) {
-        this.highlightAvailableSpaces(this.getAvailCardSpaces);
-      }
-    } else if (this.draggedElement.classList.contains('influenceToken')) {
-      if (this.getAvailTokenSpaces) {
-        this.highlightAvailableSpaces(this.getAvailTokenSpaces);
-      }
-    }
-  };
 
   protected createCard = (card: Card) => {
     // get the values from the card
