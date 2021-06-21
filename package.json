@@ -14,6 +14,7 @@
   "dependencies": {
     "@types/express": "^4.17.12",
     "express": "^4.17.1",
+    "mobile-drag-drop": "^2.3.0-rc.2",
     "pug": "^3.0.2",
     "socket.io": "^4.1.2",
     "socket.io-client": "^4.1.2",

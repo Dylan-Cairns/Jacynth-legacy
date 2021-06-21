@@ -3,6 +3,7 @@ import { Layout } from '../model/model.js';
 import { Card } from '../model/decktet.js';
 import { PlayerID } from '../model/player.js';
 import { Socket } from 'socket.io-client';
+import { polyfill } from 'mobile-drag-drop';
 
 export class View {
   currPlyrID: PlayerID;
