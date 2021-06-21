@@ -134,20 +134,10 @@ export class View {
     const token = this.createPlayerToken();
     this.influenceTokenContainer.appendChild(token);
 
+    // drag and drop methods
+
     // on dragstart, get all available spaces from the model
-    document.addEventListener('dragstart', (event) => {
-      this.pickupSound.play();
-      this.draggedElement = event.target as HTMLElement;
-      if (this.draggedElement.classList.contains('card')) {
-        if (this.getAvailCardSpaces) {
-          this.highlightAvailableSpaces(this.getAvailCardSpaces);
-        }
-      } else if (this.draggedElement.classList.contains('influenceToken')) {
-        if (this.getAvailTokenSpaces) {
-          this.highlightAvailableSpaces(this.getAvailTokenSpaces);
-        }
-      }
-    });
+    document.addEventListener('dragstart', this.dragstart_handler);
 
     document.addEventListener(
       'dragover',
@@ -339,6 +329,20 @@ export class View {
       this.gameBoard.appendChild(spaceDiv);
     });
   }
+
+  protected dragstart_handler = (event: MouseEvent) => {
+    this.pickupSound.play();
+    this.draggedElement = event.target as HTMLElement;
+    if (this.draggedElement.classList.contains('card')) {
+      if (this.getAvailCardSpaces) {
+        this.highlightAvailableSpaces(this.getAvailCardSpaces);
+      }
+    } else if (this.draggedElement.classList.contains('influenceToken')) {
+      if (this.getAvailTokenSpaces) {
+        this.highlightAvailableSpaces(this.getAvailTokenSpaces);
+      }
+    }
+  };
 
   protected createCard = (card: Card) => {
     // get the values from the card
