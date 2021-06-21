@@ -44,6 +44,11 @@ export class SinglePlayerGameModel extends GameModel {
 export class MultiplayerGameModel extends GameModel {
     constructor(deckType, socket, currPlyrID) {
         super(deckType);
+        this.createLayout = (layout) => {
+            const layoutArr = BOARD_LAYOUTS[layout];
+            this.socket.emit('createStartingLayout', layoutArr);
+            this.socket.emit('playerReady', 'Player 2');
+        };
         this.socket = socket;
         socket.on('recieveLayoutCard', (cardID, spaceID) => {
             console.log('cardid', cardID);
@@ -60,11 +65,5 @@ export class MultiplayerGameModel extends GameModel {
         this.currPlyr = new Player_MultiPlayer(currPlyrID, this.board, this.deck, this.socket);
         const opposingPlyr = currPlyrID === 'Player 1' ? 'Player 2' : 'Player 1';
         this.opposPlyr = new Player_MultiPlayer(opposingPlyr, this.board, this.deck, this.socket);
-        const layoutArr = BOARD_LAYOUTS[layout];
-        socket.emit('createStartingLayout', layoutArr);
-    }
-    drawStartingHands() {
-        this.currPlyr.drawStartingHand();
-        this.opposPlyr.drawStartingHand();
     }
 }

@@ -103,14 +103,11 @@ export class MultiplayerGameModel extends GameModel {
       this.deck,
       this.socket
     );
+  }
 
+  public createLayout = (layout: Layout) => {
     const layoutArr = BOARD_LAYOUTS[layout];
-
-    socket.emit('createStartingLayout', layoutArr);
-  }
-
-  public drawStartingHands() {
-    this.currPlyr.drawStartingHand();
-    this.opposPlyr.drawStartingHand();
-  }
+    this.socket.emit('createStartingLayout', layoutArr);
+    this.socket.emit('playerReady', 'Player 2');
+  };
 }

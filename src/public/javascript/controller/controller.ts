@@ -47,12 +47,14 @@ export class SinglePlayerController {
     );
     this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
     this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
+
+    this.view.bindCreateLayout(this.startGame);
   }
 
-  startGame(layout: Layout) {
+  startGame = (layout: Layout) => {
     this.model.startGame(layout);
     this.view.enableCardHandDragging();
-  }
+  };
 }
 
 export class MultiPlayerController {
@@ -93,6 +95,8 @@ export class MultiPlayerController {
     );
     this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
     this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
+
+    this.view.bindCreateLayout(this.model.createLayout);
 
     if (this.currentPlayer === 'Player 1')
       socket.emit('playerReady', currentPlayer);

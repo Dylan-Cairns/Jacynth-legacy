@@ -4,6 +4,10 @@ export class Controller {
 }
 export class SinglePlayerController {
     constructor(deckType) {
+        this.startGame = (layout) => {
+            this.model.startGame(layout);
+            this.view.enableCardHandDragging();
+        };
         this.model = new SinglePlayerGameModel(deckType);
         this.view = new SinglePlayerView(this.model.board, 'Player 1');
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
@@ -22,10 +26,7 @@ export class SinglePlayerController {
         this.view.bindGetOpponAvailTokens(this.model.opposPlyr.getInfluenceTokensNo);
         this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
-    }
-    startGame(layout) {
-        this.model.startGame(layout);
-        this.view.enableCardHandDragging();
+        this.view.bindCreateLayout(this.startGame);
     }
 }
 export class MultiPlayerController {
@@ -49,6 +50,7 @@ export class MultiPlayerController {
         this.view.bindGetOpponAvailTokens(this.model.opposPlyr.getInfluenceTokensNo);
         this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
+        this.view.bindCreateLayout(this.model.createLayout);
         if (this.currentPlayer === 'Player 1')
             socket.emit('playerReady', currentPlayer);
     }

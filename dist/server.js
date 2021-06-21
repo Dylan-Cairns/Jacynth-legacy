@@ -5,8 +5,6 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
 import { Decktet } from './public/javascript/model/decktet.js';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -14,8 +12,8 @@ const server = http.createServer(app);
 const io = new Server(server);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-// middleware
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/favicon.ico', express.static('assets/favicon.ico'));
 // routes
 app.get('/', (req, res) => {
     res.render('home');
@@ -25,6 +23,9 @@ app.get('/singleplayer', (req, res) => {
 });
 app.get('/multiplayer', (req, res) => {
     res.render('game', { gameType: 'multiplayer' });
+});
+app.use((req, res) => {
+    res.status(404).redirect('/');
 });
 const roomsGameData = [];
 io.on('connection', (socket) => {

@@ -1,4 +1,5 @@
 import { BoardSpace, GameBoard } from '../model/gameboard.js';
+import { Layout } from '../model/model.js';
 import { Card } from '../model/decktet.js';
 import { PlayerID } from '../model/player.js';
 import { Socket } from 'socket.io-client';
@@ -30,7 +31,7 @@ export class View {
   rules: HTMLElement;
   overlay: HTMLElement;
   chooseLayoutOverlay: HTMLElement;
-  chooseLayout: HTMLElement;
+  chooseLayoutMenu: HTMLElement;
   layoutButtons: NodeListOf<HTMLButtonElement>;
   draggedElement: HTMLElement | undefined;
   movesArr: {
@@ -51,6 +52,7 @@ export class View {
   getOpponAvailTokens: (() => number) | undefined;
   getCurrPlyrScore: (() => void) | undefined;
   getOpponentScore: (() => void) | undefined;
+  chooseLayout: ((layout: Layout) => void) | undefined;
 
   constructor(board: GameBoard, currPlyrID: PlayerID) {
     this.currPlyrID = currPlyrID;
@@ -82,7 +84,7 @@ export class View {
     ) as HTMLElement;
     this.winnerText = document.getElementById('winnerText') as HTMLElement;
     this.pickupSound = document.getElementById(
-      'pickupSound'
+      'clickSound'
     ) as HTMLMediaElement;
     this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
     this.menuButton = document.getElementById(
@@ -103,7 +105,9 @@ export class View {
     this.chooseLayoutOverlay = document.getElementById(
       'chooseLayoutOverlay'
     ) as HTMLElement;
-    this.chooseLayout = document.getElementById('chooseLayout') as HTMLElement;
+    this.chooseLayoutMenu = document.getElementById(
+      'chooseLayout'
+    ) as HTMLElement;
     this.layoutButtons = document.querySelectorAll(
       '.layoutButton'
     ) as NodeListOf<HTMLButtonElement>;
@@ -269,11 +273,11 @@ export class View {
 
     // menu modals and buttons
     this.menuButton.addEventListener('click', () => {
-      this.openModal(menu);
+      this.openModal(this.menu);
     });
 
     this.closeMenuButton.addEventListener('click', () => {
-      this.closeModal(menu);
+      this.closeModal(this.menu);
     });
 
     this.overlay.addEventListener('click', () => {
@@ -284,7 +288,7 @@ export class View {
     });
 
     this.rulesButton.addEventListener('click', () => {
-      this.openModal(rules);
+      this.openModal(this.rules);
     });
 
     this.closeRulesButton.addEventListener('click', () => {
@@ -292,7 +296,7 @@ export class View {
     });
 
     this.rules.addEventListener('click', (event) => {
-      if (event.target === rules) {
+      if (event.target === this.rules) {
         rules.classList.remove('active');
       }
     });
@@ -504,7 +508,7 @@ export class View {
       }
     });
   };
-
+  // show decktet icons from custom font for pawns, courts, and crowns
   protected prepareValueForDisplay(value: number) {
     switch (value) {
       case 0:
@@ -605,6 +609,10 @@ export class View {
   bindGetOpponentScore(getOpponentScoreCB: () => void) {
     this.getOpponentScore = getOpponentScoreCB;
   }
+
+  bindCreateLayout(createLayoutCB: (layout: Layout) => void) {
+    this.chooseLayout = createLayoutCB;
+  }
 }
 
 export class SinglePlayerView extends View {
@@ -616,8 +624,21 @@ export class SinglePlayerView extends View {
     this.opponentIcon.classList.add('player2Icon');
     this.currPlyrIcon.classList.add('losing');
     this.opponentIcon.classList.add('losing');
-
+    // use single player specific endturn function
     this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
+    // show layout menu
+    this.chooseLayoutMenu.classList.add('active');
+    this.chooseLayoutOverlay.classList.add('active');
+
+    this.layoutButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        this.chooseLayoutMenu.classList.remove('active');
+        this.chooseLayoutOverlay.classList.remove('active');
+        const layoutChoice = button.dataset.layout as Layout;
+        if (!layoutChoice || !this.chooseLayout) return;
+        this.chooseLayout(layoutChoice);
+      });
+    });
   }
 
   endTurnButtonCB = () => {
@@ -659,6 +680,21 @@ export class MultiPlayerView extends View {
       this.opponentIcon.classList.add('active');
       this.currPlyrIcon.classList.add('player2Icon');
       this.currPlyrIcon.classList.add('losing');
+    }
+    // get player 2 to choose layout
+    if (currPlyrID === 'Player 2') {
+      this.chooseLayoutMenu.classList.add('active');
+      this.chooseLayoutOverlay.classList.add('active');
+
+      this.layoutButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          this.chooseLayoutMenu.classList.remove('active');
+          this.chooseLayoutOverlay.classList.remove('active');
+          const layoutChoice = button.dataset.layout as Layout;
+          if (!layoutChoice || !this.chooseLayout) return;
+          this.chooseLayout(layoutChoice);
+        });
+      });
     }
 
     this.roomNumber = document.getElementById(

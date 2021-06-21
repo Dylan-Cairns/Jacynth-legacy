@@ -25,6 +25,7 @@
   --icon-text-color: #94eb6b;
   --icon-label-text: #a3a79f;
   --menu-border: #8c6746;
+  --link-color: #528c42;
   --link-hover: var(--icon-text-color);
   --enemy-color: #d93b18;
 }
@@ -141,19 +142,19 @@ button:hover {
 }
 
 .player1Icon.losing {
-  background-image: url('../assets/penitent_losing.png');
+  background-image: url('../assets/penitent_losing.svg');
 }
 
 .player1Icon.winning {
-  background-image: url('../assets/penitent_winning.png');
+  background-image: url('../assets/penitent_winning.svg');
 }
 
 .player2Icon.losing {
-  background-image: url('../assets/sailer_losing.png');
+  background-image: url('../assets/sailer_losing.svg');
 }
 
 .player2Icon.winning {
-  background-image: url('../assets/sailer_winning.png');
+  background-image: url('../assets/sailer_winning.svg');
 }
 
 .menuBar {
@@ -321,11 +322,11 @@ button:hover {
 }
 
 .influenceToken.Player1Token {
-  background-image: url('../assets/meeple_player.png');
+  background-image: url('../assets/meeple_player.svg');
 }
 
 .influenceToken.Player2Token {
-  background-image: url('../assets/meeple_enemy.png');
+  background-image: url('../assets/meeple_enemy.svg');
 }
 
 .influenceToken.enemyToken {
@@ -339,12 +340,13 @@ button:hover {
   border: var(--border-width) solid rgb(75, 75, 75);
   border-radius: var(--border-radius);
   margin: 0px;
-  padding: 1px;
+  padding: 4px;
   width: var(--card-size);
   height: var(--card-size);
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
+  grid-gap: 2px;
   grid-auto-flow: column;
   justify-content: center;
   box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.1),
@@ -361,29 +363,30 @@ button:hover {
   color: #2d2e2c;
   text-align: center;
   align-content: center;
-  font-size: calc(var(--gameboard-width) / 15);
-  margin: 1px;
-  background-size: cover;
+  font-size: calc(var(--gameboard-width) / 16);
+  margin: 0px;
+  background-size: 100% auto;
+  background-repeat: no-repeat;
   user-select: none;
 }
 
 .Knots {
-  background-image: url('../assets/knots.png');
+  background-image: url('../assets/knots.svg');
 }
 .Leaves {
-  background-image: url('../assets/leaves.png');
+  background-image: url('../assets/leaves.svg');
 }
 .Moons {
-  background-image: url('../assets/moons.png');
+  background-image: url('../assets/moons.svg');
 }
 .Suns {
-  background-image: url('../assets/suns.png');
+  background-image: url('../assets/suns.svg');
 }
 .Waves {
-  background-image: url('../assets/waves.png');
+  background-image: url('../assets/waves.svg');
 }
 .Wyrms {
-  background-image: url('../assets/snakes.png');
+  background-image: url('../assets/wyrms.svg');
 }
 
 a {
@@ -392,6 +395,16 @@ a {
 }
 
 a:hover {
+  color: var(--icon-text-color);
+}
+
+.link {
+  text-decoration: none;
+  font-weight: bold;
+  color: var(--link-color);
+}
+
+.link:hover {
   text-decoration: none;
   color: var(--link-hover);
 }
@@ -483,7 +496,7 @@ a:hover {
 }
 
 .menu-popup {
-  z-index: 100;
+  z-index: 10;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -506,11 +519,19 @@ a:hover {
   transform: translate(-50%, -50%) scale(1);
 }
 
+.title-menu {
+  background-color: rgba(255, 250, 240, 0.849);
+}
+
 .menu-header {
   margin-bottom: 10px;
   text-align: center;
-  font-size: 2.5em;
+  font-size: 5em;
   color: #333;
+}
+
+.subheader {
+  font-size: 2rem;
 }
 
 .menu-button {
@@ -551,6 +572,10 @@ a:hover {
 
 #chooseLayoutOverlay.active {
   pointer-events: all;
+}
+
+#layoutTitle {
+  font-size: 2em;
 }
 
 .layoutButton {

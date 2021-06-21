@@ -102,7 +102,7 @@ export class View {
         this.gameOverBox = document.getElementById('gameOverBox');
         this.disconnectedAlert = document.getElementById('disconnectedBox');
         this.winnerText = document.getElementById('winnerText');
-        this.pickupSound = document.getElementById('pickupSound');
+        this.pickupSound = document.getElementById('clickSound');
         this.dropSound = document.getElementById('dropSound');
         this.menuButton = document.getElementById('menuButton');
         this.closeMenuButton = document.getElementById('closeMenuButton');
@@ -112,7 +112,7 @@ export class View {
         this.rules = document.getElementById('rules');
         this.overlay = document.getElementById('overlay');
         this.chooseLayoutOverlay = document.getElementById('chooseLayoutOverlay');
-        this.chooseLayout = document.getElementById('chooseLayout');
+        this.chooseLayoutMenu = document.getElementById('chooseLayout');
         this.layoutButtons = document.querySelectorAll('.layoutButton');
         // make sure board and hand are empty
         while (this.gameBoard.firstChild) {
@@ -252,10 +252,10 @@ export class View {
         });
         // menu modals and buttons
         this.menuButton.addEventListener('click', () => {
-            this.openModal(menu);
+            this.openModal(this.menu);
         });
         this.closeMenuButton.addEventListener('click', () => {
-            this.closeModal(menu);
+            this.closeModal(this.menu);
         });
         this.overlay.addEventListener('click', () => {
             const modals = document.querySelectorAll('.modal.active');
@@ -264,13 +264,13 @@ export class View {
             });
         });
         this.rulesButton.addEventListener('click', () => {
-            this.openModal(rules);
+            this.openModal(this.rules);
         });
         this.closeRulesButton.addEventListener('click', () => {
             rules.classList.remove('active');
         });
         this.rules.addEventListener('click', (event) => {
-            if (event.target === rules) {
+            if (event.target === this.rules) {
                 rules.classList.remove('active');
             }
         });
@@ -387,6 +387,7 @@ export class View {
             }
         });
     }
+    // show decktet icons from custom font for pawns, courts, and crowns
     prepareValueForDisplay(value) {
         switch (value) {
             case 0:
@@ -451,6 +452,9 @@ export class View {
     bindGetOpponentScore(getOpponentScoreCB) {
         this.getOpponentScore = getOpponentScoreCB;
     }
+    bindCreateLayout(createLayoutCB) {
+        this.chooseLayout = createLayoutCB;
+    }
 }
 export class SinglePlayerView extends View {
     constructor(board, currPlyrID) {
@@ -477,7 +481,21 @@ export class SinglePlayerView extends View {
         this.opponentIcon.classList.add('player2Icon');
         this.currPlyrIcon.classList.add('losing');
         this.opponentIcon.classList.add('losing');
+        // use single player specific endturn function
         this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
+        // show layout menu
+        this.chooseLayoutMenu.classList.add('active');
+        this.chooseLayoutOverlay.classList.add('active');
+        this.layoutButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                this.chooseLayoutMenu.classList.remove('active');
+                this.chooseLayoutOverlay.classList.remove('active');
+                const layoutChoice = button.dataset.layout;
+                if (!layoutChoice || !this.chooseLayout)
+                    return;
+                this.chooseLayout(layoutChoice);
+            });
+        });
     }
 }
 export class MultiPlayerView extends View {
@@ -517,6 +535,21 @@ export class MultiPlayerView extends View {
             this.opponentIcon.classList.add('active');
             this.currPlyrIcon.classList.add('player2Icon');
             this.currPlyrIcon.classList.add('losing');
+        }
+        // get player 2 to choose layout
+        if (currPlyrID === 'Player 2') {
+            this.chooseLayoutMenu.classList.add('active');
+            this.chooseLayoutOverlay.classList.add('active');
+            this.layoutButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    this.chooseLayoutMenu.classList.remove('active');
+                    this.chooseLayoutOverlay.classList.remove('active');
+                    const layoutChoice = button.dataset.layout;
+                    if (!layoutChoice || !this.chooseLayout)
+                        return;
+                    this.chooseLayout(layoutChoice);
+                });
+            });
         }
         this.roomNumber = document.getElementById('roomNumber');
         this.endTurnButton.addEventListener('click', this.endTurnButtonCB);

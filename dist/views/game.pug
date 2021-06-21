@@ -1,7 +1,7 @@
 include header.pug
-audio#pickupSound(src='assets/rollover5.wav' preload='auto')
+audio#pickupSound(src='assets/pickupsound.wav' preload='auto')
 audio#dropSound(src='assets/switch8.wav' preload='auto')
-  
+audio#clickSound(src='assets/pickupsound.wav' preload='auto')
 script.
     const gameType = JSON.parse('!{JSON.stringify(gameType)}');
 
@@ -42,6 +42,8 @@ script.
 #menu-popup.menu-popup.modal
   button#closeMenuButton.close(href='#') &times;
   .menu-header Jacynth
+      br
+      span.subheader A Decktet Game
   #singlePlayerBttn.menu-button
     a(href='/singleplayer') New Singleplayer Game
   #multiPlayerBttn.menu-button
@@ -50,7 +52,7 @@ script.
     button Rules &amp; Credits
 #chooseLayoutOverlay
 #chooseLayout.menu-popup.modal
-  .menu-header Choose starting layout
+  #layoutTitle.menu-header Choose starting layout
   button#razeway.layoutButton(data-layout="razeway")
     img(src="./assets/razeway.png")
   button#twotowers.layoutButton(data-layout="towers")
