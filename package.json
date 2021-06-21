@@ -5,8 +5,8 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "start": "node server",
-    "dev": "nodemon server",
+    "start": "node dist/server.js",
+    "dev": "nodemon dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dylan Cairns",
