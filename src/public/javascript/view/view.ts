@@ -231,16 +231,13 @@ export class View {
       });
     });
 
-    boardSpaces.forEach((space) => {
-      space.addEventListener('dragend', () => {
-        // remove all available spaces highlighting
-        Array.from(this.gameBoard.children).forEach((space) => {
-          space.classList.remove('playable-space');
-        });
-      });
+    document.addEventListener('dragend', () => {
+      // remove all available spaces highlighting
+      this.removeSpaceHighlighting();
     });
 
     this.undoButton.addEventListener('click', () => {
+      this.removeSpaceHighlighting();
       this.pickupSound.play();
       if (this.movesArr.length > 0) {
         const moveObj = this.movesArr.pop()!;
@@ -274,6 +271,7 @@ export class View {
 
     // menu modals and buttons
     this.menuButton.addEventListener('click', () => {
+      this.removeSpaceHighlighting();
       this.openModal(this.menu);
     });
 
@@ -303,11 +301,11 @@ export class View {
     });
   }
 
-  protected dragstart_handler = (event: any) => {
+  protected dragstartHandler = (event: any) => {
+    this.removeSpaceHighlighting();
     if (!event.dataTransfer) return;
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.dropeffect = 'move';
-    event.dataTransfer.setData('text/plain', event.target.id);
     this.draggedElement = event.target as HTMLElement;
     if (this.draggedElement.classList.contains('card')) {
       if (this.getAvailCardSpaces) {
@@ -382,7 +380,7 @@ export class View {
       cardDiv.appendChild(ele);
     });
     // add drag drop listener
-    cardDiv.addEventListener('dragstart', this.dragstart_handler);
+    cardDiv.addEventListener('dragstart', this.dragstartHandler);
 
     return cardDiv;
   };
@@ -394,7 +392,7 @@ export class View {
       'influenceToken',
       `${tokenID}token`
     );
-    token.addEventListener('dragstart', this.dragstart_handler);
+    token.addEventListener('dragstart', this.dragstartHandler);
     return token;
   }
 
@@ -536,6 +534,12 @@ export class View {
       }
     });
   };
+
+  protected removeSpaceHighlighting() {
+    Array.from(this.gameBoard.children).forEach((space) => {
+      space.classList.remove('playable-space');
+    });
+  }
   // show decktet icons from custom font for pawns, courts, and crowns
   protected prepareValueForDisplay(value: number) {
     switch (value) {

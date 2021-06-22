@@ -7,16 +7,16 @@ export class BoardSpace {
     }
     setCard(card) {
         if (this.getCard())
-            return false;
+            throw new Error('space already has card');
         this.card = card;
         return true;
     }
-    setPlayerToken(player) {
+    setPlayerToken(playerID) {
         if (!this.getCard())
             return false;
         if (this.getPlayerToken())
             return false;
-        this.playerToken = player;
+        this.playerToken = playerID;
         return true;
     }
     setControlbySuit(suit, id) {
@@ -67,7 +67,7 @@ export class GameBoard {
             });
             return results;
         };
-        this.resolveInfluenceConflicts = (boardSpace) => {
+        this.resolveInfluence = (boardSpace) => {
             const card = boardSpace.getCard();
             if (!card)
                 throw new Error('no card on space');
@@ -75,12 +75,15 @@ export class GameBoard {
             suits.forEach((suit) => {
                 const district = this.getDistrict(boardSpace.getID(), suit);
                 let spacesWithTokens = district.filter((space) => space.getPlayerToken());
-                if (spacesWithTokens.length) {
-                    spacesWithTokens = spacesWithTokens.sort((a, b) => {
-                        var _a, _b;
-                        const ele1 = (_a = a.getCard()) === null || _a === void 0 ? void 0 : _a.getValue();
-                        const ele2 = (_b = b.getCard()) === null || _b === void 0 ? void 0 : _b.getValue();
-                        return ele2 - ele1;
+                if (spacesWithTokens.length > 0) {
+                    spacesWithTokens = spacesWithTokens.sort((spaceA, spaceB) => {
+                        const cardA = spaceA.getCard();
+                        const cardB = spaceB.getCard();
+                        if (!cardA || !cardB)
+                            throw new Error('no card on space during resolveInfluence');
+                        const cardAValue = cardA.getValue();
+                        const cardBValue = cardB.getValue();
+                        return cardBValue - cardAValue;
                     });
                     const controllingSpace = spacesWithTokens[0];
                     district.forEach((space) => {
@@ -89,60 +92,13 @@ export class GameBoard {
                 }
             });
         };
-        // get all spaces which a player can place a token on.
-        // A valid space must have a card, must not have a token already,
-        // and must not be part of another players district in any suit.
-        this.getAvailableTokenSpaces = (playerID) => {
-            // for each space on the board
-            const results = [];
-            for (const [id, space] of this.spaces) {
-                // if no card or already has token, move to next space
-                if (!space.getCard() || space.getPlayerToken())
-                    continue;
-                const suits = space.getControlledSuitsMap();
-                // if controlledsuitsMap is empty, it's definitely available.
-                if (suits.size === 0) {
-                    results.push(space);
-                    continue;
-                }
-                else {
-                    // check if the controlling space belongs to another player for each suit.
-                    let ownedByOtherPlayer = false;
-                    for (const [suit, controllingId] of suits) {
-                        const spaceToCheckOwnerOf = this.getSpace(controllingId);
-                        if (spaceToCheckOwnerOf.getPlayerToken() !== playerID) {
-                            ownedByOtherPlayer = true;
-                            break;
-                        }
-                    }
-                    // if it doesn't belong to any other player, add it to the results
-                    if (!ownedByOtherPlayer)
-                        results.push(space);
-                }
-            }
-            return results;
-        };
-        this.getPlayerScore = (playerID) => {
-            let score = 0;
-            this.spaces.forEach((space) => {
-                if (space.getCard()) {
-                    space.getControlledSuitsMap().forEach((controllingSpaceID) => {
-                        const controllingSpace = this.spaces.get(controllingSpaceID);
-                        const controllingPlayerID = controllingSpace === null || controllingSpace === void 0 ? void 0 : controllingSpace.getPlayerToken();
-                        if (controllingPlayerID === playerID)
-                            score += 1;
-                    });
-                }
-            });
-            return score;
-        };
         this.resolveInflunceForEntireBoard = () => {
             this.spaces.forEach((space) => {
                 space.resetSuitsControlMap();
             });
             this.spaces.forEach((space) => {
                 if (space.getCard()) {
-                    this.resolveInfluenceConflicts(space);
+                    this.resolveInfluence(space);
                 }
             });
         };
@@ -159,6 +115,83 @@ export class GameBoard {
             var _a;
             (_a = this.spaces.get(spaceID)) === null || _a === void 0 ? void 0 : _a.removePlayerToken();
             this.resolveInflunceForEntireBoard();
+        };
+        // get all spaces which a player can place a token on.
+        // A valid space must have a card, must not have a token already,
+        // and must not be part of another players district in any suit.
+        this.getAvailableTokenSpaces = (playerID) => {
+            // for each space on the board
+            const results = [];
+            for (const [, space] of this.spaces) {
+                // if no card or already has token, move to next space
+                if (!space.getCard() || space.getPlayerToken())
+                    continue;
+                const controlSuits = space.getControlledSuitsMap();
+                // if controlledsuitsMap is empty, it's definitely available.
+                if (controlSuits.size === 0) {
+                    results.push(space);
+                    continue;
+                }
+                else {
+                    // check if the controlling space belongs to another player for each suit.
+                    let ownedByOtherPlayer = false;
+                    for (const [, controllingId] of controlSuits) {
+                        const spaceToCheckOwnerOf = this.getSpace(controllingId);
+                        if (!spaceToCheckOwnerOf)
+                            throw new Error('reference to nonexistant space');
+                        if (spaceToCheckOwnerOf.getPlayerToken() !== playerID) {
+                            ownedByOtherPlayer = true;
+                            break;
+                        }
+                    }
+                    // if it doesn't belong to any other player, add it to the results
+                    if (!ownedByOtherPlayer)
+                        results.push(space);
+                }
+            }
+            return results;
+        };
+        this.setPlayerToken = (spaceID, playerID) => {
+            const currentSpace = this.getSpace(spaceID);
+            if (!currentSpace)
+                throw new Error('attempt to claim nonexistant space');
+            const currentCard = currentSpace.getCard();
+            if (!currentCard)
+                throw new Error('cannot claim empty space');
+            if (currentSpace.getPlayerToken())
+                return false;
+            // check if space is on the list of available token spaces
+            const availableSpaces = this.getAvailableTokenSpaces(playerID);
+            if (!availableSpaces.includes(currentSpace)) {
+                console.log('attempted to claim already controlled space. current board:');
+                this.spaces.forEach((space) => {
+                    console.log(space.getID(), space.getControlledSuitsMap());
+                    const printycard = space.getCard();
+                    if (printycard)
+                        console.log(printycard);
+                });
+                console.log('space attempting to claim and player: ', spaceID, playerID);
+                throw new Error('cannot place token on controlled space');
+            }
+            // if no marker and not controlled by another player, place
+            // marker and claim all districts
+            currentSpace.setPlayerToken(playerID);
+            this.resolveInflunceForEntireBoard();
+            return true;
+        };
+        this.getPlayerScore = (playerID) => {
+            let score = 0;
+            this.spaces.forEach((space) => {
+                if (space.getCard()) {
+                    space.getControlledSuitsMap().forEach((controllingSpaceID) => {
+                        const controllingSpace = this.spaces.get(controllingSpaceID);
+                        const controllingPlayerID = controllingSpace === null || controllingSpace === void 0 ? void 0 : controllingSpace.getPlayerToken();
+                        if (controllingPlayerID === playerID)
+                            score += 1;
+                    });
+                }
+            });
+            return score;
         };
         this.boardSize = boardSize;
         this.remainingSpaces = boardSize * boardSize;
@@ -199,7 +232,7 @@ export class GameBoard {
         if (!space.setCard(card))
             return false;
         this.remainingSpaces--;
-        this.resolveInfluenceConflicts(space);
+        this.resolveInflunceForEntireBoard();
         return true;
     }
     getAdjacentSpaces(spaceID) {
@@ -239,9 +272,9 @@ export class GameBoard {
         }
         return false;
     }
-    getDistrict(SpaceID, suit) {
+    getDistrict(spaceID, suit) {
         const results = [];
-        const currentSpace = this.getSpace(SpaceID);
+        const currentSpace = this.getSpace(spaceID);
         if (!currentSpace)
             return results;
         const currentCard = currentSpace.getCard();
@@ -261,37 +294,7 @@ export class GameBoard {
                 }
             });
         };
-        searchConnectedTiles(SpaceID, suit);
+        searchConnectedTiles(spaceID, suit);
         return results;
-    }
-    setPlayerToken(spaceID, playerID) {
-        const currentSpace = this.getSpace(spaceID);
-        if (!currentSpace)
-            return false;
-        const currentCard = currentSpace.getCard();
-        if (!currentCard)
-            return false;
-        if (currentSpace.getPlayerToken())
-            return false;
-        // check if card belongs to another players district in any suit
-        const suits = currentCard.getAllSuits();
-        for (const suit of suits) {
-            const district = this.getDistrict(spaceID, suit);
-            for (const space of district) {
-                if (space.getPlayerToken() && space.getPlayerToken() !== playerID) {
-                    return false;
-                }
-            }
-        }
-        // if no marker and not controlled by another player, place
-        // marker and claim all districts
-        currentSpace.setPlayerToken(playerID);
-        for (const suit of suits) {
-            const district = this.getDistrict(spaceID, suit);
-            for (const space of district) {
-                space.setControlbySuit(suit, spaceID);
-            }
-        }
-        return true;
     }
 }

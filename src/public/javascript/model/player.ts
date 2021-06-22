@@ -265,40 +265,38 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             .getAvailableTokenSpaces(this.playerID)
             .forEach((availTokenSpace) => {
               const tokenSpaceCard = availTokenSpace.getCard();
-              if (tokenSpaceCard) {
-                // check whether the card value meets our mimnimum threshold
-                const tokenSpaceCardValue = tokenSpaceCard.getValue();
+              if (!tokenSpaceCard) return;
+              // check whether the card value meets our minimum threshold
+              const tokenSpaceCardValue = tokenSpaceCard.getValue();
+              if (tokenSpaceCardValue >= adjustedCardValueThreshold) {
+                //if it does, create a resultsObj and push to results.
+                this.gameBoard.setPlayerToken(
+                  availTokenSpace.getID(),
+                  this.playerID
+                );
+                const tokenChangeInHumanScore =
+                  this.gameBoard.getPlayerScore(this.opponentID) -
+                  currentHumanScore;
+                const tokenChangeInComputerScore =
+                  this.gameBoard.getPlayerScore(this.playerID) -
+                  currentComputerScore;
+                const withTokenScore =
+                  tokenChangeInComputerScore - tokenChangeInHumanScore;
 
-                if (tokenSpaceCardValue >= adjustedCardValueThreshold) {
-                  //if it does, create a resultsObj and push to results.
-                  this.gameBoard.setPlayerToken(
-                    availTokenSpace.getID(),
-                    this.playerID
-                  );
-                  const tokenChangeInHumanScore =
-                    this.gameBoard.getPlayerScore(this.opponentID) -
-                    currentHumanScore;
-                  const tokenChangeInComputerScore =
-                    this.gameBoard.getPlayerScore(this.playerID) -
-                    currentComputerScore;
-                  const withTokenScore =
-                    tokenChangeInComputerScore - tokenChangeInHumanScore;
+                const withTokenScoreObj = {
+                  cardToPlay: card,
+                  spaceToPlaceCard: availCardSpace,
+                  cardOnlyScore: cardOnlyScore,
+                  spaceToPlaceToken: availTokenSpace,
+                  tokenSpaceCardValue: tokenSpaceCardValue,
+                  withTokenScore: withTokenScore
+                } as AiMoveSearchResultsObj;
 
-                  const withTokenScoreObj = {
-                    cardToPlay: card,
-                    spaceToPlaceCard: availCardSpace,
-                    cardOnlyScore: cardOnlyScore,
-                    spaceToPlaceToken: availTokenSpace,
-                    tokenSpaceCardValue: tokenSpaceCardValue,
-                    withTokenScore: withTokenScore
-                  } as AiMoveSearchResultsObj;
-
-                  resultsArr.push(withTokenScoreObj);
-                  // reset score after each token removal
-                  this.gameBoard.removePlayerTokenAndResolveBoard(
-                    availTokenSpace.getID()
-                  );
-                }
+                resultsArr.push(withTokenScoreObj);
+                // reset score after each token removal
+                this.gameBoard.removePlayerTokenAndResolveBoard(
+                  availTokenSpace.getID()
+                );
               }
             });
         }
