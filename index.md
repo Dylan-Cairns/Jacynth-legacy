@@ -86,7 +86,7 @@ Initially I started with a 2d array. But I realized that I can get the benefits 
 
 A district is any contiguous collection of cards which share the same suit. Recursion was an obvious choice for this problem. Initially I ran into an issue with the nested iterations losing context, but it was easily solved by refactoring to use an arrow function.
 
-```javascript
+```typescript
   getDistrict(spaceID: string, suit: Suit): BoardSpace[] {
     const results = [] as BoardSpace[];
     const currentSpace = this.getSpace(spaceID);
@@ -214,7 +214,7 @@ handleSendCardPlayToModel(cardID: string, spaceID: string) {
 
 And then bind this in the view like this:
 
-``` types
+``` typescript
 bindSendCardPlayToModel(
     sendCardPlayToModelCB: (cardID: string, spaceID: string) => boolean
   ) {
