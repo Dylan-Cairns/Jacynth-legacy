@@ -1,6 +1,6 @@
-# Creating a digital adaptation of a board game in Typescript
+# Creating a digital adaptation of a board game in TypeScript
 
-As my first project not related to any curriculum I decided to create a JavaScript implementation of the card game [Jacynth](http://wiki.decktet.com/game:jacynth) from the [Decktet](https://www.decktet.com/). I built the app using Typescript, with an Express.js server and Socket.io for real time multi-player. I took some notes during development and have included some of the more interesting questions that arose here. Let's begin!
+As my first project not related to any curriculum I decided to create an implementation of the card game [Jacynth](http://wiki.decktet.com/game:jacynth) from the [Decktet](https://www.decktet.com/). I built the app using TypeScript, with an Express.js server and Socket.io for real time multi-player. I took some notes during development and have included some of the more interesting questions that arose here. Let's begin!
 
 Jacynth is an area control card game played using the [Decktet](https://www.decktet.com/), a unique deck of cards designed and beautifully illustrated by PD Magnus, and shared for free under a Creative Commons license. The Decktet was my first introduction to the board game hobby, and a couple games playable with the Decktet still count among my favorites. (In the interest of making a design that would work well on small screens I didn't use the original cards and made the cards into tiles instead.)
 
@@ -114,13 +114,13 @@ A district is any contiguous collection of cards which share the same suit. Recu
   }
 ```
 
-### Adding type safety with Typescript
+### Adding type safety with TypeScript
 
-Not too long ago I participated in a peer led Typescript seminar using the book [Typescript in 50 lessons](https://typescript-book.com/). I was impressed by the features it added to JavaScript while still seeming to offer more flexible than Java (my frame of reference for a statically typed language.)  
+Not too long ago I participated in a peer led TypeScript seminar using the book [TypeScript in 50 lessons](https://typescript-book.com/). I was impressed by the features it added to JavaScript while still seeming to offer more flexible than Java (my frame of reference for a statically typed language.)  
 
-I initially didn't intend to use Typescript for this project, but while writing the methods for the game board class I was starting to feel like Typescripts type hints would be really handy. I decided to convert the project to Typescript. Overall it was pretty easy,  although I had to do some configuration to get prettier and ESlint to play nice together with Typescript. [This](https://khalilstemmler.com/blogs/tooling/prettier/) guide was very helpful for that.
+I initially didn't intend to use Typescript for this project, but while writing the methods for the game board class I was starting to feel like TypeScripts type hints would be really handy. I decided to convert the project to Typescript. Overall it was pretty easy,  although I had to do some configuration to get prettier and ESlint to play nice together with TypeScript. [This](https://khalilstemmler.com/blogs/tooling/prettier/) guide was very helpful for that.
 
-There wasn't really any tricky Typescript cases in this project, but it was nice to get my hands dirty with Typescript and I look forward to diving deeper with it in the future.
+There wasn't really any tricky Typescript cases in this project, but it was nice to get my hands dirty with TypeScript and I look forward to diving deeper with it in the future.
 
 ### Coding the AI
 
