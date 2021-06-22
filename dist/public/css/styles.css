@@ -16,7 +16,7 @@
     var(--gameboard-width) / var(--gameboard-dimensions) - 0.25em
   );
   --border-radius: calc(var(--gameboard-width) / 70);
-  --border-width: calc(0.005 * var(--gameboard-width));
+  --border-width: calc(var(--gameboard-width) / 200);
   --text-large: calc(var(--gameboard-width) / 20);
   --body-background: #659dbf;
   --title-text: #f2f2f2;
