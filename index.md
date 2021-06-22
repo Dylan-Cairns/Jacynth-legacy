@@ -21,7 +21,7 @@ There are a lot of ways to handle how to adapt to different device sizes. In thi
 On pretty much any device which has a 'portrait' type screen, the width will be the limiting factor to the size of the board. If the window is closer to a square for some reason it's possible that the other elements of the GUI could get cut off, so I used `min` to make sure the game board also doesn't take up more than 60% of the screen height.
 
 ```CSS
-  --desktop-gameboard-width: min(90vh, 49vw);
+--desktop-gameboard-width: min(90vh, 49vw);
 ```
 
  On a landscape type screen, height will be the limiting factor. I use media queries to change the `gameboard-width` property to our desktop version if our screen has landscape orientation.
@@ -36,9 +36,9 @@ On pretty much any device which has a 'portrait' type screen, the width will be 
  The `gameboard-width` property also acts as a perfect responsive unit of measurement for elements on the page:
 
 ```CSS
-  --border-radius: calc(var(--gameboard-width) / 70);
-  --border-width: calc(var(--gameboard-width) / 200);
-  --text-large: calc(var(--gameboard-width) / 20);
+--border-radius: calc(var(--gameboard-width) / 70);
+--border-width: calc(var(--gameboard-width) / 200);
+--text-large: calc(var(--gameboard-width) / 20);
 ```
 
 ### Working with CSS Grid
