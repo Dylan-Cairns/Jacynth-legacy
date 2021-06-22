@@ -175,7 +175,7 @@ In order to explore all the available options, the AI needs to be able to add ca
 
 #### A working AI!
 
-![Screenshot_20210605_134512](/home/chrono/Documents/Code/Jacynth_game/Documentation/Screenshot_20210605_134512.png)
+![Screenshot_20210605_134512](Screenshot_20210605_134512.png)
 
 I got the AI up and running and was excited to see it looked like it was working fairly well. I found that the threshold for placing a token was too high, leading to whichever player happens to get the luck to place a token first always winning. I reduced the threshold and things seemed to even out.
 
