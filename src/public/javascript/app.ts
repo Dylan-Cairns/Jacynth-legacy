@@ -27,7 +27,6 @@ if (gameType === 'multiplayer') {
   socket.emit('getPlayerID');
 
   socket.on('recievePlayerID', (playerID: PlayerID) => {
-    console.log('recieved player id', playerID);
     currPlyrID = playerID;
     const controller = new MultiPlayerController(
       'basicDeck',

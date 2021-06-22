@@ -291,15 +291,6 @@ export class GameBoard {
     // check if space is on the list of available token spaces
     const availableSpaces = this.getAvailableTokenSpaces(playerID);
     if (!availableSpaces.includes(currentSpace)) {
-      console.log(
-        'attempted to claim already controlled space. current board:'
-      );
-      this.spaces.forEach((space) => {
-        console.log(space.getID(), space.getControlledSuitsMap());
-        const printycard = space.getCard();
-        if (printycard) console.log(printycard);
-      });
-      console.log('space attempting to claim and player: ', spaceID, playerID);
       throw new Error('cannot place token on controlled space');
     }
 

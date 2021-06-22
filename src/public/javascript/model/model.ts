@@ -79,7 +79,6 @@ export class MultiplayerGameModel extends GameModel {
     this.socket = socket;
 
     socket.on('recieveLayoutCard', (cardID, spaceID) => {
-      console.log('cardid', cardID);
       const space = this.board.getSpace(spaceID);
       if (!cardID || !space) return;
       const card = this.deck.getCardByID(cardID);

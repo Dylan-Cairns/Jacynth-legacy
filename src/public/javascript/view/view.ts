@@ -414,9 +414,7 @@ export class View {
       this.getOpponAvailTokens
     ) {
       const currPlyrScore = this.getCurrPlyrScore();
-      console.log('currPlyrScore', currPlyrScore);
       const opponentScore = this.getOpponentScore();
-      console.log('opponentScore', opponentScore);
       const currPlyrTokens = this.getCurrPlyrAvailTokens();
       const opponentTokens = this.getOpponAvailTokens();
       this.currPlyrHUD.textContent = `Score ${currPlyrScore} Tokens ${currPlyrTokens}`;
@@ -740,7 +738,6 @@ export class MultiPlayerView extends View {
     });
 
     this.socket.on('p2Ready', () => {
-      console.log('p2ready method recieved from server');
       if (this.currPlyrID === 'Player 2') return;
       this.opponentHUDID.innerHTML = 'Player 2';
       this.opponentIcon.classList.add('player2Icon');
@@ -753,7 +750,6 @@ export class MultiPlayerView extends View {
 
     this.socket.on('beginNextTurn', (player) => {
       if (this.currPlyrID !== player) return;
-      console.log('begin next turn method called');
       this.updateScore();
       this.currPlyrIcon.classList.add('active');
       this.opponentIcon.classList.remove('active');

@@ -125,7 +125,6 @@ export class Player_MultiPlayer extends Player {
   ) {
     super(playerID, gameBoard, deck);
     this.socket = socket;
-    console.log(this.playerID);
 
     socket.on(
       'recieveCardDraw',
@@ -133,12 +132,6 @@ export class Player_MultiPlayer extends Player {
         if (playerID !== this.playerID || !cardID) return;
         const card = this.deck.getCardByID(cardID);
         if (card) this.hand.push(card);
-        console.log(
-          'cardDraw, cardID, playerID, handArr',
-          card?.getId(),
-          this.playerID,
-          this.hand
-        );
         if (!card || !this.sendCardDrawtoView) return;
         this.sendCardDrawtoView(card);
       }
@@ -147,25 +140,11 @@ export class Player_MultiPlayer extends Player {
     socket.on(
       'recievePlayerMove',
       (playerID, cardID, spaceID, tokenSpaceID) => {
-        console.log(`${this.playerID} recievePlayerMove method`);
-        console.log(
-          'recieved playerid, cardid, spaceID, tokenSpaceID: ',
-          playerID,
-          cardID,
-          spaceID
-        );
-        console.log('sendCardplaytoMoveCB?', this.sendCardPlaytoView);
         if (playerID !== this.playerID) return;
         if (!this.sendCardPlaytoView) return;
 
         const card = this.getCardFromHandByID(cardID);
         const space = this.gameBoard.getSpace(spaceID);
-        console.log(
-          'card from hand by id, spaceID',
-          card?.getId(),
-          space?.getID()
-        );
-        console.log('hand arr', this.hand);
         if (!card || !space) return;
 
         this.playCard(spaceID, cardID);
@@ -318,14 +297,12 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         const random = Math.random() > 0.5 ? 1 : -1;
         return b.cardOnlyScore - a.cardOnlyScore || random;
       });
-    console.log('cardonlyMovesSorted', cardOnlyMovesSorted);
     const topCardOnlyMove = cardOnlyMovesSorted[0];
     const topCardOnlyScore = topCardOnlyMove.cardOnlyScore;
     const tokenMoveArr = this.filterAndSortTokenScoreResults(
       topCardOnlyScore,
       allMoves
     );
-    console.log('tokenMovesSorted', tokenMoveArr);
     const topTokenMove = tokenMoveArr[0];
 
     // if there is at least 1 item in the tokenmove list after filtering,
@@ -335,11 +312,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     this.playCard(
       finalChoice.spaceToPlaceCard.getID(),
       finalChoice.cardToPlay.getId()
-    );
-    console.log(
-      `${
-        this.playerID
-      } played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`
     );
     if (this.sendCardPlaytoView) {
       this.sendCardPlaytoView(
@@ -353,11 +325,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
       if (this.sendTokenPlayToView) {
         this.sendTokenPlayToView(finalChoice.spaceToPlaceToken);
       }
-      console.log(
-        `${
-          this.playerID
-        } played a token to ${finalChoice.spaceToPlaceToken?.getID()}`
-      );
     }
     this.drawCard();
   };
