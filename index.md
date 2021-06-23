@@ -14,19 +14,19 @@ I wanted to create a mobile first design, and I knew that drag and drop would be
 
 There are a lot of ways to handle how to adapt to different device sizes. In this case the main element of the interface is the game board. I decided to set the game board size based on the available screen size.
 
-``` css
+```css
 --gameboard-width: min(60vh, 100vw);
 ```
 
 On pretty much any device which has a 'portrait' type screen, the width will be the limiting factor to the size of the board. If the window is closer to a square for some reason, it's possible that the other elements of the GUI could get cut off, so I used `min` to make sure the game board also doesn't take up more than 60% of the screen height.
 
-``` css
+```css
 --desktop-gameboard-width: min(90vh, 49vw);
 ```
 
 On a landscape type screen, height will be the limiting factor. I used media queries to change the `gameboard-width` property to our desktop version if our screen has landscape orientation.
 
-``` css
+```css
 @media (orientation: landscape) {
   :root {
     --gameboard-width: var(--desktop-gameboard-width);
@@ -35,7 +35,7 @@ On a landscape type screen, height will be the limiting factor. I used media que
 
  The `gameboard-width` property also acts as a perfect responsive unit of measurement for elements on the page:
 
-``` css
+```css
 --border-radius: calc(var(--gameboard-width) / 70);
 --border-width: calc(var(--gameboard-width) / 200);
 --text-large: calc(var(--gameboard-width) / 20);
@@ -45,7 +45,7 @@ On a landscape type screen, height will be the limiting factor. I used media que
 
 CSS grid makes working in two dimensions easy. [This](https://grid.malven.co/) reference sheet is super handy! There was one hitch though: I wanted the grid elements to be in a slightly different order on landscape vs portrait devices. [CSS gris template areas](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas) to the rescue. With CSS grid template areas you can define (or redefine) exactly how different grid elements should be displayed.
 
-``` css
+```css
 .main-grid {
 /*other CSS */
   grid-template-areas:
@@ -86,7 +86,7 @@ Initially I started with a 2d array. But I realized that I can get the benefits 
 
 A district is any contiguous collection of cards which share the same suit. Recursion was an obvious choice for this problem. Initially I ran into an issue with the nested iterations losing context, but it was easily solved by refactoring to an arrow function.
 
-``` TypeScript
+```typescript
   getDistrict(spaceID: string, suit: Suit): BoardSpace[] {
     const results = [] as BoardSpace[];
     const currentSpace = this.getSpace(spaceID);
@@ -143,7 +143,7 @@ A good minimum threshold for placing a token for each related factor might be:
 
 As the game progresses however we need to get less picky. We'll use the number of empty spaces on the board as a percentage of the whole to create a function that we can use to dynamically adjust the threshold for both card rank and territory.
 
-``` TypeScript
+```typescript
   private adjustMinThreshold(hopedForAmt: number) {
     const spaceLeft = this.gameBoard.getRemainingSpacesNumber();
     const sizeOfTheBoard = Math.pow(this.gameBoard.getBoardSize(), 2);
@@ -189,7 +189,7 @@ Fairly quickly I decided that there was enough code involved in this project to 
 
 Once model and view methods are complete, they are connected together in the controller. For example, when a player drags a tile on to the board via methods defined in the view, that needs to get updated in the model. Here's the play card method in the model:
 
-``` TypeScript
+```typescript
   playCard = (spaceID: string, cardID: string) => {
     const card = this.getCardFromHandByID(cardID);
     if (!card) return false;
@@ -214,7 +214,7 @@ handleSendCardPlayToModel(cardID: string, spaceID: string) {
 
 And then bind this in the view like this:
 
-``` TypeScript
+```typescript
 bindSendCardPlayToModel(
     sendCardPlayToModelCB: (cardID: string, spaceID: string) => boolean
   ) {
@@ -226,7 +226,7 @@ Perhaps the author is working from an existing design pattern, or perhaps in lar
 
 It makes sense to me to just pass the model method directly into the `bind` function of the model from within the controller:
 
-``` TypeScript
+```typescript
 this.view.bindSendCardPlayToModel(this.model.player1.playCard);
 ```
 
@@ -242,7 +242,7 @@ I decided to make the game multi-player and after reading up on Socket.io it's u
 
 The server should be responsible for dealing cards to players so as to ensure consistency in what the players recieve. But cards can't be JSONified since they have setter and getter methods. The solution is for the server to transmit a card ID, which the client will use to find the card from it's own local copy of the deck.
 
-``` TypeScript
+```typescript
  // server side
 const deck = new Decktet('basicDeck');
 
@@ -286,7 +286,7 @@ We need to be able to match players, ensure that we get 2 players in each game, 
 
 Each room will have an object to hold related data:
 
-``` TypeScript
+```typescript
 type roomDataObject = {
   roomName: string;
   layoutSpaces: string[] | undefined;
@@ -301,13 +301,13 @@ type roomDataObject = {
 
 and we will create an array of these objects, one for each game table.
 
-``` TypeScript
+```typescript
 const roomsGameData = [] as roomDataObject[];
 ```
 
 Then, whenever a user connects, we start from room #0 and keep looking until we find an open room.
 
-``` TypeScript
+```typescript
 io.on('connection', (socket) => {
   console.log('a user connected');
 
