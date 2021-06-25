@@ -260,6 +260,7 @@ export class View {
     });
 
     this.undoButton.addEventListener('click', () => {
+      this.removeControlledSpacesHighlighting();
       this.removeSpaceHighlighting();
       this.pickupSound.play();
       if (this.movesArr.length > 0) {
@@ -615,7 +616,7 @@ export class View {
   }
 
   protected removeControlledSpacesHighlighting() {
-    this.gameBoard.querySelectorAll('.card-cell').forEach((ele) => {
+    document.querySelectorAll('.card-cell').forEach((ele) => {
       ele.classList.remove('p1-control');
       ele.classList.remove('p2-control');
     });

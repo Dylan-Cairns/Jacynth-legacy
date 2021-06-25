@@ -251,6 +251,7 @@ export class View {
             this.overlay.classList.remove('active');
         });
         this.undoButton.addEventListener('click', () => {
+            this.removeControlledSpacesHighlighting();
             this.removeSpaceHighlighting();
             this.pickupSound.play();
             if (this.movesArr.length > 0) {
@@ -480,7 +481,7 @@ export class View {
         }
     }
     removeControlledSpacesHighlighting() {
-        this.gameBoard.querySelectorAll('.card-cell').forEach((ele) => {
+        document.querySelectorAll('.card-cell').forEach((ele) => {
             ele.classList.remove('p1-control');
             ele.classList.remove('p2-control');
         });
