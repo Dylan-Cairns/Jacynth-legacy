@@ -372,7 +372,7 @@ button:hover {
 }
 
 .p1-control::after {
-  z-index: 2;
+  z-index: 3;
   content: ' ';
   position: absolute;
   left: -0.1em;
@@ -383,8 +383,20 @@ button:hover {
   border-radius: 1000px;
 }
 
-.p2-control::after {
+.p1-control::before {
   z-index: 2;
+  content: ' ';
+  position: absolute;
+  left: -0.1em;
+  top: -0.1em;
+  right: -0.1em;
+  bottom: -0.1em;
+  border-radius: 1000px;
+  animation: ripple 3s linear infinite;
+}
+
+.p2-control::after {
+  z-index: 3;
   content: ' ';
   position: absolute;
   left: -0.1em;
@@ -393,6 +405,29 @@ button:hover {
   bottom: -0.1em;
   border: solid calc(var(--border-width) * 2) #d93b18da;
   border-radius: 1000px;
+}
+
+.p2-control::before {
+  z-index: 2;
+  content: ' ';
+  position: absolute;
+  left: -0.1em;
+  top: -0.1em;
+  right: -0.1em;
+  bottom: -0.1em;
+  border-radius: 1000px;
+  animation: ripple 3s linear infinite;
+}
+
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0rem rgba(255, 255, 255, 0.6),
+      0 0 0 0.5rem rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 0.5rem rgba(255, 255, 255, 0.6),
+      0 0 0 1rem rgba(255, 255, 255, 0);
+  }
 }
 
 .Knots {
