@@ -426,7 +426,7 @@ export class View {
     return this.createElement(
       'div',
       'influenceToken',
-      `${tokenID}token`,
+      `${tokenID}Token`,
       'enemyToken'
     );
   }
@@ -615,9 +615,7 @@ export class View {
   }
 
   protected removeControlledSpacesHighlighting() {
-    console.log('removeControlledSpacesHighlighting Method Called');
     this.gameBoard.querySelectorAll('.card-cell').forEach((ele) => {
-      console.log(ele);
       ele.classList.remove('p1-control');
       ele.classList.remove('p2-control');
     });

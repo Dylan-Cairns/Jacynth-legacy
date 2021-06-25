@@ -353,7 +353,7 @@ export class View {
     }
     createEnemyToken() {
         const tokenID = this.currPlyrID === 'Player 1' ? 'Player2' : 'Player1';
-        return this.createElement('div', 'influenceToken', `${tokenID}token`, 'enemyToken');
+        return this.createElement('div', 'influenceToken', `${tokenID}Token`, 'enemyToken');
     }
     updateScore() {
         if (this.getCurrPlyrScore &&
@@ -480,9 +480,7 @@ export class View {
         }
     }
     removeControlledSpacesHighlighting() {
-        console.log('removeControlledSpacesHighlighting Method Called');
         this.gameBoard.querySelectorAll('.card-cell').forEach((ele) => {
-            console.log(ele);
             ele.classList.remove('p1-control');
             ele.classList.remove('p2-control');
         });

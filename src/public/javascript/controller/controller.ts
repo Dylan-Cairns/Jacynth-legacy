@@ -98,6 +98,10 @@ export class MultiPlayerController {
 
     this.view.bindCreateLayout(this.model.createLayout);
 
+    this.view.bindGetControlledSpaces(
+      this.model.board.getSpacesControlledByToken
+    );
+
     if (this.currentPlayer === 'Player 1')
       socket.emit('playerReady', currentPlayer);
   }

@@ -329,7 +329,6 @@ export class GameBoard {
         }
       }
     }
-    console.log(resultsTuples);
     return resultsTuples;
   };
 }
