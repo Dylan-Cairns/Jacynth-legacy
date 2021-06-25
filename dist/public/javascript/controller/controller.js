@@ -27,6 +27,7 @@ export class SinglePlayerController {
         this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
         this.view.bindCreateLayout(this.startGame);
+        this.view.bindGetControlledSpaces(this.model.board.getSpacesControlledByToken);
     }
 }
 export class MultiPlayerController {

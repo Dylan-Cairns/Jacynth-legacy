@@ -163,14 +163,6 @@ export class GameBoard {
             // check if space is on the list of available token spaces
             const availableSpaces = this.getAvailableTokenSpaces(playerID);
             if (!availableSpaces.includes(currentSpace)) {
-                console.log('attempted to claim already controlled space. current board:');
-                this.spaces.forEach((space) => {
-                    console.log(space.getID(), space.getControlledSuitsMap());
-                    const printycard = space.getCard();
-                    if (printycard)
-                        console.log(printycard);
-                });
-                console.log('space attempting to claim and player: ', spaceID, playerID);
                 throw new Error('cannot place token on controlled space');
             }
             // if no marker and not controlled by another player, place
@@ -192,6 +184,22 @@ export class GameBoard {
                 }
             });
             return score;
+        };
+        this.getSpacesControlledByToken = (spaceID) => {
+            const resultsTuples = [];
+            for (const [id, space] of this.spaces) {
+                const card = space.getCard();
+                if (!card)
+                    continue;
+                const controlMap = space.getControlledSuitsMap();
+                for (const [suit, controllingSpaceID] of controlMap) {
+                    if (controllingSpaceID === spaceID) {
+                        resultsTuples.push([space.getID(), suit]);
+                    }
+                }
+            }
+            console.log(resultsTuples);
+            return resultsTuples;
         };
         this.boardSize = boardSize;
         this.remainingSpaces = boardSize * boardSize;

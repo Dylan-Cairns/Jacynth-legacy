@@ -314,4 +314,22 @@ export class GameBoard {
     });
     return score;
   };
+
+  getSpacesControlledByToken = (spaceID: string) => {
+    const resultsTuples = [] as [string, string][];
+    for (const [id, space] of this.spaces) {
+      const card = space.getCard();
+      if (!card) continue;
+
+      const controlMap = space.getControlledSuitsMap();
+
+      for (const [suit, controllingSpaceID] of controlMap) {
+        if (controllingSpaceID === spaceID) {
+          resultsTuples.push([space.getID(), suit]);
+        }
+      }
+    }
+    console.log(resultsTuples);
+    return resultsTuples;
+  };
 }

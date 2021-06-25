@@ -80,30 +80,23 @@ export class Player_MultiPlayer extends Player {
             this.socket.emit('drawCard', this.playerID);
         };
         this.socket = socket;
-        console.log(this.playerID);
         socket.on('recieveCardDraw', (cardID, playerID) => {
             if (playerID !== this.playerID || !cardID)
                 return;
             const card = this.deck.getCardByID(cardID);
             if (card)
                 this.hand.push(card);
-            console.log('cardDraw, cardID, playerID, handArr', card === null || card === void 0 ? void 0 : card.getId(), this.playerID, this.hand);
             if (!card || !this.sendCardDrawtoView)
                 return;
             this.sendCardDrawtoView(card);
         });
         socket.on('recievePlayerMove', (playerID, cardID, spaceID, tokenSpaceID) => {
-            console.log(`${this.playerID} recievePlayerMove method`);
-            console.log('recieved playerid, cardid, spaceID, tokenSpaceID: ', playerID, cardID, spaceID);
-            console.log('sendCardplaytoMoveCB?', this.sendCardPlaytoView);
             if (playerID !== this.playerID)
                 return;
             if (!this.sendCardPlaytoView)
                 return;
             const card = this.getCardFromHandByID(cardID);
             const space = this.gameBoard.getSpace(spaceID);
-            console.log('card from hand by id, spaceID', card === null || card === void 0 ? void 0 : card.getId(), space === null || space === void 0 ? void 0 : space.getID());
-            console.log('hand arr', this.hand);
             if (!card || !space)
                 return;
             this.playCard(spaceID, cardID);
@@ -147,7 +140,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     constructor(playerID, gameBoard, deck, opponentID) {
         super(playerID, gameBoard, deck);
         this.computerTakeTurn = () => {
-            var _a;
             const allMoves = this.getAllAvailableMoves();
             // remove token moves, then sort by score, if same score then randomize
             // (otherwise the computer will fill spaces in the board from top
@@ -158,18 +150,15 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 const random = Math.random() > 0.5 ? 1 : -1;
                 return b.cardOnlyScore - a.cardOnlyScore || random;
             });
-            console.log('cardonlyMovesSorted', cardOnlyMovesSorted);
             const topCardOnlyMove = cardOnlyMovesSorted[0];
             const topCardOnlyScore = topCardOnlyMove.cardOnlyScore;
             const tokenMoveArr = this.filterAndSortTokenScoreResults(topCardOnlyScore, allMoves);
-            console.log('tokenMovesSorted', tokenMoveArr);
             const topTokenMove = tokenMoveArr[0];
             // if there is at least 1 item in the tokenmove list after filtering,
             // that's our choice.
             const finalChoice = topTokenMove ? topTokenMove : topCardOnlyMove;
             // play card
             this.playCard(finalChoice.spaceToPlaceCard.getID(), finalChoice.cardToPlay.getId());
-            console.log(`${this.playerID} played ${finalChoice.cardToPlay.getName()} to ${finalChoice.spaceToPlaceCard.getID()}`);
             if (this.sendCardPlaytoView) {
                 this.sendCardPlaytoView(finalChoice.cardToPlay, finalChoice.spaceToPlaceCard);
             }
@@ -179,7 +168,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 if (this.sendTokenPlayToView) {
                     this.sendTokenPlayToView(finalChoice.spaceToPlaceToken);
                 }
-                console.log(`${this.playerID} played a token to ${(_a = finalChoice.spaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getID()}`);
             }
             this.drawCard();
         };

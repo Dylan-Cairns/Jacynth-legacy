@@ -1,6 +1,4 @@
 import {
-  GameModel,
-  GameType,
   Layout,
   MultiplayerGameModel,
   SinglePlayerGameModel
@@ -47,8 +45,10 @@ export class SinglePlayerController {
     );
     this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
     this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
-
     this.view.bindCreateLayout(this.startGame);
+    this.view.bindGetControlledSpaces(
+      this.model.board.getSpacesControlledByToken
+    );
   }
 
   startGame = (layout: Layout) => {

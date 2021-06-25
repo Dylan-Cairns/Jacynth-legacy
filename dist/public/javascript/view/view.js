@@ -1,6 +1,7 @@
 export class View {
     constructor(board, currPlyrID) {
         this.dragstartHandler = (event) => {
+            this.removeControlledSpacesHighlighting();
             this.removeSpaceHighlighting();
             if (!event.dataTransfer)
                 return;
@@ -52,7 +53,7 @@ export class View {
                 !this.getOpponentScore ||
                 !this.getCurrPlyrAvailTokens ||
                 !this.getOpponAvailTokens)
-                return;
+                throw new Error('callback methods are undefined');
             if (this.getAvailCardSpaces().length === 0) {
                 this.disableAllCardDragging();
                 this.disableAllTokenDragging();
@@ -71,13 +72,16 @@ export class View {
                     this.winnerText.innerHTML = "It's a tie!";
                 }
                 this.gameOverBox.style.visibility = 'visible';
+                return true;
             }
+            return false;
         };
         this.addCardToSpace = (cardDiv, spaceID) => {
             const boardSpace = document.getElementById(spaceID);
             boardSpace === null || boardSpace === void 0 ? void 0 : boardSpace.appendChild(cardDiv);
         };
         this.highlightAvailableSpaces = (getAvailableSpacesCallback) => {
+            this.removeControlledSpacesHighlighting();
             const availableSpaces = getAvailableSpacesCallback();
             availableSpaces.forEach((space) => {
                 const spaceID = space.getID();
@@ -154,6 +158,12 @@ export class View {
         this.influenceTokenContainer.appendChild(token);
         // drag and drop methods
         const boardSpaces = document.querySelectorAll('.boardSpace');
+        boardSpaces.forEach((space) => {
+            space.addEventListener('click', () => {
+                this.removeControlledSpacesHighlighting();
+                this.highlightControlledSpaces(space);
+            });
+        });
         boardSpaces.forEach((space) => {
             space.addEventListener('dragover', function (event) {
                 // prevent default to allow drop
@@ -268,6 +278,7 @@ export class View {
         });
         // menu modals and buttons
         this.menuButton.addEventListener('click', () => {
+            this.removeControlledSpacesHighlighting();
             this.removeSpaceHighlighting();
             this.openModal(this.menu);
         });
@@ -329,7 +340,7 @@ export class View {
     }
     createPlayerToken() {
         const tokenID = this.currPlyrID === 'Player 1' ? 'Player1' : 'Player2';
-        const token = this.createElement('div', 'influenceToken', `${tokenID}token`);
+        const token = this.createElement('div', 'influenceToken', `${tokenID}Token`);
         token.addEventListener('dragstart', this.dragstartHandler);
         return token;
     }
@@ -343,9 +354,7 @@ export class View {
             this.getCurrPlyrAvailTokens &&
             this.getOpponAvailTokens) {
             const currPlyrScore = this.getCurrPlyrScore();
-            console.log('currPlyrScore', currPlyrScore);
             const opponentScore = this.getOpponentScore();
-            console.log('opponentScore', opponentScore);
             const currPlyrTokens = this.getCurrPlyrAvailTokens();
             const opponentTokens = this.getOpponAvailTokens();
             this.currPlyrHUD.textContent = `Score ${currPlyrScore} Tokens ${currPlyrTokens}`;
@@ -440,6 +449,37 @@ export class View {
         modal.classList.remove('active');
         this.overlay.classList.remove('active');
     }
+    highlightControlledSpaces(space) {
+        const token = space.querySelector('.influenceToken');
+        if (!token)
+            return; // no token found, nothing to do.
+        if (!this.getSpacesControlledByToken)
+            throw new Error('callback not provided');
+        const controlledSpaces = this.getSpacesControlledByToken(space.id);
+        if (controlledSpaces.length === 0)
+            return;
+        for (const [spaceID, suit] of controlledSpaces) {
+            const spaceEle = document.getElementById(spaceID);
+            if (!spaceEle)
+                throw new Error('space not found');
+            const suitEle = spaceEle.querySelector(`.${suit}`);
+            if (!suitEle)
+                throw new Error('suit not found');
+            if (token.classList.contains('Player1Token')) {
+                suitEle.classList.add('p1-control');
+            }
+            else
+                suitEle.classList.add('p2-control');
+        }
+    }
+    removeControlledSpacesHighlighting() {
+        console.log('removeControlledSpacesHighlighting Method Called');
+        this.gameBoard.querySelectorAll('.card-cell').forEach((ele) => {
+            console.log(ele);
+            ele.classList.remove('p1-control');
+            ele.classList.remove('p2-control');
+        });
+    }
     bindGetAvailCardSpaces(availCardSpacesCB) {
         this.getAvailCardSpaces = availCardSpacesCB;
     }
@@ -479,11 +519,15 @@ export class View {
     bindCreateLayout(createLayoutCB) {
         this.chooseLayout = createLayoutCB;
     }
+    bindGetControlledSpaces(getControlledSpacesCB) {
+        this.getSpacesControlledByToken = getControlledSpacesCB;
+    }
 }
 export class SinglePlayerView extends View {
     constructor(board, currPlyrID) {
         super(board, currPlyrID);
         this.endTurnButtonCB = () => {
+            this.removeControlledSpacesHighlighting();
             this.pickupSound.play();
             if (this.computerTakeTurn) {
                 this.computerTakeTurn();
@@ -526,6 +570,7 @@ export class MultiPlayerView extends View {
     constructor(board, socket, currPlyrID) {
         super(board, currPlyrID);
         this.endTurnButtonCB = () => {
+            this.removeControlledSpacesHighlighting();
             this.pickupSound.play();
             if (this.getCardDrawFromModel) {
                 this.getCardDrawFromModel();
@@ -581,7 +626,6 @@ export class MultiPlayerView extends View {
             this.roomNumber.innerHTML = `In game room ${roomNumber} as ${this.currPlyrID}`;
         });
         this.socket.on('p2Ready', () => {
-            console.log('p2ready method recieved from server');
             if (this.currPlyrID === 'Player 2')
                 return;
             this.opponentHUDID.innerHTML = 'Player 2';
@@ -595,7 +639,6 @@ export class MultiPlayerView extends View {
         this.socket.on('beginNextTurn', (player) => {
             if (this.currPlyrID !== player)
                 return;
-            console.log('begin next turn method called');
             this.updateScore();
             this.currPlyrIcon.classList.add('active');
             this.opponentIcon.classList.remove('active');

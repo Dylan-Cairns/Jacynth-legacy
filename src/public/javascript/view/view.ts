@@ -3,7 +3,6 @@ import { Layout } from '../model/model.js';
 import { Card } from '../model/decktet.js';
 import { PlayerID } from '../model/player.js';
 import { Socket } from 'socket.io-client';
-import { polyfill } from 'mobile-drag-drop';
 
 export class View {
   currPlyrID: PlayerID;
@@ -54,6 +53,9 @@ export class View {
   getCurrPlyrScore: (() => void) | undefined;
   getOpponentScore: (() => void) | undefined;
   chooseLayout: ((layout: Layout) => void) | undefined;
+  getSpacesControlledByToken:
+    | ((spaceID: string) => [string, string][])
+    | undefined;
 
   constructor(board: GameBoard, currPlyrID: PlayerID) {
     this.currPlyrID = currPlyrID;
@@ -137,6 +139,13 @@ export class View {
     // drag and drop methods
 
     const boardSpaces = document.querySelectorAll('.boardSpace');
+
+    boardSpaces.forEach((space) => {
+      space.addEventListener('click', () => {
+        this.removeControlledSpacesHighlighting();
+        this.highlightControlledSpaces(space);
+      });
+    });
 
     boardSpaces.forEach((space) => {
       space.addEventListener(
@@ -271,6 +280,7 @@ export class View {
 
     // menu modals and buttons
     this.menuButton.addEventListener('click', () => {
+      this.removeControlledSpacesHighlighting();
       this.removeSpaceHighlighting();
       this.openModal(this.menu);
     });
@@ -302,6 +312,7 @@ export class View {
   }
 
   protected dragstartHandler = (event: any) => {
+    this.removeControlledSpacesHighlighting();
     this.removeSpaceHighlighting();
     if (!event.dataTransfer) return;
     event.dataTransfer.effectAllowed = 'move';
@@ -390,7 +401,7 @@ export class View {
     const token = this.createElement(
       'div',
       'influenceToken',
-      `${tokenID}token`
+      `${tokenID}Token`
     );
     token.addEventListener('dragstart', this.dragstartHandler);
     return token;
@@ -442,7 +453,7 @@ export class View {
       !this.getCurrPlyrAvailTokens ||
       !this.getOpponAvailTokens
     )
-      return;
+      throw new Error('callback methods are undefined');
     if (this.getAvailCardSpaces().length === 0) {
       this.disableAllCardDragging();
       this.disableAllTokenDragging();
@@ -459,7 +470,9 @@ export class View {
         this.winnerText.innerHTML = "It's a tie!";
       }
       this.gameOverBox.style.visibility = 'visible';
+      return true;
     }
+    return false;
   };
 
   protected addInfluenceTokenToHand() {
@@ -523,6 +536,7 @@ export class View {
   protected highlightAvailableSpaces = (
     getAvailableSpacesCallback: () => BoardSpace[]
   ) => {
+    this.removeControlledSpacesHighlighting();
     const availableSpaces = getAvailableSpacesCallback();
     availableSpaces.forEach((space) => {
       const spaceID = space.getID();
@@ -566,6 +580,33 @@ export class View {
     if (modal == null) return;
     modal.classList.remove('active');
     this.overlay.classList.remove('active');
+  }
+
+  protected highlightControlledSpaces(space: Element) {
+    const token = space.querySelector('.influenceToken');
+    if (!token) return; // no token found, nothing to do.
+    if (!this.getSpacesControlledByToken)
+      throw new Error('callback not provided');
+    const controlledSpaces = this.getSpacesControlledByToken(space.id);
+    if (controlledSpaces.length === 0) return;
+    for (const [spaceID, suit] of controlledSpaces) {
+      const spaceEle = document.getElementById(spaceID);
+      if (!spaceEle) throw new Error('space not found');
+      const suitEle = spaceEle.querySelector(`.${suit}`);
+      if (!suitEle) throw new Error('suit not found');
+      if (token.classList.contains('Player1Token')) {
+        suitEle.classList.add('p1-control');
+      } else suitEle.classList.add('p2-control');
+    }
+  }
+
+  protected removeControlledSpacesHighlighting() {
+    console.log('removeControlledSpacesHighlighting Method Called');
+    this.gameBoard.querySelectorAll('.card-cell').forEach((ele) => {
+      console.log(ele);
+      ele.classList.remove('p1-control');
+      ele.classList.remove('p2-control');
+    });
   }
 
   playerDrawCardCB = (card: Card) => {
@@ -643,6 +684,12 @@ export class View {
   bindCreateLayout(createLayoutCB: (layout: Layout) => void) {
     this.chooseLayout = createLayoutCB;
   }
+
+  bindGetControlledSpaces(
+    getControlledSpacesCB: (spaceID: string) => [string, string][]
+  ) {
+    this.getSpacesControlledByToken = getControlledSpacesCB;
+  }
 }
 
 export class SinglePlayerView extends View {
@@ -672,6 +719,7 @@ export class SinglePlayerView extends View {
   }
 
   endTurnButtonCB = () => {
+    this.removeControlledSpacesHighlighting();
     this.pickupSound.play();
     if (this.computerTakeTurn) {
       this.computerTakeTurn();
@@ -763,6 +811,7 @@ export class MultiPlayerView extends View {
   }
 
   endTurnButtonCB = () => {
+    this.removeControlledSpacesHighlighting();
     this.pickupSound.play();
     if (this.getCardDrawFromModel) {
       this.getCardDrawFromModel();
