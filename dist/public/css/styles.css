@@ -391,7 +391,7 @@ button:hover {
   top: -0.1em;
   right: -0.1em;
   bottom: -0.1em;
-  border: solid calc(var(--border-width) * 2) #d93b18bb;
+  border: solid calc(var(--border-width) * 2) #d93b18;
   border-radius: 1000px;
 }
 
