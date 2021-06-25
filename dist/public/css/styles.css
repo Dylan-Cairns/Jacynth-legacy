@@ -379,7 +379,7 @@ button:hover {
   top: -0.1em;
   right: -0.1em;
   bottom: -0.1em;
-  border: solid calc(var(--border-width) * 2) #94eb6b;
+  border: solid calc(var(--border-width) * 2) #4ceb02;
   border-radius: 1000px;
 }
 
@@ -567,6 +567,11 @@ a:hover {
   border-radius: var(--border-radius);
   margin: 5px;
   text-justify: center;
+  cursor: pointer;
+}
+
+.menu-button:hover {
+  color: var(--icon-text-color);
 }
 
 .menu-popup .close {
@@ -582,6 +587,13 @@ a:hover {
 
 .menu-popup .close:hover {
   color: var(--icon-text-color);
+}
+
+#howToPlayInfo {
+  width: calc(0.9 * var(--gameboard-width));
+  justify-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
 #chooseLayoutOverlay {

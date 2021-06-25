@@ -139,6 +139,8 @@ export class View {
         this.chooseLayoutOverlay = document.getElementById('chooseLayoutOverlay');
         this.chooseLayoutMenu = document.getElementById('chooseLayout');
         this.layoutButtons = document.querySelectorAll('.layoutButton');
+        this.howToPlayInfo = document.getElementById('howToPlayInfo');
+        this.howToPlayButton = document.getElementById('howToPlayButton');
         // make sure board and hand are empty
         while (this.gameBoard.firstChild) {
             this.gameBoard.removeChild(this.gameBoard.firstChild);
@@ -158,12 +160,6 @@ export class View {
         this.influenceTokenContainer.appendChild(token);
         // drag and drop methods
         const boardSpaces = document.querySelectorAll('.boardSpace');
-        boardSpaces.forEach((space) => {
-            space.addEventListener('click', () => {
-                this.removeControlledSpacesHighlighting();
-                this.highlightControlledSpaces(space);
-            });
-        });
         boardSpaces.forEach((space) => {
             space.addEventListener('dragover', function (event) {
                 // prevent default to allow drop
@@ -242,6 +238,17 @@ export class View {
         document.addEventListener('dragend', () => {
             // remove all available spaces highlighting
             this.removeSpaceHighlighting();
+        });
+        // highlight which spaces are controlled by a certain token
+        boardSpaces.forEach((space) => {
+            space.addEventListener('click', () => {
+                this.removeControlledSpacesHighlighting();
+                this.highlightControlledSpaces(space);
+            });
+        });
+        this.howToPlayButton.addEventListener('click', () => {
+            this.howToPlayInfo.classList.remove('active');
+            this.overlay.classList.remove('active');
         });
         this.undoButton.addEventListener('click', () => {
             this.removeSpaceHighlighting();
@@ -529,6 +536,8 @@ export class SinglePlayerView extends View {
         this.endTurnButtonCB = () => {
             this.removeControlledSpacesHighlighting();
             this.pickupSound.play();
+            this.currPlyrIcon.classList.remove('active');
+            this.opponentIcon.classList.add('active');
             if (this.computerTakeTurn) {
                 this.computerTakeTurn();
             }
@@ -542,6 +551,8 @@ export class SinglePlayerView extends View {
             this.endTurnButton.disabled = true;
             this.updateScore();
             this.checkForGameEnd();
+            this.currPlyrIcon.classList.add('active');
+            this.opponentIcon.classList.remove('active');
         };
         this.currPlyrHUDID.innerHTML = `Player`;
         this.opponentHUDID.innerHTML = `Computer`;
@@ -562,6 +573,8 @@ export class SinglePlayerView extends View {
                 if (!layoutChoice || !this.chooseLayout)
                     return;
                 this.chooseLayout(layoutChoice);
+                this.howToPlayInfo.classList.add('active');
+                this.overlay.classList.add('active');
             });
         });
     }
@@ -595,6 +608,8 @@ export class MultiPlayerView extends View {
             this.currPlyrIcon.classList.add('player1Icon');
             this.currPlyrIcon.classList.add('losing');
             this.currPlyrIcon.classList.add('active');
+            this.howToPlayInfo.classList.add('active');
+            this.overlay.classList.add('active');
         }
         else {
             this.currPlyrHUDID.innerHTML = 'Player 2';
@@ -617,6 +632,8 @@ export class MultiPlayerView extends View {
                     if (!layoutChoice || !this.chooseLayout)
                         return;
                     this.chooseLayout(layoutChoice);
+                    this.howToPlayInfo.classList.add('active');
+                    this.overlay.classList.add('active');
                 });
             });
         }
