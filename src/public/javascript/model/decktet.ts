@@ -465,15 +465,18 @@ export class Card {
 
 export class Decktet {
   private cards: Card[];
+  private referenceDeck: Map<string, Card>;
 
   constructor(deckType: DeckType) {
     this.cards = [];
+    this.referenceDeck = new Map();
 
     if (deckType === 'basicDeck') {
       for (const obj of RAW_CARD_OBJECTS) {
         if (['Ace', 'Numeral', 'Crown'].includes(obj.rank)) {
           const card = new Card(obj);
           this.cards.push(card);
+          this.referenceDeck.set(card.getId(), card);
         }
       }
     } else {
@@ -503,6 +506,10 @@ export class Decktet {
   }
 
   getCardByID(cardID: string): Card | undefined {
-    return this.cards.filter((card) => card.getId() === cardID)[0];
+    return this.referenceDeck.get(cardID);
+  }
+
+  getReferenceDeck() {
+    return this.referenceDeck;
   }
 }

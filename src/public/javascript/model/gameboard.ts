@@ -291,6 +291,9 @@ export class GameBoard {
     // check if space is on the list of available token spaces
     const availableSpaces = this.getAvailableTokenSpaces(playerID);
     if (!availableSpaces.includes(currentSpace)) {
+      console.log('space to place token: ', currentSpace);
+      console.log('playeriD: ', playerID);
+      console.log('board: ', this.spaces);
       throw new Error('cannot place token on controlled space');
     }
 

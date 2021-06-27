@@ -375,11 +375,11 @@ button:hover {
   z-index: 3;
   content: ' ';
   position: absolute;
-  left: -0.1em;
-  top: -0.1em;
-  right: -0.1em;
-  bottom: -0.1em;
-  border: solid calc(var(--border-width) * 2) #4ceb02e1;
+  left: calc(-1 * var(--border-width));
+  top: calc(-1 * var(--border-width));
+  right: calc(-1 * var(--border-width));
+  bottom: calc(-1 * var(--border-width));
+  border: solid calc(var(--border-width) * 1.5) #4ceb02e1;
   border-radius: 1000px;
 }
 
@@ -399,11 +399,11 @@ button:hover {
   z-index: 3;
   content: ' ';
   position: absolute;
-  left: -0.1em;
-  top: -0.1em;
-  right: -0.1em;
-  bottom: -0.1em;
-  border: solid calc(var(--border-width) * 2) #d93b18da;
+  left: calc(-1 * var(--border-width));
+  top: calc(-1 * var(--border-width));
+  right: calc(-1 * var(--border-width));
+  bottom: calc(-1 * var(--border-width));
+  border: solid calc(var(--border-width) * 1.5) #d93b18da;
   border-radius: 1000px;
 }
 

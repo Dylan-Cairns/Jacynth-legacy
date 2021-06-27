@@ -439,11 +439,13 @@ export class Card {
 export class Decktet {
     constructor(deckType) {
         this.cards = [];
+        this.referenceDeck = new Map();
         if (deckType === 'basicDeck') {
             for (const obj of RAW_CARD_OBJECTS) {
                 if (['Ace', 'Numeral', 'Crown'].includes(obj.rank)) {
                     const card = new Card(obj);
                     this.cards.push(card);
+                    this.referenceDeck.set(card.getId(), card);
                 }
             }
         }
@@ -470,6 +472,9 @@ export class Decktet {
         }
     }
     getCardByID(cardID) {
-        return this.cards.filter((card) => card.getId() === cardID)[0];
+        return this.referenceDeck.get(cardID);
+    }
+    getReferenceDeck() {
+        return this.referenceDeck;
     }
 }
