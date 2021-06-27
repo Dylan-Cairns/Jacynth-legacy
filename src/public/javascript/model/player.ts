@@ -1,14 +1,14 @@
 import { Socket } from 'socket.io-client';
 
-import { Card, Decktet } from './decktet.js';
+import { Suit, Card, Decktet } from './decktet.js';
 import { BoardSpace, GameBoard } from './gameboard.js';
 
 // game variables that never change
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 // initial minimum values used in AI move selection
-const CARD_VALUE_THRESHOLD = 6;
-const SCORE_INCREASE_THRESHOLD = 1;
+const CARD_VALUE_THRESHOLD = 7;
+const SCORE_INCREASE_THRESHOLD = 3;
 
 type AiMoveSearchResultsObj = {
   cardToPlay: Card;
@@ -202,15 +202,23 @@ export class Player_SinglePlayer extends Player {
 
 export class Player_ComputerPlayer extends Player_SinglePlayer {
   opponentID: PlayerID;
+  getOpponentTokensNum: () => number;
+  placeOpponentToken: (spaceID: string) => boolean;
+  removeOpponentToken: (spaceID: string) => void;
   constructor(
     playerID: PlayerID,
     gameBoard: GameBoard,
     deck: Decktet,
-    opponentID: PlayerID
+    opponentID: PlayerID,
+    getOpponentTokensNumCB: () => number,
+    placeOpponentTokenCB: (spaceID: string) => boolean,
+    removeOpponentTokenCB: (spaceID: string) => void
   ) {
     super(playerID, gameBoard, deck);
     this.opponentID = opponentID;
-    // variable to set max depth for minimax search
+    this.getOpponentTokensNum = getOpponentTokensNumCB;
+    this.placeOpponentToken = placeOpponentTokenCB;
+    this.removeOpponentToken = removeOpponentTokenCB;
   }
 
   private generatePossibleCardsinFutureHands() {
@@ -244,6 +252,193 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     return availableCards;
   }
 
+  // helper fn to adjust requirements for placing an influence
+  // token as the game progresses
+  private adjustMinThreshold(hopedForAmt: number) {
+    const spaceLeft = this.gameBoard.getRemainingSpacesNumber();
+    const sizeOfTheBoard = Math.pow(this.gameBoard.getBoardSize(), 2);
+    // hack add on: don't go less than 50% of our original requirement
+    let settledForNumber = Math.ceil(
+      hopedForAmt * Math.max(0.5, spaceLeft / sizeOfTheBoard)
+    );
+    // hack add on: don't start reducing threshold until middle half of the game
+    if (spaceLeft / sizeOfTheBoard > 0.25) settledForNumber = hopedForAmt;
+
+    return settledForNumber;
+  }
+
+  private blockTheft(
+    cardMoves: AiMoveSearchResultsObj[],
+    tokenMoves: AiMoveSearchResultsObj[]
+  ) {
+    const suitArr = [
+      'Knots',
+      'Leaves',
+      'Moons',
+      'Suns',
+      'Waves',
+      'Wyrms'
+    ] as Suit[];
+    for (const space of this.gameBoard.getAvailableSpaces()) {
+      const adjSpaces = this.gameBoard.getAdjacentSpaces(space.getID());
+      // for each suit, check if there are adjacent spaces controlled by
+      // different opponents.
+      for (const suit of suitArr) {
+        const spacesWSuit = adjSpaces.filter((adjSpace) =>
+          adjSpace.getControlledSuitsMap().get(suit)
+        );
+        const controllingSpaces = [] as BoardSpace[];
+        const playerIDs = [] as PlayerID[];
+
+        spacesWSuit.forEach((spaceWSuit) => {
+          const controllingSpaceID = spaceWSuit.getControllingSpaceID(suit)!;
+          const controllingSpace = this.gameBoard.getSpace(controllingSpaceID)!;
+          controllingSpaces.push(controllingSpace);
+          const controllingPlayer = controllingSpace.getPlayerToken()!;
+          if (!playerIDs.includes(controllingPlayer))
+            playerIDs.push(controllingPlayer);
+        });
+        // if we found 2 different player IDs, next move someone could
+        // get their territory stolen. check whose card is higher.
+        if (playerIDs.length > 1) {
+          const highValueSpace = controllingSpaces.sort(
+            (spaceA, spaceB) =>
+              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+              spaceB.getCard()?.getValue()! - spaceA.getCard()?.getValue()!
+          )[0];
+          if (highValueSpace?.getControllingSpaceID(suit) !== this.playerID) {
+            console.log('found potential steal risk!');
+            console.log(space.getID(), suit);
+
+            const filterMovesCB = (move: AiMoveSearchResultsObj) => {
+              if (
+                move.spaceToPlaceCard === space &&
+                !move.cardToPlay.getAllSuits().includes(suit)
+              ) {
+                return true;
+              }
+              return false;
+            };
+
+            const cardOnlyblockMoves = cardMoves.filter((move) =>
+              filterMovesCB(move)
+            );
+            const tokenBlockMoves = tokenMoves.filter((move) =>
+              filterMovesCB(move)
+            );
+            console.log('card block moves arr: ', cardOnlyblockMoves);
+            console.log('tokenBlockMovesarr', tokenBlockMoves);
+            const topCardOnlyMove = cardOnlyblockMoves[0];
+            const topTokenMove = tokenBlockMoves[0];
+            // if there is at least 1 item in the tokenmove list after filtering,
+            // that's our choice.
+            const finalChoice = topTokenMove ? topTokenMove : topCardOnlyMove;
+            // play card
+
+            // if no play that can defend from the theft was found, continue.
+            if (!finalChoice) continue;
+
+            this.playCard(
+              finalChoice.spaceToPlaceCard.getID(),
+              finalChoice.cardToPlay.getId()
+            );
+            if (this.sendCardPlaytoView) {
+              this.sendCardPlaytoView(
+                finalChoice.cardToPlay,
+                finalChoice.spaceToPlaceCard
+              );
+            }
+            // if token play information exists, play token
+            if (finalChoice?.withTokenScore && finalChoice?.spaceToPlaceToken) {
+              this.placeToken(finalChoice.spaceToPlaceToken.getID());
+              if (this.sendTokenPlayToView) {
+                this.sendTokenPlayToView(finalChoice.spaceToPlaceToken);
+              }
+            }
+            this.drawCard();
+
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  private hasTheftRisk() {
+    const suitArr = [
+      'Knots',
+      'Leaves',
+      'Moons',
+      'Suns',
+      'Waves',
+      'Wyrms'
+    ] as Suit[];
+    for (const space of this.gameBoard.getAvailableSpaces()) {
+      const adjSpaces = this.gameBoard.getAdjacentSpaces(space.getID());
+      // for each suit, check if there are adjacent spaces controlled by
+      // different opponents.
+      for (const suit of suitArr) {
+        const spacesWSuit = adjSpaces.filter((adjSpace) =>
+          adjSpace.getControlledSuitsMap().get(suit)
+        );
+        const controllingSpaces = [] as BoardSpace[];
+        const playerIDs = [] as PlayerID[];
+
+        spacesWSuit.forEach((spaceWSuit) => {
+          const controllingSpaceID = spaceWSuit.getControllingSpaceID(suit)!;
+          const controllingSpace = this.gameBoard.getSpace(controllingSpaceID)!;
+          controllingSpaces.push(controllingSpace);
+          const controllingPlayer = controllingSpace.getPlayerToken()!;
+          if (!playerIDs.includes(controllingPlayer))
+            playerIDs.push(controllingPlayer);
+        });
+        // if we found 2 different player IDs, next move someone could
+        // get their territory stolen. check whose card is higher.
+        if (playerIDs.length > 1) {
+          const highValueSpace = controllingSpaces.sort(
+            (spaceA, spaceB) =>
+              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+              spaceB.getCard()?.getValue()! - spaceA.getCard()?.getValue()!
+          )[0];
+          if (highValueSpace?.getControllingSpaceID(suit) !== this.playerID) {
+            console.log('has steal risk method found potential steal risk!');
+            console.log(space.getID(), suit);
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  // helper fn to test wether a potential token placement meets minimum reqs
+  private filterAndSortTokenScoreResults(
+    topCardScore: number,
+    tokenScoreArr: AiMoveSearchResultsObj[]
+  ): AiMoveSearchResultsObj[] {
+    const adjustedCardValueThreshold =
+      this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
+    const adjustedScoreThreshold = this.adjustMinThreshold(
+      SCORE_INCREASE_THRESHOLD
+    );
+    // check for withTokenScore to remove card-only results from the list.
+    // Then remove results which don't raise the score by the minimum threshold
+    // versus just playing a card
+    tokenScoreArr = tokenScoreArr.filter(
+      (ele) =>
+        ele.withTokenScore !== undefined &&
+        ele.withTokenScore! - topCardScore >= adjustedScoreThreshold
+    );
+    // sort the array first by score,
+    // then by the value of the card the token will be placed on
+    return tokenScoreArr.sort(
+      (a, b) =>
+        b.withTokenScore! - a.withTokenScore! ||
+        b.tokenSpaceCardValue! - a.tokenSpaceCardValue!
+    );
+  }
+
   private getAllAvailableMoves(playerID: PlayerID, availableCards: Card[]) {
     // switch search between current player or opponent player
     const opponentID =
@@ -268,7 +463,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
           this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
         const changeInComputerScore =
           this.gameBoard.getPlayerScore(playerID) - currentComputerScore;
-        const cardOnlyScore = changeInComputerScore - changeInHumanScore;
+        let cardOnlyScore = changeInComputerScore - changeInHumanScore;
+
+        if (this.hasTheftRisk()) cardOnlyScore -= 10;
 
         const cardOnlyScoreObj = {
           cardToPlay: card,
@@ -301,8 +498,10 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 const tokenChangeInComputerScore =
                   this.gameBoard.getPlayerScore(playerID) -
                   currentComputerScore;
-                const withTokenScore =
+                let withTokenScore =
                   tokenChangeInComputerScore - tokenChangeInHumanScore;
+
+                if (this.hasTheftRisk()) withTokenScore -= 10;
 
                 const withTokenScoreObj = {
                   cardToPlay: card,
@@ -328,7 +527,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     return resultsArr;
   }
 
-  computerTakeTurnOld = () => {
+  computerTakeTurn = () => {
     const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
     // remove token moves, then sort by score, if same score then randomize
     // (otherwise the computer will fill spaces in the board from top
@@ -346,6 +545,8 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
       allMoves
     );
     const topTokenMove = tokenMoveArr[0];
+    // call the blocktheft fn to check for potential theft and place a move to block it.
+    if (this.blockTheft(cardOnlyMovesSorted, tokenMoveArr)) return;
 
     // if there is at least 1 item in the tokenmove list after filtering,
     // that's our choice.
@@ -371,17 +572,37 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     this.drawCard();
   };
 
-  computerTakeTurn = () => {
+  // an experiment to implement minimax which predictably didn't work well
+  // given the nature of this game. It was interesting though!
+  computerTakeTurnMinimax = () => {
     const MAXSEARCHDEPTH = 2;
 
+    const getAvailableMovesMinimax = (cards: Card[], playerID: PlayerID) => {
+      const results = [] as MiniMaxSearchObj[];
+      const availableSpaces = this.gameBoard.getAvailableSpaces();
+
+      availableSpaces.forEach((space) => {
+        cards.forEach((card) => {
+          const cardOnly = {
+            cardToPlay: card,
+            spaceToPlaceCard: space,
+            spaceToPlaceToken: undefined,
+            score: 0
+          };
+          results.push(cardOnly);
+        });
+      });
+
+      return results;
+    };
+
     const minimax = (maximizing = true, depth = 0) => {
-      const movesArr = [] as MiniMaxSearchObj[];
+      const cardonlyMovesArr = [] as MiniMaxSearchObj[];
+      const tokenmovesArr = [] as MiniMaxSearchObj[];
 
       const boardSpacesRemaining = this.gameBoard.getRemainingSpacesNumber();
+
       if (boardSpacesRemaining === 0 || depth === MAXSEARCHDEPTH) {
-        // if reached terminal state or max recursive depth, first get
-        // each players score. then reset all played moves. Then
-        // return a score
         const computerScore = this.gameBoard.getPlayerScore(this.playerID);
         const opponentScore = this.gameBoard.getPlayerScore(this.opponentID);
 
@@ -390,62 +611,88 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
           else if (opponentScore > computerScore)
             return { score: -100 + depth };
           else return { score: computerScore - opponentScore };
-        } else if (depth === MAXSEARCHDEPTH) {
-          // console.log('max depth');
-          return { score: computerScore - opponentScore };
         }
+        return { score: computerScore - opponentScore };
       }
 
       let bestMove;
 
       if (maximizing) {
         let availableMoves = [] as MiniMaxSearchObj[];
+        // if first move, use cards in hand. Otherwise use all potential cards
         if (depth === 0) {
-          availableMoves = this.getAvailableMovesMinimax(
-            this.hand,
-            this.playerID
-          );
+          availableMoves = getAvailableMovesMinimax(this.hand, this.playerID);
         } else {
-          availableMoves = this.getAvailableMovesMinimax(
+          availableMoves = getAvailableMovesMinimax(
             this.generatePossibleCardsinFutureHands(),
             this.playerID
           );
         }
-
+        // try each move
         availableMoves.forEach((move) => {
           this.gameBoard.setCard(
             move.spaceToPlaceCard.getID(),
             move.cardToPlay
           );
-          if (move.spaceToPlaceToken) {
-            this.gameBoard.setPlayerToken(
-              move.spaceToPlaceToken.getID(),
+          // if computer still has influence tokens, test each placement choice
+          // that meets minimum requirements
+          if (this.influenceTokens > 0) {
+            const tokenSpaces = this.gameBoard.getAvailableTokenSpaces(
               this.playerID
             );
+
+            tokenSpaces.forEach((tokenSpace) => {
+              const tokenSpaceCard = tokenSpace.getCard();
+              if (tokenSpaceCard && tokenSpaceCard.getValue() > 6) {
+                this.placeToken(tokenSpace.getID());
+
+                const tokenMove = {
+                  cardToPlay: move.cardToPlay,
+                  spaceToPlaceCard: move.spaceToPlaceCard,
+                  spaceToPlaceToken: tokenSpace,
+                  score: 0
+                };
+
+                const result = minimax(false, depth + 1);
+                if (result && result.score) tokenMove.score = result.score;
+
+                tokenmovesArr.push(tokenMove);
+
+                this.undoPlaceToken(tokenMove.spaceToPlaceToken.getID());
+              }
+            });
           }
 
           const result = minimax(false, depth + 1);
           if (result && result.score) move.score = result.score;
 
-          movesArr.push(move);
+          cardonlyMovesArr.push(move);
           // undo move
-          if (move.spaceToPlaceToken) {
-            this.gameBoard.removePlayerTokenAndResolveBoard(
-              move.spaceToPlaceToken.getID()
-            );
-          }
+
           this.gameBoard.removeCardAndResolveBoard(
             move.spaceToPlaceCard.getID()
           );
         });
 
-        bestMove = movesArr.sort(
+        const bestCardOnlyMove = cardonlyMovesArr.sort(
           (moveA, moveB) => moveB.score - moveA.score
         )[0];
+        const bestTokenMove = tokenmovesArr.sort(
+          (moveA, moveB) => moveB.score - moveA.score
+        )[0];
+        // only choose token move if it scores at least 2 more points than card only move
+        if (bestTokenMove) {
+          bestMove =
+            bestTokenMove.score - bestCardOnlyMove.score > 1
+              ? bestTokenMove
+              : bestCardOnlyMove;
+        } else {
+          bestMove = bestCardOnlyMove;
+        }
       }
       if (!maximizing) {
         let availableMoves = [] as MiniMaxSearchObj[];
-        availableMoves = this.getAvailableMovesMinimax(
+        availableMoves = getAvailableMovesMinimax(
           this.generatePossibleCardsinFutureHands(),
           this.opponentID
         );
@@ -455,119 +702,72 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             move.spaceToPlaceCard.getID(),
             move.cardToPlay
           );
-          if (move.spaceToPlaceToken) {
-            this.gameBoard.setPlayerToken(
-              move.spaceToPlaceToken.getID(),
+
+          if (this.getOpponentTokensNum() > 0) {
+            const tokenSpaces = this.gameBoard.getAvailableTokenSpaces(
               this.opponentID
             );
+
+            tokenSpaces.forEach((tokenSpace) => {
+              const tokenSpaceCard = tokenSpace.getCard();
+              if (tokenSpaceCard && tokenSpaceCard.getValue() > 6) {
+                this.placeOpponentToken(tokenSpace.getID());
+
+                const tokenMove = {
+                  cardToPlay: move.cardToPlay,
+                  spaceToPlaceCard: move.spaceToPlaceCard,
+                  spaceToPlaceToken: tokenSpace,
+                  score: 0
+                };
+
+                const result = minimax(true, depth + 1);
+                if (result && result.score) tokenMove.score = result.score;
+
+                tokenmovesArr.push(tokenMove);
+
+                this.removeOpponentToken(tokenMove.spaceToPlaceToken.getID());
+              }
+            });
           }
 
           const result = minimax(false, depth + 1);
           if (result && result.score) move.score = result.score;
 
-          movesArr.push(move);
+          cardonlyMovesArr.push(move);
+          // undo move
 
-          if (move.spaceToPlaceToken) {
-            this.gameBoard.removePlayerTokenAndResolveBoard(
-              move.spaceToPlaceToken.getID()
-            );
-          }
           this.gameBoard.removeCardAndResolveBoard(
             move.spaceToPlaceCard.getID()
           );
         });
-        bestMove = movesArr.sort(
-          (moveA, moveB) => moveA.score - moveB.score
+        const bestCardOnlyMove = cardonlyMovesArr.sort(
+          (moveA, moveB) => moveB.score - moveA.score
         )[0];
+        const bestTokenMove = tokenmovesArr.sort(
+          (moveA, moveB) => moveB.score - moveA.score
+        )[0];
+        // only choose token move if it scores at least 2 more points than card only move
+        if (bestTokenMove) {
+          bestMove =
+            bestTokenMove.score - bestCardOnlyMove.score > 1
+              ? bestTokenMove
+              : bestCardOnlyMove;
+        } else {
+          bestMove = bestCardOnlyMove;
+        }
       }
       return bestMove;
     };
     const topMove = minimax() as MiniMaxSearchObj;
     console.log('minimax finished', topMove);
-
     this.playCard(topMove.spaceToPlaceCard.getID(), topMove.cardToPlay.getId());
     if (this.sendCardPlaytoView)
       this.sendCardPlaytoView(topMove.cardToPlay, topMove.spaceToPlaceCard);
-    // if (topMove.spaceToPlaceToken) {
-    //   this.gameBoard.setPlayerToken(
-    //     topMove.spaceToPlaceToken.getID(),
-    //     this.playerID
-    //   );
-    //   if (this.sendTokenPlayToView)
-    //     this.sendTokenPlayToView(topMove.spaceToPlaceToken);
-    // }
+    if (topMove.spaceToPlaceToken) {
+      this.placeToken(topMove.spaceToPlaceToken.getID());
+      if (this.sendTokenPlayToView)
+        this.sendTokenPlayToView(topMove.spaceToPlaceToken);
+    }
+    this.drawCard();
   };
-
-  getAvailableMovesMinimax = (cards: Card[], playerID: PlayerID) => {
-    const results = [] as MiniMaxSearchObj[];
-    const availableSpaces = this.gameBoard.getAvailableSpaces();
-
-    availableSpaces.forEach((space) => {
-      cards.forEach((card) => {
-        const cardOnly = {
-          cardToPlay: card,
-          spaceToPlaceCard: space,
-          spaceToPlaceToken: undefined,
-          score: 0
-        };
-        results.push(cardOnly);
-        // const tokenSpaces = this.gameBoard.getAvailableTokenSpaces(playerID);
-        // tokenSpaces.forEach((tokenSpace) => {
-        //   const card = tokenSpace.getCard();
-        //   if (card) {
-        //     if (card.getValue() > 7) {
-        //       const withToken = {
-        //         cardToPlay: card,
-        //         spaceToPlaceCard: space,
-        //         spaceToPlaceToken: tokenSpace,
-        //         score: 0
-        //       };
-        //       results.push(withToken);
-        //     }
-        //   }
-        // });
-      });
-    });
-    // console.log(results);
-    return results;
-  };
-
-  // helper fn to adjust requirements for placing an influence
-  // token as the game progresses
-  private adjustMinThreshold(hopedForAmt: number) {
-    const spaceLeft = this.gameBoard.getRemainingSpacesNumber();
-    const sizeOfTheBoard = Math.pow(this.gameBoard.getBoardSize(), 2);
-    const settledForNumber = Math.ceil(
-      hopedForAmt * (spaceLeft / sizeOfTheBoard)
-    );
-
-    return settledForNumber;
-  }
-
-  // helper fn to test wether a potential token placement meets minimum
-  private filterAndSortTokenScoreResults(
-    topCardScore: number,
-    tokenScoreArr: AiMoveSearchResultsObj[]
-  ): AiMoveSearchResultsObj[] {
-    const adjustedCardValueThreshold =
-      this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
-    const adjustedScoreThreshold = this.adjustMinThreshold(
-      SCORE_INCREASE_THRESHOLD
-    );
-    // check for withTokenScore to remove card-only results from the list.
-    // Then remove results which don't raise the score by the minimum threshold
-    // versus just playing a card
-    tokenScoreArr = tokenScoreArr.filter(
-      (ele) =>
-        ele.withTokenScore !== undefined &&
-        ele.withTokenScore! - topCardScore >= adjustedScoreThreshold
-    );
-    // sort the array first by score,
-    // then by the value of the card the token will be placed on
-    return tokenScoreArr.sort(
-      (a, b) =>
-        b.withTokenScore! - a.withTokenScore! ||
-        b.tokenSpaceCardValue! - a.tokenSpaceCardValue!
-    );
-  }
 }

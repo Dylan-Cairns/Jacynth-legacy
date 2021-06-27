@@ -22,7 +22,7 @@ export class SinglePlayerGameModel extends GameModel {
     constructor(deckType) {
         super(deckType);
         this.currPlyr = new Player_SinglePlayer('Player 1', this.board, this.deck);
-        this.opposPlyr = new Player_ComputerPlayer('Computer', this.board, this.deck, 'Player 1');
+        this.opposPlyr = new Player_ComputerPlayer('Computer', this.board, this.deck, 'Player 1', this.currPlyr.getInfluenceTokensNo, this.currPlyr.placeToken, this.currPlyr.undoPlaceToken);
     }
     startGame(layout) {
         this.createLayout(this.board, this.deck, layout);

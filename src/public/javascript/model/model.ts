@@ -47,7 +47,10 @@ export class SinglePlayerGameModel extends GameModel {
       'Computer',
       this.board,
       this.deck,
-      'Player 1'
+      'Player 1',
+      this.currPlyr.getInfluenceTokensNo,
+      this.currPlyr.placeToken,
+      this.currPlyr.undoPlaceToken
     );
   }
 
