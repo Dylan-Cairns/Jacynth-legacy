@@ -266,7 +266,10 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
 
     return settledForNumber;
   }
-
+  // Method to detect and avoid territories being stolen.
+  // TODO: update the method to increase the score of the potential blocking moves
+  // by the size of the at risk district and defer to the computerTakeTurn
+  // method to actually place the card
   private blockTheft(
     cardMoves: AiMoveSearchResultsObj[],
     tokenMoves: AiMoveSearchResultsObj[]
@@ -402,8 +405,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
               spaceB.getCard()?.getValue()! - spaceA.getCard()?.getValue()!
           )[0];
           if (highValueSpace?.getControllingSpaceID(suit) !== this.playerID) {
-            console.log('has steal risk method found potential steal risk!');
-            console.log(space.getID(), suit);
             return true;
           }
         }
@@ -449,8 +450,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     const resultsArr = [] as AiMoveSearchResultsObj[];
     const adjustedCardValueThreshold =
       this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
-    // sort cards in hand by value. If it's not possible to increase the
-    // score this turn, then at least we will only play the lowest valued card
+
     const handArr = this.getHandArr().sort((a, b) => {
       return a.getValue() - b.getValue();
     });
@@ -464,7 +464,8 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         const changeInComputerScore =
           this.gameBoard.getPlayerScore(playerID) - currentComputerScore;
         let cardOnlyScore = changeInComputerScore - changeInHumanScore;
-
+        // if there is a theft risk, reduce the score of this move by a large number.
+        // TODO: adjust the score by the num of cards in the at risk district instead
         if (this.hasTheftRisk()) cardOnlyScore -= 10;
 
         const cardOnlyScoreObj = {
