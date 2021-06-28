@@ -527,6 +527,10 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     });
     return resultsArr;
   }
+  // TODO: overhaul this method to use a weighted system taking into account
+  // the current parameters and also
+  // - considering growth potential of a district when placing a token
+  // - blocking an opponent when no better move is available
 
   computerTakeTurn = () => {
     const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
