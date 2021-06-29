@@ -144,6 +144,23 @@ export class GameBoard {
     return results;
   }
 
+  getDiagonalSpaces(spaceID: string) {
+    const x = parseInt(spaceID[1]);
+    const y = parseInt(spaceID[3]);
+    const diagArr = [
+      [x - 1, y - 1],
+      [x + 1, y - 1],
+      [x - 1, y + 1],
+      [x + 1, y + 1]
+    ];
+    const resultsArr = [];
+    for (const coord of diagArr) {
+      const space = this.spaces.get(`x${coord[0]}y${coord[1]}`);
+      if (space) resultsArr.push(space);
+    }
+    return resultsArr;
+  }
+
   // To be available, a space must be empty
   // and adjacent to an already played card
   isPlayableSpace(spaceID: string): boolean {

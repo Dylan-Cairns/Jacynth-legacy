@@ -219,7 +219,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         }
         // filter for spaces that are available
         const availableAdjSpaces = adjacentSpaces.filter((space) => this.gameBoard.getAvailableSpaces().includes(space));
-        console.log('availadjspaces', availableAdjSpaces, availableAdjSpaces.length);
         return availableAdjSpaces.length;
     }
     // Method to detect and avoid territories being stolen.
@@ -266,17 +265,12 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
                     return ((_a = spaceB.getCard()) === null || _a === void 0 ? void 0 : _a.getValue()) - ((_b = spaceA.getCard()) === null || _b === void 0 ? void 0 : _b.getValue()); });
                     const highValueSpace = sortedSpaces[0];
-                    console.log(sortedSpaces);
                     if ((highValueSpace === null || highValueSpace === void 0 ? void 0 : highValueSpace.getPlayerToken()) !== this.playerID) {
-                        console.log(highValueSpace === null || highValueSpace === void 0 ? void 0 : highValueSpace.getPlayerToken());
-                        console.log('found potential steal risk!');
-                        console.log(space.getID(), suit);
                         // if theft risk found, increase the score of any moves which will
                         // block the theft by the size of the district that would be lost.
                         if (!atRiskTokenSpaceID)
                             return 0;
                         const atRiskDistrictSize = this.gameBoard.getDistrict(atRiskTokenSpaceID, suit).length;
-                        console.log('atRiskDistrictSize', atRiskDistrictSize);
                         largestAtRiskDistrictSize = Math.max(largestAtRiskDistrictSize, atRiskDistrictSize);
                         if (!checkforSelfKill) {
                             const blockingMoves = movesArr.filter((move) => {
@@ -292,7 +286,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 }
             }
         }
-        console.log('largestAtRiskDistrictSize', largestAtRiskDistrictSize);
         return largestAtRiskDistrictSize;
     }
     // helper fn to test wether a potential token placement meets minimum reqs
@@ -364,6 +357,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                 spaceToPlaceToken: availTokenSpace,
                                 tokenSpaceCardValue: tokenSpaceCardValue
                             };
+                            this.searchForTheftOpportunity(withTokenScoreObj);
                             resultsArr.push(withTokenScoreObj);
                             // reset score after each token removal
                             this.gameBoard.removePlayerTokenAndResolveBoard(availTokenSpace.getID());
@@ -375,5 +369,62 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             });
         });
         return resultsArr;
+    }
+    searchForTheftOpportunity(tokenMove) {
+        var _a, _b, _c;
+        const tokenSpaceSuits = (_a = tokenMove.spaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getControlledSuitsMap();
+        if (!tokenSpaceSuits)
+            return;
+        // get diagonal spaces
+        const diagSpaces = this.gameBoard.getDiagonalSpaces(tokenMove.spaceToPlaceToken.getID());
+        const adjacentSpaces = this.gameBoard.getAdjacentSpaces(tokenMove.spaceToPlaceToken.getID());
+        // for each diagonal space
+        for (const diagSpace of diagSpaces) {
+            if (!diagSpace.getCard())
+                continue;
+            // get the adjacent spaces that it has in common with the
+            // space we are considering placing a token on, and make sure they are
+            // playable
+            const commonAdjSpaces = this.gameBoard
+                .getAdjacentSpaces(diagSpace.getID())
+                .filter((adjSpace) => adjacentSpaces.includes(adjSpace) &&
+                this.gameBoard.isPlayableSpace(adjSpace.getID()));
+            // there should be exactly two playable spaces in between.
+            if (commonAdjSpaces.length !== 2)
+                continue;
+            const suits = diagSpace.getControlledSuitsMap();
+            for (const [suit, ctrlspce] of suits) {
+                if (!tokenSpaceSuits.get(suit))
+                    continue;
+                // we have found a card with the same suit as our token card
+                const controlSpaceID = diagSpace.getControllingSpaceID(suit);
+                const controlSpace = this.gameBoard.getSpace(controlSpaceID);
+                if (controlSpace.getPlayerToken() === this.playerID)
+                    return;
+                // it's controlled by an enemy
+                const enemyCardValue = controlSpace.getCard().getValue();
+                if (
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                enemyCardValue > ((_c = (_b = tokenMove.spaceToPlaceToken) === null || _b === void 0 ? void 0 : _b.getCard()) === null || _c === void 0 ? void 0 : _c.getValue()))
+                    return;
+                // our card is of a higher value.
+                const cardsinHandWSameSuit = this.hand.filter((card) => {
+                    var _a;
+                    return card.getAllSuits().includes(suit) &&
+                        ((_a = tokenMove.spaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getCard()) !== card;
+                });
+                if (cardsinHandWSameSuit.length < 1)
+                    return;
+                // and we have another card with the same suit in our hand with which to make the connection.
+                // We now know we have found an enemy territory which we can steal!
+                // Get the size of the territory.
+                const enemyDistrictSize = this.gameBoard.getDistrict(diagSpace.getID(), suit).length;
+                console.log('found diagonal theft opportunity!');
+                console.log('space to attack:', diagSpace);
+                console.log('attacking space', tokenMove.spaceToPlaceToken);
+                console.log('suit: ', suit);
+                tokenMove.score += enemyDistrictSize;
+            }
+        }
     }
 }
