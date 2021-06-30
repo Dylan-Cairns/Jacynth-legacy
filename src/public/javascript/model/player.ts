@@ -548,8 +548,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
 
         const cardsinHandWSameSuit = this.hand.filter(
           (card) =>
-            card.getAllSuits().includes(suit) &&
-            tokenMove.spaceToPlaceToken?.getCard() !== card
+            card.getAllSuits().includes(suit) && tokenMove.cardToPlay !== card
         );
         if (cardsinHandWSameSuit.length < 1) return;
         // and we have another card with the same suit in our hand with which to make the connection.

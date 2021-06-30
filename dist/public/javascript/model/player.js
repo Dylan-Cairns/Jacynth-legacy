@@ -398,11 +398,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 enemyCardValue > ((_c = (_b = tokenMove.spaceToPlaceToken) === null || _b === void 0 ? void 0 : _b.getCard()) === null || _c === void 0 ? void 0 : _c.getValue()))
                     return;
                 // our card is of a higher value.
-                const cardsinHandWSameSuit = this.hand.filter((card) => {
-                    var _a;
-                    return card.getAllSuits().includes(suit) &&
-                        ((_a = tokenMove.spaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getCard()) !== card;
-                });
+                const cardsinHandWSameSuit = this.hand.filter((card) => card.getAllSuits().includes(suit) && tokenMove.cardToPlay !== card);
                 if (cardsinHandWSameSuit.length < 1)
                     return;
                 // and we have another card with the same suit in our hand with which to make the connection.
