@@ -8,7 +8,7 @@ const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 // initial minimum values used in AI move selection
 const CARD_VALUE_THRESHOLD = 7;
-const SCORE_INCREASE_THRESHOLD = 6;
+const SCORE_INCREASE_THRESHOLD = 5;
 
 type AiMoveSearchResultsObj = {
   cardToPlay: Card;
