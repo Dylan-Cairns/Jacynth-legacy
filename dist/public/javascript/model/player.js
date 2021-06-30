@@ -221,6 +221,78 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         const availableAdjSpaces = adjacentSpaces.filter((space) => this.gameBoard.getAvailableSpaces().includes(space));
         return availableAdjSpaces.length;
     }
+    getAllAvailableMoves(playerID, availableCards) {
+        // switch search between current player or opponent player
+        const opponentID = playerID === this.playerID ? this.opponentID : this.playerID;
+        const currentHumanScore = this.gameBoard.getPlayerScore(opponentID);
+        const currentComputerScore = this.gameBoard.getPlayerScore(playerID);
+        const resultsArr = [];
+        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
+        const handArr = this.getHandArr().sort((a, b) => {
+            return a.getValue() - b.getValue();
+        });
+        //for each card in computers hand,
+        handArr.forEach((card) => {
+            this.gameBoard.getAvailableSpaces().forEach((availCardSpace) => {
+                // see what the change in score will be for each open space on the board
+                this.gameBoard.setCard(availCardSpace.getID(), card);
+                const changeInHumanScore = this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
+                const changeInComputerScore = this.gameBoard.getPlayerScore(playerID) - currentComputerScore;
+                let cardOnlyScore = changeInComputerScore - changeInHumanScore;
+                // if there is a theft risk, reduce the score of this move by a large number.
+                // TODO: adjust the score by the num of cards in the at risk district instead
+                cardOnlyScore -= this.blockTheft(true);
+                const cardOnlyScoreObj = {
+                    cardToPlay: card,
+                    spaceToPlaceCard: availCardSpace,
+                    score: cardOnlyScore,
+                    spaceToPlaceToken: undefined,
+                    tokenSpaceCardValue: undefined
+                };
+                this.scoreintermediateMoves(cardOnlyScoreObj);
+                resultsArr.push(cardOnlyScoreObj);
+                // then also check what the change in score will be when placing a token
+                // in any space meeting the minimum card valuerequirements
+                if (this.influenceTokens > 0) {
+                    this.gameBoard
+                        .getAvailableTokenSpaces(playerID)
+                        .forEach((availTokenSpace) => {
+                        const tokenSpaceCard = availTokenSpace.getCard();
+                        if (!tokenSpaceCard)
+                            return;
+                        // check whether the card value meets our minimum threshold
+                        const tokenSpaceCardValue = tokenSpaceCard.getValue();
+                        if (tokenSpaceCardValue >= adjustedCardValueThreshold) {
+                            //if it does, create a resultsObj and push to results.
+                            this.gameBoard.setPlayerToken(availTokenSpace.getID(), playerID);
+                            const tokenChangeInHumanScore = this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
+                            const tokenChangeInComputerScore = this.gameBoard.getPlayerScore(playerID) -
+                                currentComputerScore;
+                            let withTokenScore = tokenChangeInComputerScore - tokenChangeInHumanScore;
+                            withTokenScore -= this.blockTheft(true);
+                            withTokenScore +=
+                                this.getDistrictsGrowthPotential(availTokenSpace) * 0.25;
+                            const withTokenScoreObj = {
+                                cardToPlay: card,
+                                spaceToPlaceCard: availCardSpace,
+                                score: withTokenScore,
+                                spaceToPlaceToken: availTokenSpace,
+                                tokenSpaceCardValue: tokenSpaceCardValue
+                            };
+                            this.scoreintermediateMoves(withTokenScoreObj);
+                            this.searchForTheftOpportunity(withTokenScoreObj);
+                            resultsArr.push(withTokenScoreObj);
+                            // reset score after each token removal
+                            this.gameBoard.removePlayerTokenAndResolveBoard(availTokenSpace.getID());
+                        }
+                    });
+                }
+                // reset score after each card removal
+                this.gameBoard.removeCardAndResolveBoard(availCardSpace.getID());
+            });
+        });
+        return resultsArr;
+    }
     // Method to detect and avoid territories being stolen.
     // Boolean checkforSelfKill determines wether the method adjusts the values of
     // an array of potential moves, or wether it returns the size of the largest
@@ -288,88 +360,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         }
         return largestAtRiskDistrictSize;
     }
-    // helper fn to test wether a potential token placement meets minimum reqs
-    filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
-        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
-        const adjustedScoreThreshold = this.adjustMinThreshold(SCORE_INCREASE_THRESHOLD);
-        // check for withTokenScore to remove card-only results from the list.
-        // Then remove results which don't raise the score by the minimum threshold
-        // versus just playing a card
-        tokenScoreArr = tokenScoreArr.filter((ele) => ele.score - topCardScore >= adjustedScoreThreshold);
-        // sort the array first by score,
-        // then by the value of the card the token will be placed on
-        return tokenScoreArr.sort((a, b) => b.score - a.score || b.tokenSpaceCardValue - a.tokenSpaceCardValue);
-    }
-    getAllAvailableMoves(playerID, availableCards) {
-        // switch search between current player or opponent player
-        const opponentID = playerID === this.playerID ? this.opponentID : this.playerID;
-        const currentHumanScore = this.gameBoard.getPlayerScore(opponentID);
-        const currentComputerScore = this.gameBoard.getPlayerScore(playerID);
-        const resultsArr = [];
-        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
-        const handArr = this.getHandArr().sort((a, b) => {
-            return a.getValue() - b.getValue();
-        });
-        //for each card in computers hand,
-        handArr.forEach((card) => {
-            this.gameBoard.getAvailableSpaces().forEach((availCardSpace) => {
-                // see what the change in score will be for each open space on the board
-                this.gameBoard.setCard(availCardSpace.getID(), card);
-                const changeInHumanScore = this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
-                const changeInComputerScore = this.gameBoard.getPlayerScore(playerID) - currentComputerScore;
-                let cardOnlyScore = changeInComputerScore - changeInHumanScore;
-                // if there is a theft risk, reduce the score of this move by a large number.
-                // TODO: adjust the score by the num of cards in the at risk district instead
-                cardOnlyScore -= this.blockTheft(true);
-                const cardOnlyScoreObj = {
-                    cardToPlay: card,
-                    spaceToPlaceCard: availCardSpace,
-                    score: cardOnlyScore,
-                    spaceToPlaceToken: undefined,
-                    tokenSpaceCardValue: undefined
-                };
-                resultsArr.push(cardOnlyScoreObj);
-                // then also check what the change in score will be when placing a token
-                // in any space meeting the minimum card valuerequirements
-                if (this.influenceTokens > 0) {
-                    this.gameBoard
-                        .getAvailableTokenSpaces(playerID)
-                        .forEach((availTokenSpace) => {
-                        const tokenSpaceCard = availTokenSpace.getCard();
-                        if (!tokenSpaceCard)
-                            return;
-                        // check whether the card value meets our minimum threshold
-                        const tokenSpaceCardValue = tokenSpaceCard.getValue();
-                        if (tokenSpaceCardValue >= adjustedCardValueThreshold) {
-                            //if it does, create a resultsObj and push to results.
-                            this.gameBoard.setPlayerToken(availTokenSpace.getID(), playerID);
-                            const tokenChangeInHumanScore = this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
-                            const tokenChangeInComputerScore = this.gameBoard.getPlayerScore(playerID) -
-                                currentComputerScore;
-                            let withTokenScore = tokenChangeInComputerScore - tokenChangeInHumanScore;
-                            withTokenScore -= this.blockTheft(true);
-                            withTokenScore +=
-                                this.getDistrictsGrowthPotential(availTokenSpace) * 0.25;
-                            const withTokenScoreObj = {
-                                cardToPlay: card,
-                                spaceToPlaceCard: availCardSpace,
-                                score: withTokenScore,
-                                spaceToPlaceToken: availTokenSpace,
-                                tokenSpaceCardValue: tokenSpaceCardValue
-                            };
-                            this.searchForTheftOpportunity(withTokenScoreObj);
-                            resultsArr.push(withTokenScoreObj);
-                            // reset score after each token removal
-                            this.gameBoard.removePlayerTokenAndResolveBoard(availTokenSpace.getID());
-                        }
-                    });
-                }
-                // reset score after each card removal
-                this.gameBoard.removeCardAndResolveBoard(availCardSpace.getID());
-            });
-        });
-        return resultsArr;
-    }
     searchForTheftOpportunity(tokenMove) {
         var _a, _b, _c;
         const tokenSpaceSuits = (_a = tokenMove.spaceToPlaceToken) === null || _a === void 0 ? void 0 : _a.getControlledSuitsMap();
@@ -426,5 +416,132 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 tokenMove.score += enemyDistrictSize;
             }
         }
+    }
+    // add scoring to less obvious moves;
+    // don't put good cards near opponent or next to uncontrolled cards of the same suit.
+    // do put good cards near us.
+    scoreintermediateMoves(move) {
+        // if we control the current card, nothing to do here.
+        const cardSuits = move.cardToPlay.getAllSuits();
+        const moveCombinedDistrict = [];
+        // get an array of all the spaces that are adjacent or one away
+        // that are already a part of our district. we don't need to do anything
+        // with those and can skip them in coming steps.
+        for (const suit of cardSuits) {
+            const district = this.gameBoard.getDistrict(move.spaceToPlaceCard.getID(), suit);
+            district.forEach((space) => {
+                if (!moveCombinedDistrict.includes(space))
+                    moveCombinedDistrict.push(space);
+            });
+        }
+        // get an array of adjacent spaces
+        const adjSpaces = this.gameBoard.getAdjacentSpaces(move.spaceToPlaceCard.getID());
+        // create oneaway array for later use.
+        // if the adjacent space is playable, add *it's* adjacent spaces
+        // to the list of spaces that are 1 space away
+        const oneSpaceAwayArr = [];
+        for (const adjSpace of adjSpaces) {
+            if (this.gameBoard.isPlayableSpace(adjSpace.getID())) {
+                const oneaway = this.gameBoard.getAdjacentSpaces(adjSpace.getID());
+                for (const oneawaySpace of oneaway) {
+                    if (oneawaySpace !== move.spaceToPlaceCard &&
+                        !oneSpaceAwayArr.includes(oneawaySpace) &&
+                        !moveCombinedDistrict.includes(oneawaySpace))
+                        oneSpaceAwayArr.push(oneawaySpace);
+                }
+            }
+            if (oneSpaceAwayArr.includes(adjSpace))
+                continue;
+            // if we find an adjacent card that is the same suit that's not controlled by us,
+            // reduce the value of this move.
+            const card = adjSpace.getCard();
+            if (!card)
+                continue;
+            const adjSuits = card.getAllSuits();
+            for (const suit of adjSuits) {
+                if (cardSuits.includes(suit)) {
+                    const adjcontrolSpaceID = adjSpace.getControllingSpaceID(suit);
+                    const adjControlSpace = adjcontrolSpaceID
+                        ? this.gameBoard.getSpace(adjcontrolSpaceID)
+                        : undefined;
+                    const adjControlPlayerID = adjControlSpace
+                        ? adjControlSpace.getPlayerToken()
+                        : undefined;
+                    if (adjControlPlayerID === 'Computer')
+                        continue;
+                    move.score -= 1;
+                    console.log('reduce score of placing a tile near an uncontrolled tile of same suit');
+                    console.log('adjspace', adjSpace);
+                    console.log('moveSpace', move.spaceToPlaceCard);
+                    console.log('cardToPlay', move.cardToPlay);
+                }
+            }
+            // next, check for territories or cards that are 1 space away.
+            for (const oneAwaySpace of oneSpaceAwayArr) {
+                const card = oneAwaySpace.getCard();
+                if (!card)
+                    continue;
+                const suits = card.getAllSuits();
+                for (const suit of suits) {
+                    if (cardSuits.includes(suit)) {
+                        // found a card 1 space away with the same suit as
+                        // the card we are considering playing.
+                        // if it's controlled by us, increase score.
+                        // otherwise decrease score.
+                        console.log('found a card that is one away from another card of same suit');
+                        console.log('spacetoPlay: ', move.spaceToPlaceCard);
+                        console.log('cardtoPlay', move.cardToPlay);
+                        console.log('oneawayspace', oneAwaySpace);
+                        const oneawcontrolSpaceID = oneAwaySpace.getControllingSpaceID(suit);
+                        const oneawControlSpace = oneawcontrolSpaceID
+                            ? this.gameBoard.getSpace(oneawcontrolSpaceID)
+                            : undefined;
+                        const oneawControlPlayerID = oneawControlSpace
+                            ? oneawControlSpace.getPlayerToken()
+                            : undefined;
+                        console.log('oneawaycontrollingPID', oneawControlPlayerID);
+                        if (oneawControlPlayerID === 'Computer') {
+                            console.log('helps us, increase score');
+                            move.score += 0.5;
+                        }
+                        else if (oneawControlPlayerID === 'Player 1') {
+                            const moveControlSpaceID = move.spaceToPlaceCard.getControllingSpaceID(suit);
+                            const moveControlSpace = moveControlSpaceID
+                                ? this.gameBoard.getSpace(moveControlSpaceID)
+                                : undefined;
+                            const moveControlPlayer = moveControlSpace
+                                ? moveControlSpace.getPlayerToken()
+                                : undefined;
+                            const moveControlCard = moveControlSpace
+                                ? moveControlSpace.getCard()
+                                : undefined;
+                            if (moveControlPlayer === 'Computer' &&
+                                moveControlCard &&
+                                moveControlCard.getRank() > card.getRank()) {
+                                console.log('found a longshot theft opportunity');
+                                move.score += 0.75;
+                                console.log('movespace', move.spaceToPlaceCard);
+                                console.log('cardToPlay', move.cardToPlay);
+                                console.log('oneawaySpace', oneAwaySpace);
+                            }
+                            console.log('helps opp, decrease score');
+                            move.score -= 0.5;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // helper fn to test wether a potential token placement meets minimum reqs
+    filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
+        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
+        const adjustedScoreThreshold = this.adjustMinThreshold(SCORE_INCREASE_THRESHOLD);
+        // check for withTokenScore to remove card-only results from the list.
+        // Then remove results which don't raise the score by the minimum threshold
+        // versus just playing a card
+        tokenScoreArr = tokenScoreArr.filter((ele) => ele.score - topCardScore >= adjustedScoreThreshold);
+        // sort the array first by score,
+        // then by the value of the card the token will be placed on
+        return tokenScoreArr.sort((a, b) => b.score - a.score || b.tokenSpaceCardValue - a.tokenSpaceCardValue);
     }
 }
