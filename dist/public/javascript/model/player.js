@@ -279,6 +279,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                 spaceToPlaceToken: availTokenSpace,
                                 tokenSpaceCardValue: tokenSpaceCardValue
                             };
+                            this.extraPtforCardinHand(withTokenScoreObj);
                             this.scoreintermediateMoves(withTokenScoreObj);
                             this.searchForTheftOpportunity(withTokenScoreObj);
                             resultsArr.push(withTokenScoreObj);
@@ -532,6 +533,25 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 }
             }
         }
+    }
+    extraPtforCardinHand(move) {
+        const tokenSpace = move.spaceToPlaceToken;
+        const card = tokenSpace.getCard();
+        if (!card)
+            throw new Error('no card on token space');
+        let suits = card.getAllSuits();
+        suits = suits.filter((suit) => tokenSpace.getControllingSpaceID(suit) === tokenSpace.getID());
+        let points = 0;
+        const filteredHand = this.hand.filter((hcard) => hcard.getId() !== move.cardToPlay.getId());
+        for (const hCard of filteredHand) {
+            const hSuits = hCard.getAllSuits();
+            for (const hSuit of hSuits) {
+                if (suits.includes(hSuit)) {
+                    points += 1;
+                }
+            }
+        }
+        move.score += points;
     }
     // helper fn to test wether a potential token placement meets minimum reqs
     filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
