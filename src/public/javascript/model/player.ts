@@ -566,7 +566,8 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         console.log('space to attack:', diagSpace);
         console.log('attacking space', tokenMove.spaceToPlaceToken);
         console.log('suit: ', suit);
-        tokenMove.score += enemyDistrictSize;
+        console.log('cards in hand:', this.hand);
+        tokenMove.score += 2 * enemyDistrictSize;
       }
     }
   }
@@ -630,12 +631,12 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
           if (adjControlPlayerID === 'Computer') continue;
 
           move.score -= 1;
-          console.log(
-            'reduce score of placing a tile near an uncontrolled tile of same suit'
-          );
-          console.log('adjspace', adjSpace);
-          console.log('moveSpace', move.spaceToPlaceCard);
-          console.log('cardToPlay', move.cardToPlay);
+          // console.log(
+          //   'reduce score of placing a tile near an uncontrolled tile of same suit'
+          // );
+          // console.log('adjspace', adjSpace);
+          // console.log('moveSpace', move.spaceToPlaceCard);
+          // console.log('cardToPlay', move.cardToPlay);
         }
       }
 
@@ -650,12 +651,12 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             // the card we are considering playing.
             // if it's controlled by us, increase score.
             // otherwise decrease score.
-            console.log(
-              'found a card that is one away from another card of same suit'
-            );
-            console.log('spacetoPlay: ', move.spaceToPlaceCard);
-            console.log('cardtoPlay', move.cardToPlay);
-            console.log('oneawayspace', oneAwaySpace);
+            // console.log(
+            //   'found a card that is one away from another card of same suit'
+            // );
+            // console.log('spacetoPlay: ', move.spaceToPlaceCard);
+            // console.log('cardtoPlay', move.cardToPlay);
+            // console.log('oneawayspace', oneAwaySpace);
             const oneawcontrolSpaceID =
               oneAwaySpace.getControllingSpaceID(suit);
             const oneawControlSpace = oneawcontrolSpaceID
@@ -664,9 +665,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             const oneawControlPlayerID = oneawControlSpace
               ? oneawControlSpace.getPlayerToken()
               : undefined;
-            console.log('oneawaycontrollingPID', oneawControlPlayerID);
+            // console.log('oneawaycontrollingPID', oneawControlPlayerID);
             if (oneawControlPlayerID === 'Computer') {
-              console.log('helps us, increase score');
+              // console.log('helps us, increase score');
               move.score += 0.5;
             } else if (oneawControlPlayerID === 'Player 1') {
               const moveControlSpaceID =
@@ -686,14 +687,14 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 moveControlCard &&
                 moveControlCard.getRank() > card.getRank()
               ) {
-                console.log('found a longshot theft opportunity');
+                // console.log('found a longshot theft opportunity');
                 move.score += 0.75;
-                console.log('movespace', move.spaceToPlaceCard);
-                console.log('cardToPlay', move.cardToPlay);
-                console.log('oneawaySpace', oneAwaySpace);
+                // console.log('movespace', move.spaceToPlaceCard);
+                // console.log('cardToPlay', move.cardToPlay);
+                // console.log('oneawaySpace', oneAwaySpace);
               }
 
-              console.log('helps opp, decrease score');
+              // console.log('helps opp, decrease score');
               move.score -= 0.5;
             }
           }
