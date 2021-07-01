@@ -467,7 +467,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                         : undefined;
                     if (adjControlPlayerID === 'Computer')
                         continue;
-                    move.score -= 1;
+                    move.score -= 0.5;
                     // console.log(
                     //   'reduce score of placing a tile near an uncontrolled tile of same suit'
                     // );
