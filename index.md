@@ -4,6 +4,9 @@ As my first project not related to any curriculum I decided to create an impleme
 
 Jacynth is an area control card game played using the [Decktet](https://www.decktet.com/), a unique deck of cards designed and beautifully illustrated by PD Magnus, and shared for free under a Creative Commons license. The Decktet was my first introduction to the board game hobby, and a couple Decktet games playable still count among my favorites. (In the interest of making a design that would work well on small screens I didn't use the original cards and made the cards into tiles instead.)
 
+### A brief description of the game
+The game is played on a 6x6 grid. On each turn, a player places a tile to the grid. After doing this they may optionally place an influence tokens onto a tile on the board. Placing a token on a tile creates a district which consists of all connected tiles that share the same suit as the card the token was placed on. It's possible for a conflict of control to arise between two players tokens in which 1 player will lose control of their territory, making careful play important. At the end of the game the winner is the player in control of the most territory.
+
 ## The User Interface
 
 ### Drag and Drop
