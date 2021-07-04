@@ -8,12 +8,12 @@ const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 // initial minimum values used in AI move selection
 const CARD_VALUE_THRESHOLD = 7;
-const SCORE_INCREASE_THRESHOLD = 5;
+const SCORE_INCREASE_THRESHOLD = 4.5;
 // values used in scoring more ambigious moves
-const ADJ_SPACE_SAME_SUIT = 0.5;
-const LONG_SHOT_THEFT = 0.75;
-const SAME_SUIT_IN_HAND = 1;
-const GROWTH_POTENTIAL = 0.25;
+const ADJ_SPACE_SAME_SUIT = 0.25;
+const LONG_SHOT_THEFT = 0.5;
+const SAME_SUIT_IN_HAND = 0.5;
+const GROWTH_POTENTIAL = 0.2;
 
 type AiMoveSearchResultsObj = {
   cardToPlay: Card;
