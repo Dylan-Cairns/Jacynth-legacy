@@ -53,8 +53,8 @@ export class View {
   getCardDrawFromModel: (() => void) | undefined;
   getCurrPlyrAvailTokens: (() => number) | undefined;
   getOpponAvailTokens: (() => number) | undefined;
-  getCurrPlyrScore: (() => void) | undefined;
-  getOpponentScore: (() => void) | undefined;
+  getCurrPlyrScore: (() => number) | undefined;
+  getOpponentScore: (() => number) | undefined;
   chooseLayout: ((layout: Layout) => void) | undefined;
   getSpacesControlledByToken:
     | ((spaceID: string) => [string, string][])
@@ -687,11 +687,11 @@ export class View {
     this.getOpponAvailTokens = availTokensCB;
   }
 
-  bindGetCurrPlyrScore(getCurrPlyrScoreCB: () => void) {
+  bindGetCurrPlyrScore(getCurrPlyrScoreCB: () => number) {
     this.getCurrPlyrScore = getCurrPlyrScoreCB;
   }
 
-  bindGetOpponentScore(getOpponentScoreCB: () => void) {
+  bindGetOpponentScore(getOpponentScoreCB: () => number) {
     this.getOpponentScore = getOpponentScoreCB;
   }
 
