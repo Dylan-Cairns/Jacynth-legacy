@@ -30,7 +30,7 @@ export type SendTokenPlayToViewCB = (boardSpace: BoardSpace) => void;
 export type PlayerID = 'Player 1' | 'Player 2' | 'Computer';
 
 export class Player {
-  protected playerID: PlayerID;
+  public playerID: PlayerID;
   protected hand: Card[];
   protected deck: Decktet;
   protected gameBoard: GameBoard;

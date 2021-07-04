@@ -1,5 +1,5 @@
 export class View {
-    constructor(board, currPlyrID) {
+    constructor(board, currPlyrID, opposPlyrID) {
         this.dragstartHandler = (event) => {
             this.removeControlledSpacesHighlighting();
             this.removeSpaceHighlighting();
@@ -65,8 +65,7 @@ export class View {
                     this.winnerText.innerHTML = `${this.currPlyrID} wins`;
                 }
                 else if (opponentScore > currPlyrScore) {
-                    this.winnerText.innerHTML =
-                        this.winnerText.innerHTML = `${this.opponentHUDID.innerText} wins`;
+                    this.winnerText.innerHTML = `${this.opposPlrID} wins`;
                 }
                 else {
                     this.winnerText.innerHTML = "It's a tie!";
@@ -110,6 +109,7 @@ export class View {
             spaceElement === null || spaceElement === void 0 ? void 0 : spaceElement.appendChild(token);
         };
         this.currPlyrID = currPlyrID;
+        this.opposPlrID = opposPlyrID;
         this.app = document.querySelector('#root');
         this.gameBoard = document.querySelector('.gameboard');
         this.playerHandContainer = document.querySelector('.player-hand');
@@ -530,8 +530,8 @@ export class View {
     }
 }
 export class SinglePlayerView extends View {
-    constructor(board, currPlyrID) {
-        super(board, currPlyrID);
+    constructor(board, currPlyrID, opposPlyrID) {
+        super(board, currPlyrID, opposPlyrID);
         this.endTurnButtonCB = () => {
             this.removeControlledSpacesHighlighting();
             this.pickupSound.play();
@@ -579,8 +579,8 @@ export class SinglePlayerView extends View {
     }
 }
 export class MultiPlayerView extends View {
-    constructor(board, socket, currPlyrID) {
-        super(board, currPlyrID);
+    constructor(board, socket, currPlyrID, opposPlyrID) {
+        super(board, currPlyrID, opposPlyrID);
         this.endTurnButtonCB = () => {
             this.removeControlledSpacesHighlighting();
             this.pickupSound.play();

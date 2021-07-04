@@ -202,7 +202,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             return settledForNumber;
         if (spaceLeft / sizeOfTheBoard < 0.25)
             return hopedForAmt * 0.5;
-        return settledForNumber;
+        return hopedForAmt;
     }
     getDistrictsGrowthPotential(boardSpace) {
         const controlledSpaces = [];

@@ -9,7 +9,7 @@ export class SinglePlayerController {
             this.view.enableCardHandDragging();
         };
         this.model = new SinglePlayerGameModel(deckType);
-        this.view = new SinglePlayerView(this.model.board, 'Player 1');
+        this.view = new SinglePlayerView(this.model.board, 'Player 1', this.model.opposPlyr.playerID);
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
         this.model.opposPlyr.bindSendTokenPlayToView(this.view.nonPlayerTokenPlacementCB);
@@ -35,7 +35,7 @@ export class MultiPlayerController {
         this.currentPlayer = currentPlayer;
         this.socket = socket;
         this.model = new MultiplayerGameModel(deckType, socket, currentPlayer);
-        this.view = new MultiPlayerView(this.model.board, socket, currentPlayer);
+        this.view = new MultiPlayerView(this.model.board, socket, currentPlayer, this.model.opposPlyr.playerID);
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
         this.model.opposPlyr.bindSendTokenPlayToView(this.view.nonPlayerTokenPlacementCB);

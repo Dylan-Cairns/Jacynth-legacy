@@ -6,6 +6,7 @@ import { Socket } from 'socket.io-client';
 
 export class View {
   currPlyrID: PlayerID;
+  opposPlrID: PlayerID;
   app: Element;
   gameBoard: HTMLElement;
   playerHandContainer: HTMLElement;
@@ -59,8 +60,9 @@ export class View {
     | ((spaceID: string) => [string, string][])
     | undefined;
 
-  constructor(board: GameBoard, currPlyrID: PlayerID) {
+  constructor(board: GameBoard, currPlyrID: PlayerID, opposPlyrID: PlayerID) {
     this.currPlyrID = currPlyrID;
+    this.opposPlrID = opposPlyrID;
     this.app = document.querySelector('#root')! as HTMLElement;
     this.gameBoard = document.querySelector('.gameboard')! as HTMLElement;
     this.playerHandContainer = document.querySelector(
@@ -479,8 +481,7 @@ export class View {
       if (currPlyrScore > opponentScore) {
         this.winnerText.innerHTML = `${this.currPlyrID} wins`;
       } else if (opponentScore > currPlyrScore) {
-        this.winnerText.innerHTML =
-          this.winnerText.innerHTML = `${this.opponentHUDID.innerText} wins`;
+        this.winnerText.innerHTML = `${this.opposPlrID} wins`;
       } else {
         this.winnerText.innerHTML = "It's a tie!";
       }
@@ -706,8 +707,8 @@ export class View {
 }
 
 export class SinglePlayerView extends View {
-  constructor(board: GameBoard, currPlyrID: PlayerID) {
-    super(board, currPlyrID);
+  constructor(board: GameBoard, currPlyrID: PlayerID, opposPlyrID: PlayerID) {
+    super(board, currPlyrID, opposPlyrID);
     this.currPlyrHUDID.innerHTML = `Player`;
     this.opponentHUDID.innerHTML = `Computer`;
     this.currPlyrIcon.classList.add('player1Icon');
@@ -760,8 +761,13 @@ export class SinglePlayerView extends View {
 export class MultiPlayerView extends View {
   socket: Socket;
   roomNumber: HTMLElement;
-  constructor(board: GameBoard, socket: Socket, currPlyrID: PlayerID) {
-    super(board, currPlyrID);
+  constructor(
+    board: GameBoard,
+    socket: Socket,
+    currPlyrID: PlayerID,
+    opposPlyrID: PlayerID
+  ) {
+    super(board, currPlyrID, opposPlyrID);
     this.socket = socket;
     this.currPlyrID = currPlyrID;
 
