@@ -195,10 +195,13 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         const spaceLeft = this.gameBoard.getRemainingSpacesNumber();
         const sizeOfTheBoard = Math.pow(this.gameBoard.getBoardSize(), 2);
         // hack add on: don't go less than 50% of our original requirement
-        let settledForNumber = Math.ceil(hopedForAmt * Math.max(0.5, spaceLeft / sizeOfTheBoard));
-        // hack add on: don't start reducing threshold until middle half of the game
-        if (spaceLeft / sizeOfTheBoard > 0.25)
-            settledForNumber = hopedForAmt;
+        const settledForNumber = Math.ceil((hopedForAmt * spaceLeft) / sizeOfTheBoard);
+        // Once there is 1/4 of the game left, reduce the threshold by half.
+        // Then near the end of the game reduce to scale.
+        if (spaceLeft / sizeOfTheBoard < 0.15)
+            return settledForNumber;
+        if (spaceLeft / sizeOfTheBoard < 0.25)
+            return hopedForAmt * 0.5;
         return settledForNumber;
     }
     getDistrictsGrowthPotential(boardSpace) {
@@ -560,7 +563,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     }
     // helper fn to test wether a potential token placement meets minimum reqs
     filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
-        const adjustedCardValueThreshold = this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
         const adjustedScoreThreshold = this.adjustMinThreshold(SCORE_INCREASE_THRESHOLD);
         // check for withTokenScore to remove card-only results from the list.
         // Then remove results which don't raise the score by the minimum threshold

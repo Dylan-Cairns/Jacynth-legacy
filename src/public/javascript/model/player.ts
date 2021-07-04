@@ -278,11 +278,13 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     const spaceLeft = this.gameBoard.getRemainingSpacesNumber();
     const sizeOfTheBoard = Math.pow(this.gameBoard.getBoardSize(), 2);
     // hack add on: don't go less than 50% of our original requirement
-    let settledForNumber = Math.ceil(
-      hopedForAmt * Math.max(0.5, spaceLeft / sizeOfTheBoard)
+    const settledForNumber = Math.ceil(
+      (hopedForAmt * spaceLeft) / sizeOfTheBoard
     );
-    // hack add on: don't start reducing threshold until middle half of the game
-    if (spaceLeft / sizeOfTheBoard > 0.25) settledForNumber = hopedForAmt;
+    // Once there is 1/4 of the game left, reduce the threshold by half.
+    // Then near the end of the game reduce to scale.
+    if (spaceLeft / sizeOfTheBoard < 0.15) return settledForNumber;
+    if (spaceLeft / sizeOfTheBoard < 0.25) return hopedForAmt * 0.5;
 
     return settledForNumber;
   }
@@ -736,8 +738,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     topCardScore: number,
     tokenScoreArr: AiMoveSearchResultsObj[]
   ): AiMoveSearchResultsObj[] {
-    const adjustedCardValueThreshold =
-      this.adjustMinThreshold(CARD_VALUE_THRESHOLD);
     const adjustedScoreThreshold = this.adjustMinThreshold(
       SCORE_INCREASE_THRESHOLD
     );
