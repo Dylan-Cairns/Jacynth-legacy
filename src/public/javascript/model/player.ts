@@ -286,7 +286,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     if (spaceLeft / sizeOfTheBoard < 0.15) return settledForNumber;
     if (spaceLeft / sizeOfTheBoard < 0.25) return hopedForAmt * 0.5;
 
-    return settledForNumber;
+    return hopedForAmt;
   }
 
   private getDistrictsGrowthPotential(boardSpace: BoardSpace) {
