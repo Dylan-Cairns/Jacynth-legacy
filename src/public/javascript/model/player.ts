@@ -9,6 +9,11 @@ const PLAYER_HAND_SIZE = 3;
 // initial minimum values used in AI move selection
 const CARD_VALUE_THRESHOLD = 7;
 const SCORE_INCREASE_THRESHOLD = 5;
+// values used in scoring more ambigious moves
+const ADJ_SPACE_SAME_SUIT = 0.5;
+const LONG_SHOT_THEFT = 0.75;
+const SAME_SUIT_IN_HAND = 1;
+const GROWTH_POTENTIAL = 0.25;
 
 type AiMoveSearchResultsObj = {
   cardToPlay: Card;
@@ -309,7 +314,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     const availableAdjSpaces = adjacentSpaces.filter((space) =>
       this.gameBoard.getAvailableSpaces().includes(space)
     );
-    return availableAdjSpaces.length;
+    return availableAdjSpaces.length * GROWTH_POTENTIAL;
   }
 
   private getAllAvailableMoves(playerID: PlayerID, availableCards: Card[]) {
@@ -378,7 +383,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 withTokenScore -= this.blockTheft(true);
 
                 withTokenScore +=
-                  this.getDistrictsGrowthPotential(availTokenSpace) * 0.25;
+                  this.getDistrictsGrowthPotential(availTokenSpace);
 
                 const withTokenScoreObj = {
                   cardToPlay: card,
@@ -630,7 +635,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
 
           if (adjControlPlayerID === 'Computer') continue;
 
-          move.score -= 0.5;
+          move.score -= ADJ_SPACE_SAME_SUIT;
           // console.log(
           //   'reduce score of placing a tile near an uncontrolled tile of same suit'
           // );
@@ -668,7 +673,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             // console.log('oneawaycontrollingPID', oneawControlPlayerID);
             if (oneawControlPlayerID === 'Computer') {
               // console.log('helps us, increase score');
-              move.score += 0.5;
+              move.score += ADJ_SPACE_SAME_SUIT;
             } else if (oneawControlPlayerID === 'Player 1') {
               const moveControlSpaceID =
                 move.spaceToPlaceCard.getControllingSpaceID(suit);
@@ -688,14 +693,14 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 moveControlCard.getRank() > card.getRank()
               ) {
                 // console.log('found a longshot theft opportunity');
-                move.score += 0.75;
+                move.score += LONG_SHOT_THEFT;
                 // console.log('movespace', move.spaceToPlaceCard);
                 // console.log('cardToPlay', move.cardToPlay);
                 // console.log('oneawaySpace', oneAwaySpace);
               }
 
               // console.log('helps opp, decrease score');
-              move.score -= 0.5;
+              move.score -= ADJ_SPACE_SAME_SUIT;
             }
           }
         }
@@ -719,7 +724,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
       const hSuits = hCard.getAllSuits();
       for (const hSuit of hSuits) {
         if (suits.includes(hSuit)) {
-          points += 1;
+          points += SAME_SUIT_IN_HAND;
         }
       }
     }
