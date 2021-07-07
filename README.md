@@ -8,7 +8,7 @@ You can read about the creation of the app [here](https://dylan-cairns.github.io
 Features:
 - Written in Typescript
 - MVC based design
-- Express.JS backend
+- Express.js backend
 - Multiplayer enabled by Socket.io
 - Mobile-first responsive design
 - HTML 5 Drag and Drop interface with polyfill for mobile browsers
