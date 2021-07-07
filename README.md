@@ -19,5 +19,5 @@ Desktop:
 </p>
 Mobile:
 <p float="middle">
-  <img src="Screen Shot 2021-07-07 at 13.31.52.png" width="100" />
+  <img src="screenshots/Screen Shot 2021-07-07 at 13.31.52.png" width="100" />
 </p>
