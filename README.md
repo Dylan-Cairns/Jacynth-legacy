@@ -15,9 +15,9 @@ Features:
 
 Desktop:
 <p float="middle">
-  <img src="screenshots/Screen Shot 2021-07-07 at 13.32.06.png" width="100" /> 
+  <img src="screenshots/Screen Shot 2021-07-07 at 13.32.06.png" width="500" /> 
 </p>
 Mobile:
 <p float="middle">
-  <img src="screenshots/Screen Shot 2021-07-07 at 13.31.52.png" width="100" />
+  <img src="screenshots/Screen Shot 2021-07-07 at 13.31.52.png" width="300" />
 </p>
