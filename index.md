@@ -237,6 +237,8 @@ this.view.bindSendCardPlayToModel(this.model.player1.playCard);
 
 And with that the single-player mode is complete! I regularly score 5-10 points above the AI, so it's certainly not competitive, but not too shabby. Perhaps I will improve it in the future.
 
+*Note: I later added a number of additional rules to the AI to improve it's performance. My own win ratio against the AI is now around 60/40.*
+
 ## Multi-player with Socket.io
 
 I decided to make the game multi-player and after reading up on Socket.io it's usage seems fairly straight forward. The greatest obstacle was synchronizing the state of the board and deck for both players. The entire game was originally client side. This synchronization necessitated moving some functionality to the server. There were really only two main functions that needed to be moved - the deck, and the function that lays out the initial board at the start of the game. In addition to this, the methods related to updating the model and view needed to be modified to work with Socket.io. An obvious solution was to extend the main classes with `singlePlayer` and `multiPlayer` variants.
