@@ -9,6 +9,7 @@ Features:
 - Written in Typescript
 - MVC based design
 - Express.js backend
+- Singleplayer against competent rule-based AI
 - Multiplayer enabled by Socket.io
 - Mobile-first responsive design
 - HTML 5 Drag and Drop interface with polyfill for mobile browsers
