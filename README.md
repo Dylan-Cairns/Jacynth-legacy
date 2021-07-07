@@ -5,7 +5,7 @@ You can play the game [here](https://jacynth.herokuapp.com/)!
 
 You can read about the creation of the app [here](https://dylan-cairns.github.io/Jacynth/).
 
-
+Features:
 - Written in Typescript
 - MVC based design
 - Express.JS backend
