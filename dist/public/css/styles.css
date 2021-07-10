@@ -353,6 +353,15 @@ button:hover {
     inset -2px -2px 2px rgba(0, 0, 0, 0.1);
 }
 
+.draggable {
+  cursor: pointer;
+}
+
+.draggable:hover {
+  border: solid var(--border-width) white;
+  border-radius: var(--border-radius);
+}
+
 .roll-in-top {
   -webkit-animation: roll-in-top 0.4s ease-out both;
   animation: roll-in-top 0.4s ease-out both;

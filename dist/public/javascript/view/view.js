@@ -428,6 +428,7 @@ export class View {
         CardsArr.forEach((ele) => {
             if (ele.classList.contains('card')) {
                 ele.draggable = true;
+                ele.classList.add('draggable');
             }
         });
     }
@@ -436,6 +437,7 @@ export class View {
         CardsArr.forEach((ele) => {
             if (ele.classList.contains('card') && ele.draggable) {
                 ele.draggable = false;
+                ele.classList.remove('draggable');
             }
         });
     }
@@ -443,6 +445,7 @@ export class View {
         const token = this.influenceTokenContainer.firstChild;
         if (token) {
             token.draggable = true;
+            token.classList.add('draggable');
         }
     }
     disableAllTokenDragging() {
@@ -450,6 +453,7 @@ export class View {
         tokenArr.forEach((ele) => {
             if (ele.classList.contains('influenceToken') && ele.draggable) {
                 ele.draggable = false;
+                ele.classList.remove('draggable');
             }
         });
     }
