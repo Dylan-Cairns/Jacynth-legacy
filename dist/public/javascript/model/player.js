@@ -144,10 +144,6 @@ export class Player_SinglePlayer extends Player {
 export class Player_ComputerPlayer extends Player_SinglePlayer {
     constructor(playerID, gameBoard, deck, opponentID, getOpponentTokensNumCB, placeOpponentTokenCB, removeOpponentTokenCB) {
         super(playerID, gameBoard, deck);
-        // TODO: overhaul this method to use a weighted system taking into account
-        // the current parameters and also
-        // - considering growth potential of a district when placing a token
-        // - blocking an opponent when no better move is available
         this.computerTakeTurn = () => {
             const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
             this.blockTheft(false, allMoves);
@@ -203,31 +199,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         if (spaceLeft / sizeOfTheBoard < 0.25)
             return hopedForAmt * 0.5;
         return hopedForAmt;
-    }
-    getDistrictsGrowthPotential(boardSpace) {
-        const controlledSpaces = [];
-        const adjacentSpaces = [];
-        //get an array of all the board spaces controlled by this token
-        for (const [, space] of this.gameBoard.getAllSpaces()) {
-            for (const [, spaceID] of space.getControlledSuitsMap()) {
-                if (spaceID === boardSpace.getID() &&
-                    !controlledSpaces.includes(space)) {
-                    controlledSpaces.push(space);
-                }
-            }
-        }
-        // get an array of all spaces which are adjacent to one of the controlled spaces
-        for (const space of controlledSpaces) {
-            const adjSpaces = this.gameBoard.getAdjacentSpaces(space.getID());
-            adjSpaces.forEach((adjSpace) => {
-                if (!adjacentSpaces.includes(adjSpace)) {
-                    adjacentSpaces.push(adjSpace);
-                }
-            });
-        }
-        // filter for spaces that are available
-        const availableAdjSpaces = adjacentSpaces.filter((space) => this.gameBoard.getAvailableSpaces().includes(space));
-        return availableAdjSpaces.length * GROWTH_POTENTIAL;
     }
     getAllAvailableMoves(playerID, availableCards) {
         // switch search between current player or opponent player
@@ -301,6 +272,32 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             });
         });
         return resultsArr;
+    }
+    // check if there is open space around a card when placing a token
+    getDistrictsGrowthPotential(boardSpace) {
+        const controlledSpaces = [];
+        const adjacentSpaces = [];
+        //get an array of all the board spaces controlled by this token
+        for (const [, space] of this.gameBoard.getAllSpaces()) {
+            for (const [, spaceID] of space.getControlledSuitsMap()) {
+                if (spaceID === boardSpace.getID() &&
+                    !controlledSpaces.includes(space)) {
+                    controlledSpaces.push(space);
+                }
+            }
+        }
+        // get an array of all spaces which are adjacent to one of the controlled spaces
+        for (const space of controlledSpaces) {
+            const adjSpaces = this.gameBoard.getAdjacentSpaces(space.getID());
+            adjSpaces.forEach((adjSpace) => {
+                if (!adjacentSpaces.includes(adjSpace)) {
+                    adjacentSpaces.push(adjSpace);
+                }
+            });
+        }
+        // filter for spaces that are available
+        const availableAdjSpaces = adjacentSpaces.filter((space) => this.gameBoard.getAvailableSpaces().includes(space));
+        return availableAdjSpaces.length * GROWTH_POTENTIAL;
     }
     // Method to detect and avoid territories being stolen.
     // Boolean checkforSelfKill determines wether the method adjusts the values of

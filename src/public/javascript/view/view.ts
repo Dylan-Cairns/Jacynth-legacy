@@ -125,6 +125,9 @@ export class View {
       'howToPlayButton'
     ) as HTMLButtonElement;
 
+    //preload images
+    this.preload_images();
+
     // make sure board and hand are empty
     while (this.gameBoard.firstChild) {
       this.gameBoard.removeChild(this.gameBoard.firstChild);
@@ -346,6 +349,35 @@ export class View {
     }
     this.pickupSound.play();
   };
+
+  protected preload_images() {
+    const sailorWinning = new Image();
+    sailorWinning.src = '../assets/sailor_winning.svg';
+    const sailorLosing = new Image();
+    sailorLosing.src = '../assets/sailor_losing.svg';
+    const penitentWinning = new Image();
+    penitentWinning.src = '../assets/penitent_winning.svg';
+    const penitentLosing = new Image();
+    penitentLosing.src = '../assets/penitent_losing.svg';
+    const suns = new Image();
+    suns.src = '../assets/suns.svg';
+    const moons = new Image();
+    moons.src = '../assets/moons.svg';
+    const wyrms = new Image();
+    wyrms.src = '../assets/wyrms.svg';
+    const knots = new Image();
+    knots.src = '../assets/knots.svg';
+    const leaves = new Image();
+    leaves.src = '../assets/leaves.svg';
+    const waves = new Image();
+    waves.src = '../assets/waves.svg';
+    const meeple_player1 = new Image();
+    meeple_player1.src = '../assets/meeple_player.svg';
+    const dinner = new Image();
+    dinner.src = '../assets/dinner.svg';
+    const suits_ranks = new Image();
+    suits_ranks.src = '../assets/suits_ranks_basic.svg';
+  }
 
   createElement(tag: string, ...classNames: string[]) {
     const element = document.createElement(tag);

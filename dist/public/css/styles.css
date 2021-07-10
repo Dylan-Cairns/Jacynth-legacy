@@ -150,11 +150,11 @@ button:hover {
 }
 
 .player2Icon.losing {
-  background-image: url('../assets/sailer_losing.svg');
+  background-image: url('../assets/sailor_losing.svg');
 }
 
 .player2Icon.winning {
-  background-image: url('../assets/sailer_winning.svg');
+  background-image: url('../assets/sailor_winning.svg');
 }
 
 .menuBar {
