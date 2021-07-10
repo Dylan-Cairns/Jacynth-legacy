@@ -370,14 +370,15 @@ export class View {
     const meeple_player2 = new Image();
     meeple_player2.src = '../assets/meeple_enemy.svg';
 
-    const sailorWinning = new Image();
-    sailorWinning.src = '../assets/sailor_winning.svg';
     const sailorLosing = new Image();
     sailorLosing.src = '../assets/sailor_losing.svg';
-    const penitentWinning = new Image();
-    penitentWinning.src = '../assets/penitent_winning.svg';
     const penitentLosing = new Image();
     penitentLosing.src = '../assets/penitent_losing.svg';
+
+    const sailorWinning = new Image();
+    sailorWinning.src = '../assets/sailor_winning.svg';
+    const penitentWinning = new Image();
+    penitentWinning.src = '../assets/penitent_winning.svg';
 
     const dinner = new Image();
     dinner.src = '../assets/dinner.svg';
