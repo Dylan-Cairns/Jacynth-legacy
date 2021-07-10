@@ -314,14 +314,6 @@ export class View {
         });
     }
     preload_images() {
-        const sailorWinning = new Image();
-        sailorWinning.src = '../assets/sailor_winning.svg';
-        const sailorLosing = new Image();
-        sailorLosing.src = '../assets/sailor_losing.svg';
-        const penitentWinning = new Image();
-        penitentWinning.src = '../assets/penitent_winning.svg';
-        const penitentLosing = new Image();
-        penitentLosing.src = '../assets/penitent_losing.svg';
         const suns = new Image();
         suns.src = '../assets/suns.svg';
         const moons = new Image();
@@ -336,6 +328,16 @@ export class View {
         waves.src = '../assets/waves.svg';
         const meeple_player1 = new Image();
         meeple_player1.src = '../assets/meeple_player.svg';
+        const meeple_player2 = new Image();
+        meeple_player2.src = '../assets/meeple_enemy.svg';
+        const sailorWinning = new Image();
+        sailorWinning.src = '../assets/sailor_winning.svg';
+        const sailorLosing = new Image();
+        sailorLosing.src = '../assets/sailor_losing.svg';
+        const penitentWinning = new Image();
+        penitentWinning.src = '../assets/penitent_winning.svg';
+        const penitentLosing = new Image();
+        penitentLosing.src = '../assets/penitent_losing.svg';
         const dinner = new Image();
         dinner.src = '../assets/dinner.svg';
         const suits_ranks = new Image();
