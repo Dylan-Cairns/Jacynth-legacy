@@ -279,7 +279,7 @@ button:hover {
   top: 0.3em;
   right: 0.3em;
   bottom: 0.3em;
-  border: solid var(--border-width) var(--icon-text-color);
+  border: solid calc(var(--border-width) * 2) #94eb6be5;
   border-radius: var(--border-radius);
 }
 
