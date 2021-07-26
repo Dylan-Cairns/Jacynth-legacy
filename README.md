@@ -13,6 +13,7 @@ Features:
 - Multiplayer enabled by Socket.io
 - Mobile-first responsive design
 - HTML 5 Drag and Drop interface with polyfill for mobile browsers
+- Resume of single player games via the use of localStorage
 
 Desktop:
 <p float="middle">
