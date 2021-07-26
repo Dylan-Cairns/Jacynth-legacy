@@ -10,8 +10,13 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+// Put this code before `app.set("views", "./views");`
+const clone = (object) => {
+    return JSON.parse(JSON.stringify(object));
+};
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+// middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/favicon.ico', express.static('assets/favicon.ico'));
 // routes

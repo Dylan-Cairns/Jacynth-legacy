@@ -109,9 +109,9 @@ export class GameBoard {
     return this.spaces.get(spaceID)?.getControllingSpaceID(suit);
   }
 
-  getRemainingSpacesNumber(): number {
+  getRemainingSpacesNumber = () => {
     return this.remainingSpaces;
-  }
+  };
 
   setCard(spaceID: string, card: Card): boolean {
     const space = this.getSpace(spaceID);

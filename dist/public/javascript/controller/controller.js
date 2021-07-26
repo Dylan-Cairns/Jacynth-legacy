@@ -5,6 +5,7 @@ export class Controller {
 export class SinglePlayerController {
     constructor(deckType) {
         this.startGame = (layout) => {
+            this.model.resetStorage();
             this.model.startGame(layout);
             this.view.enableCardHandDragging();
         };
@@ -14,8 +15,10 @@ export class SinglePlayerController {
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
         this.model.opposPlyr.bindSendTokenPlayToView(this.view.nonPlayerTokenPlacementCB);
         this.model.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
+        this.model.bindSendTokenPlayToView(this.view.nonPlayerTokenPlacementCB);
         this.view.bindGetAvailCardSpaces(this.model.board.getAvailableSpaces);
         this.view.bindGetAvailTokenSpaces(this.model.currPlyr.getAvailableTokenSpaces);
+        this.view.bindGetRemainingSpaces(this.model.board.getRemainingSpacesNumber);
         this.view.bindSendCardPlayToModel(this.model.currPlyr.playCard);
         this.view.bindSendTokenPlayToModel(this.model.currPlyr.placeToken);
         this.view.bindUndoPlayCard(this.model.currPlyr.undoPlayCard);
@@ -28,6 +31,13 @@ export class SinglePlayerController {
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
         this.view.bindCreateLayout(this.startGame);
         this.view.bindGetControlledSpaces(this.model.board.getSpacesControlledByToken);
+        this.view.bindResetStorage(this.model.resetStorage);
+        // if there is existing game data in local storage, restore the
+        // in progress game.
+        if (localStorage.getItem('layout')) {
+            this.model.restoreGame();
+            this.view.restoreGame();
+        }
     }
 }
 export class MultiPlayerController {

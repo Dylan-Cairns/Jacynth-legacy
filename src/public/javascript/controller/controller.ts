@@ -6,7 +6,7 @@ import {
 import { DeckType } from '../model/decktet.js';
 import { PlayerID } from '../model/player.js';
 import { MultiPlayerView, SinglePlayerView, View } from '../view/view.js';
-import { io, Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 
 export class Controller {}
 
@@ -30,11 +30,13 @@ export class SinglePlayerController {
       this.view.nonPlayerTokenPlacementCB
     );
     this.model.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
+    this.model.bindSendTokenPlayToView(this.view.nonPlayerTokenPlacementCB);
 
     this.view.bindGetAvailCardSpaces(this.model.board.getAvailableSpaces);
     this.view.bindGetAvailTokenSpaces(
       this.model.currPlyr.getAvailableTokenSpaces
     );
+    this.view.bindGetRemainingSpaces(this.model.board.getRemainingSpacesNumber);
     this.view.bindSendCardPlayToModel(this.model.currPlyr.playCard);
     this.view.bindSendTokenPlayToModel(this.model.currPlyr.placeToken);
     this.view.bindUndoPlayCard(this.model.currPlyr.undoPlayCard);
@@ -53,9 +55,18 @@ export class SinglePlayerController {
     this.view.bindGetControlledSpaces(
       this.model.board.getSpacesControlledByToken
     );
+    this.view.bindResetStorage(this.model.resetStorage);
+
+    // if there is existing game data in local storage, restore the
+    // in progress game.
+    if (localStorage.getItem('layout')) {
+      this.model.restoreGame();
+      this.view.restoreGame();
+    }
   }
 
   startGame = (layout: Layout) => {
+    this.model.resetStorage();
     this.model.startGame(layout);
     this.view.enableCardHandDragging();
   };

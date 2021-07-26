@@ -25,7 +25,10 @@ type AiMoveSearchResultsObj = {
 
 export type SendCardDrawtoViewCB = (card: Card) => void;
 export type SendCardPlaytoViewCB = (card: Card, boardSpace: BoardSpace) => void;
-export type SendTokenPlayToViewCB = (boardSpace: BoardSpace) => void;
+export type SendTokenPlayToViewCB = (
+  boardSpace: BoardSpace,
+  playerID: PlayerID
+) => void;
 
 export type PlayerID = 'Player 1' | 'Player 2' | 'Computer';
 
@@ -50,10 +53,26 @@ export class Player {
   playCard = (spaceID: string, cardID: string) => {
     const card = this.getCardFromHandByID(cardID);
     if (!card) return false;
+    // place the card on the board
     if (!this.gameBoard.setCard(spaceID, card)) {
       return false;
     } else {
+      // add card play info to localStorage
+      const movesJSON = localStorage.getItem('movesArr');
+      const movesArr = movesJSON ? JSON.parse(movesJSON) : [];
+      movesArr.push({
+        player: this.playerID,
+        cardToPlay: cardID,
+        spaceToPlaceCard: spaceID
+      });
+      localStorage.setItem('movesArr', JSON.stringify(movesArr));
+      // remove card from hand
       this.hand = this.hand.filter((ele) => ele !== card);
+      // remove card from hand backup in local storage
+      const handJSON = localStorage.getItem(`${this.playerID}-hand`);
+      let handArr = handJSON ? JSON.parse(handJSON) : [];
+      handArr = handArr.filter((ele: string) => ele !== card.getId());
+      localStorage.setItem(`${this.playerID}-hand`, JSON.stringify(handArr));
       return true;
     }
   };
@@ -63,8 +82,24 @@ export class Player {
     if (space) {
       const card = space.getCard();
       if (card) {
+        // return card to hand
         this.hand.push(card);
+        // return card to local storage backup
+        const handJSON = localStorage.getItem(`${this.playerID}-hand`);
+        if (handJSON) {
+          const handArr = JSON.parse(handJSON);
+          handArr.push(card.getId());
+          localStorage.setItem(
+            `${this.playerID}-hand`,
+            JSON.stringify(handArr)
+          );
+        }
+        // remove card from board
         this.gameBoard.removeCardAndResolveBoard(spaceID);
+        // remove card play from localStorage
+        const movesArr = JSON.parse(localStorage.getItem('movesArr') as string);
+        movesArr.pop();
+        localStorage.setItem('movesArr', JSON.stringify(movesArr));
       }
     }
   };
@@ -75,24 +110,59 @@ export class Player {
 
   placeToken = (spaceID: string) => {
     if (this.influenceTokens > 0) {
+      // remove 1 token from user total
       this.influenceTokens--;
-      return this.gameBoard.setPlayerToken(spaceID, this.playerID);
+      // place token
+      this.gameBoard.setPlayerToken(spaceID, this.playerID);
+      // record token play info in local storage
+      this.recordTokenPlay(spaceID);
     }
-    return false;
+    return true;
   };
 
-  undoPlaceToken = (spaceID: string) => {
+  // identical to placeToken method except it does not add
+  // a move entry to local storage
+  restoreTokenPlay = (spaceID: string) => {
+    if (this.influenceTokens > 0) {
+      // remove 1 token from user total
+      this.influenceTokens--;
+      // place token
+      this.gameBoard.setPlayerToken(spaceID, this.playerID);
+      // record token play info in local storage
+    }
+  };
+
+  private recordTokenPlay = (spaceID: string) => {
+    const movesArr = JSON.parse(localStorage.getItem('movesArr') as string);
+    movesArr.push({
+      playerID: this.playerID,
+      spaceToPlaceToken: spaceID
+    });
+    localStorage.setItem('movesArr', JSON.stringify(movesArr));
+  };
+
+  public undoPlaceToken = (spaceID: string) => {
+    // restore user token
     this.influenceTokens++;
-    return this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
+    // remove token from board
+    this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
+    // remove token play from local storage
+    this.recordUndoTokenPlay(spaceID);
   };
 
-  getInfluenceTokensNo = () => {
+  protected recordUndoTokenPlay = (spaceID: string) => {
+    const movesArr = JSON.parse(localStorage.getItem('movesArr') as string);
+    movesArr.pop();
+    localStorage.setItem('movesArr', JSON.stringify(movesArr));
+  };
+
+  public getInfluenceTokensNo = () => {
     return this.influenceTokens;
   };
 
-  getCardFromHandByID(cardID: string): Card | undefined {
+  getCardFromHandByID = (cardID: string) => {
     return this.hand.filter((card) => card.getId() === cardID)[0];
-  }
+  };
 
   getHandArr() {
     return this.hand;
@@ -157,7 +227,7 @@ export class Player_MultiPlayer extends Player {
         if (!tokenSpaceID || !this.sendTokenPlayToView) return;
         this.placeToken(tokenSpaceID);
         const tokenSpace = this.gameBoard.getSpace(tokenSpaceID);
-        if (tokenSpace) this.sendTokenPlayToView(tokenSpace);
+        if (tokenSpace) this.sendTokenPlayToView(tokenSpace, this.playerID);
       }
     );
   }
@@ -179,20 +249,53 @@ export class Player_SinglePlayer extends Player {
   }
 
   drawCard = () => {
+    // get card from deck
     const newCard = this.deck.drawCard();
     if (newCard) {
+      // add new card to hand
       this.hand.push(newCard);
-      if (this.playerID !== 'Computer') {
-        if (this.sendCardDrawtoView) {
-          this.sendCardDrawtoView(newCard);
-        }
+      // save info to local storage
+      this.saveCardDrawToStorage(newCard);
+      // send card to view
+      if (this.sendCardDrawtoView) {
+        this.sendCardDrawtoView(newCard);
       }
     }
   };
 
+  private saveCardDrawToStorage(card: Card) {
+    // save hand info to local storage
+    const handJSON = localStorage.getItem(`${this.playerID}-hand`);
+    const handArr = handJSON ? JSON.parse(handJSON) : [];
+    handArr.push(card.getId());
+    localStorage.setItem(`${this.playerID}-hand`, JSON.stringify(handArr));
+    // add card to list of already played cards in local storage
+    const playedCardsJSON = localStorage.getItem('playedCards');
+    const playedCardsArr = playedCardsJSON ? JSON.parse(playedCardsJSON) : [];
+    playedCardsArr.push(card.getId());
+    localStorage.setItem('playedCards', JSON.stringify(playedCardsArr));
+  }
+
   drawStartingHand() {
     for (let i = 0; i < PLAYER_HAND_SIZE; i++) {
       this.drawCard();
+    }
+  }
+
+  restoreHand() {
+    // restore hand from local storage
+    const handJSON = localStorage.getItem(`${this.playerID}-hand`);
+    if (handJSON) {
+      const handArr = JSON.parse(handJSON);
+      handArr.forEach((cardID: string) => {
+        const card = this.deck.getCardByID(cardID) as Card;
+        this.hand.push(card);
+        if (this.playerID !== 'Computer') {
+          if (this.sendCardDrawtoView) {
+            this.sendCardDrawtoView(card);
+          }
+        }
+      });
     }
   }
 }
@@ -261,7 +364,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     if (finalChoice?.spaceToPlaceToken) {
       this.placeToken(finalChoice.spaceToPlaceToken.getID());
       if (this.sendTokenPlayToView) {
-        this.sendTokenPlayToView(finalChoice.spaceToPlaceToken);
+        this.sendTokenPlayToView(finalChoice.spaceToPlaceToken, this.playerID);
       }
     }
     this.drawCard();

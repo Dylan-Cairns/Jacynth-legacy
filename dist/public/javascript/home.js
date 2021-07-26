@@ -1,4 +1,6 @@
 "use strict";
+var _a;
+const newGameButton = document.getElementById('newGameBttn');
 const menu = document.getElementById('menu-popup');
 const rulesButton = document.getElementById('rulesButton');
 const closeRulesButton = document.getElementById('closeRulesButton');
@@ -15,3 +17,19 @@ rules.addEventListener('click', (event) => {
         rules.classList.remove('active');
     }
 });
+newGameButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    // removing the layout item from localStorage will cause the game app to
+    // reset the rest of the storage as well.
+    // (We don't reset it directly here to avoid duplication,
+    // and we don't have the playerIDs in order to delete card hands.)
+    localStorage.removeItem('layout');
+    location.href = newGameButton.href;
+});
+// remove 'resume game' button if there is no stored game info
+if (!localStorage.getItem('layout')) {
+    (_a = document.getElementById('singlePlayerResumeBttn')) === null || _a === void 0 ? void 0 : _a.remove();
+}
+// use location reload to force the browser to update each time the page is visited,
+// to make sure the resume button appears when appropriate
+// location.reload();

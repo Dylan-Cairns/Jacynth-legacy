@@ -5,7 +5,8 @@ import {
   Player_MultiPlayer,
   Player_SinglePlayer,
   Player_ComputerPlayer,
-  SendCardPlaytoViewCB
+  SendCardPlaytoViewCB,
+  SendTokenPlayToViewCB
 } from './player.js';
 import { io, Socket } from 'socket.io-client';
 
@@ -25,6 +26,7 @@ export class GameModel {
   board: GameBoard;
   deck: Decktet;
   sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
+  sendTokenPlaytoView: SendTokenPlayToViewCB | undefined;
 
   constructor(deckType: DeckType) {
     this.board = new GameBoard(TWOPLAYER_BOARD_DIMENSIONS);
@@ -33,6 +35,10 @@ export class GameModel {
 
   bindSendCardPlayToView(sendCardPlaytoView: SendCardPlaytoViewCB) {
     this.sendCardPlaytoView = sendCardPlaytoView;
+  }
+
+  bindSendTokenPlayToView(sendTokenPlayToView: SendTokenPlayToViewCB) {
+    this.sendTokenPlaytoView = sendTokenPlayToView;
   }
 }
 
@@ -55,21 +61,90 @@ export class SinglePlayerGameModel extends GameModel {
   }
 
   public startGame(layout: Layout) {
-    this.createLayout(this.board, this.deck, layout);
+    this.createLayout(this.deck, layout);
     this.currPlyr.drawStartingHand();
     this.opposPlyr.drawStartingHand();
   }
 
-  private createLayout(board: GameBoard, deck: Decktet, layout: Layout) {
+  public restoreGame() {
+    this.restoreLayout();
+    this.restorePlayedMoves();
+    this.currPlyr.restoreHand();
+    this.opposPlyr.restoreHand();
+    this.deck.restoreDeck(this.currPlyr.playerID, this.opposPlyr.playerID);
+    this.board.resolveInflunceForEntireBoard();
+  }
+
+  public resetStorage = () => {
+    localStorage.removeItem('layout');
+    localStorage.removeItem('playedCards');
+    localStorage.removeItem('movesArr');
+    localStorage.removeItem('undoMoves');
+    localStorage.removeItem('turnStatus');
+    localStorage.removeItem(`${this.currPlyr.playerID}-hand`);
+    localStorage.removeItem(`${this.opposPlyr.playerID}-hand`);
+  };
+
+  private restorePlayedMoves() {
+    // check if local save data exists. If so, add the cards and tokens
+    // to the board in the same order as originally played.
+    const movesJSON = localStorage.getItem('movesArr');
+    if (movesJSON) {
+      const movesArr = JSON.parse(movesJSON);
+      for (let idx = 0; idx < movesArr.length; idx++) {
+        const obj = movesArr[idx];
+        if (obj.cardToPlay) {
+          const card = this.deck.getCardByID(obj.cardToPlay)!;
+          const space = this.board.getSpace(obj.spaceToPlaceCard)!;
+          this.board.setCard(obj.spaceToPlaceCard, card);
+          if (this.sendCardPlaytoView) this.sendCardPlaytoView(card, space);
+        } else if (obj.spaceToPlaceToken) {
+          const space = this.board.getSpace(obj.spaceToPlaceToken)!;
+
+          if (this.currPlyr.playerID === obj.playerID) {
+            this.currPlyr.restoreTokenPlay(obj.spaceToPlaceToken);
+          } else {
+            this.opposPlyr.restoreTokenPlay(obj.spaceToPlaceToken);
+          }
+
+          if (this.sendTokenPlaytoView)
+            this.sendTokenPlaytoView(space, obj.playerID);
+        }
+      }
+    }
+  }
+
+  private createLayout(deck: Decktet, layout: Layout) {
+    const layoutStorArr = [] as { cardID: string; spaceID: string }[];
+
     const handleInitialPlacementCB = (spaceID: string) => {
       const card = deck.drawCard()!;
       const space = this.board.getSpace(spaceID)!;
-      board.setCard(spaceID, card);
+      this.board.setCard(spaceID, card);
       if (this.sendCardPlaytoView) this.sendCardPlaytoView(card, space);
+      // add card info to array which will be saved in local storage
+      layoutStorArr.push({ cardID: card.getId(), spaceID: spaceID });
     };
 
-    const layourArr = BOARD_LAYOUTS[layout];
-    layourArr.forEach((spaceID) => handleInitialPlacementCB(spaceID));
+    const layoutArr = BOARD_LAYOUTS[layout];
+    layoutArr.forEach((spaceID) => handleInitialPlacementCB(spaceID));
+
+    //save layout info to local storage
+    localStorage.setItem('layout', JSON.stringify(layoutStorArr));
+  }
+
+  private restoreLayout() {
+    // check for stored layout info
+    const layoutJSON = localStorage.getItem('layout');
+    if (layoutJSON) {
+      const layoutArr = JSON.parse(layoutJSON);
+      layoutArr.forEach((obj: { cardID: string; spaceID: string }) => {
+        const card = this.deck.getCardByID(obj.cardID)!;
+        const space = this.board.getSpace(obj.spaceID)!;
+        this.board.setCard(obj.spaceID, card);
+        if (this.sendCardPlaytoView) this.sendCardPlaytoView(card, space);
+      });
+    }
   }
 }
 

@@ -14,7 +14,7 @@ declare const io: any;
 // gametype variable passed in by express route
 declare const gameType: 'singleplayer' | 'multiplayer';
 
-let controller: any;
+let controller: Controller;
 
 if (gameType === 'singleplayer') {
   controller = new SinglePlayerController('basicDeck');

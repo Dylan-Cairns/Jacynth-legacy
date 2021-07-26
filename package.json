@@ -13,6 +13,7 @@
   "license": "CC-BY-SA-3.0",
   "dependencies": {
     "@types/express": "^4.17.12",
+    "@types/express-session": "^1.17.4",
     "express": "^4.17.1",
     "mobile-drag-drop": "^2.3.0-rc.2",
     "pug": "^3.0.2",

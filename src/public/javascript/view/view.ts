@@ -36,6 +36,7 @@ export class View {
   layoutButtons: NodeListOf<HTMLButtonElement>;
   howToPlayInfo: HTMLElement;
   howToPlayButton: HTMLButtonElement;
+  newGameButton: HTMLAnchorElement;
   draggedElement: HTMLElement | undefined;
   movesArr: {
     draggedEle: HTMLElement;
@@ -43,6 +44,7 @@ export class View {
   }[];
   getAvailCardSpaces: (() => BoardSpace[]) | undefined;
   getAvailTokenSpaces: (() => BoardSpace[]) | undefined;
+  getRemainingSpaces: (() => number) | undefined;
   sendCardPlayToModel:
     | ((cardID: string, spaceID: string) => boolean)
     | undefined;
@@ -59,6 +61,7 @@ export class View {
   getSpacesControlledByToken:
     | ((spaceID: string) => [string, string][])
     | undefined;
+  resetStorage: (() => void) | undefined;
 
   constructor(board: GameBoard, currPlyrID: PlayerID, opposPlyrID: PlayerID) {
     this.currPlyrID = currPlyrID;
@@ -124,6 +127,9 @@ export class View {
     this.howToPlayButton = document.getElementById(
       'howToPlayButton'
     ) as HTMLButtonElement;
+    this.newGameButton = document.getElementById(
+      'newGameBttn'
+    ) as HTMLAnchorElement;
 
     //preload images
     this.preload_images();
@@ -145,12 +151,21 @@ export class View {
 
     this.movesArr = [];
     this.createBoardSpaces(board);
-    // create initial influence token
-    const token = this.createPlayerToken();
-    this.influenceTokenContainer.appendChild(token);
+
+    // check wether there is move information stored in local backup. If so,
+    // check wether a token has been played this turn. If a token was *not*
+    // played this turn, then create a token in the users hand.
+    const undoMovesJSON = localStorage.getItem('undoMoves');
+    const undoMove = undoMovesJSON
+      ? JSON.parse(undoMovesJSON).pop()
+      : undefined;
+    if (!(undoMove && undoMove.draggedEle === 'influenceToken')) {
+      // create initial influence token
+      const token = this.createPlayerToken();
+      this.influenceTokenContainer.appendChild(token);
+    }
 
     // drag and drop methods
-
     const boardSpaces = document.querySelectorAll('.boardSpace');
 
     boardSpaces.forEach((space) => {
@@ -200,49 +215,70 @@ export class View {
         targetSpace.classList.remove('dragenter');
         // check space is playable & required attributes are defined
         if (
-          targetSpace.classList.contains('playable-space') &&
-          this.draggedElement &&
-          this.draggedElement.parentNode &&
-          targetSpace
-        ) {
-          this.dropSound.play();
-          // if dragged item is a card, place the card,
-          // disable dragging of remaining cards and enable dragging token,
-          // and invoke playcard callback to trigger change in model
-          if (this.draggedElement.classList.contains('card')) {
-            this.disableAllCardDragging();
-            this.enableTokenDragging();
+          !(
+            targetSpace.classList.contains('playable-space') &&
+            this.draggedElement &&
+            this.draggedElement.parentNode &&
+            targetSpace
+          )
+        )
+          return;
 
-            this.draggedElement.parentNode.removeChild(this.draggedElement);
-            targetSpace.appendChild(this.draggedElement);
-            if (this.sendCardPlayToModel) {
-              this.sendCardPlayToModel(targetSpace.id, this.draggedElement.id);
-            }
-            // save move information for undo
-            this.movesArr.push({
-              draggedEle: this.draggedElement,
-              targetSpace: targetSpace
-            });
-            //enable undo button
-            this.undoButton.disabled = false;
-            // play can end turn after placing a card
-            this.endTurnButton.disabled = false;
-            // or place a token
-          } else if (this.draggedElement.classList.contains('influenceToken')) {
-            this.draggedElement.parentNode.removeChild(this.draggedElement);
-            targetSpace.appendChild(this.draggedElement);
-            this.disableAllTokenDragging();
-            if (this.sendTokenPlayToModel) {
-              this.sendTokenPlayToModel(targetSpace.id);
-            }
-            // save move information for undo
-            this.movesArr.push({
-              draggedEle: this.draggedElement,
-              targetSpace: targetSpace
-            });
-            this.undoButton.disabled = false;
+        this.dropSound.play();
+        // if dragged item is a card, place the card,
+        // disable dragging of remaining cards and enable dragging token,
+        // and invoke playcard callback to trigger change in model
+        if (this.draggedElement.classList.contains('card')) {
+          this.disableAllCardDragging();
+          this.enableTokenDragging();
+
+          this.draggedElement.parentNode.removeChild(this.draggedElement);
+          targetSpace.appendChild(this.draggedElement);
+          if (this.sendCardPlayToModel) {
+            this.sendCardPlayToModel(targetSpace.id, this.draggedElement.id);
           }
+
+          //enable undo button
+          this.undoButton.disabled = false;
+          // play can end turn after placing a card
+          this.endTurnButton.disabled = false;
+          // set turn status in localStorage
+          localStorage.setItem('turnStatus', 'playedCard');
+          // or place a token
+        } else if (this.draggedElement.classList.contains('influenceToken')) {
+          this.draggedElement.parentNode.removeChild(this.draggedElement);
+          targetSpace.appendChild(this.draggedElement);
+          this.disableAllTokenDragging();
+          if (this.sendTokenPlayToModel) {
+            this.sendTokenPlayToModel(targetSpace.id);
+          }
+
+          this.undoButton.disabled = false;
+          // set turn status in localStorage
+          localStorage.setItem('turnStatus', 'playedToken');
         }
+
+        // save move information for undo
+        const undoMoveObj = {
+          draggedEle: this.draggedElement,
+          targetSpace: targetSpace
+        };
+        this.movesArr.push(undoMoveObj);
+
+        // Save move information to localStorage. We can't save the HTMLElement directoy
+        // because card elements have children which won't be included in the JSON object.
+        // We could make a custom method to jsonify the children elements, but it's easier
+        // to just find the elements on the page by id later.
+        const undoMovesArr = localStorage.getItem('undoMoves')
+          ? JSON.parse(localStorage.getItem('undoMoves')!)
+          : [];
+        undoMovesArr.push({
+          draggedEle: undoMoveObj.draggedEle.id
+            ? undoMoveObj.draggedEle.id
+            : 'influenceToken',
+          targetSpace: undoMoveObj.targetSpace.id
+        });
+        localStorage.setItem('undoMoves', JSON.stringify(undoMovesArr));
       });
     });
 
@@ -268,8 +304,33 @@ export class View {
       this.removeControlledSpacesHighlighting();
       this.removeSpaceHighlighting();
       this.pickupSound.play();
-      if (this.movesArr.length > 0) {
-        const moveObj = this.movesArr.pop()!;
+      if (this.movesArr.length > 0 || localStorage.getItem('undoMoves')) {
+        let moveObj;
+        if (this.movesArr.length > 0) {
+          moveObj = this.movesArr.pop()!;
+          const undoMovesJSON = localStorage.getItem('undoMoves');
+          if (undoMovesJSON) {
+            const undoMoves = JSON.parse(undoMovesJSON);
+            undoMoves.pop();
+            localStorage.setItem('undoMoves', JSON.stringify(undoMoves));
+          }
+        } else {
+          // if restoring from local storage, use the boardspace id and
+          //  card or token class name to find the right div in the page.
+          // after this the moveObj can be used as normal.
+          const undoMoves = JSON.parse(localStorage.getItem('undoMoves')!);
+          console.log(undoMoves);
+          moveObj = undoMoves.pop();
+          localStorage.setItem('undoMoves', JSON.stringify(undoMoves));
+          moveObj.targetSpace = this.gameBoard.querySelector(
+            `#${moveObj.targetSpace}`
+          );
+          console.log(moveObj.targetSpace);
+          moveObj.draggedEle =
+            moveObj.draggedEle === 'influenceToken'
+              ? moveObj.targetSpace.querySelector('.influenceToken')
+              : moveObj.targetSpace.querySelector('.card');
+        }
         const cardOrTokenToUndo = moveObj.draggedEle;
         const targetSpace = moveObj.targetSpace;
         // if first item in undo list is card,
@@ -286,6 +347,8 @@ export class View {
           this.disableAllTokenDragging();
           this.undoButton.disabled = true;
           this.endTurnButton.disabled = true;
+          // update turn status in storage for resuming game
+          localStorage.removeItem('turnStatus');
           // if it's a token, leave undo button active.
         } else if (cardOrTokenToUndo?.classList.contains('influenceToken')) {
           targetSpace.removeChild(cardOrTokenToUndo);
@@ -294,6 +357,8 @@ export class View {
             this.undoPlaceToken(targetSpace.id);
           }
           this.enableTokenDragging();
+          // update turn status in storage for resuming game
+          localStorage.setItem('turnStatus', 'playedCard');
         }
       }
     });
@@ -328,6 +393,12 @@ export class View {
       if (event.target === this.rules) {
         rules.classList.remove('active');
       }
+    });
+
+    this.newGameButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (this.resetStorage) this.resetStorage();
+      location.href = this.newGameButton.href;
     });
   }
 
@@ -473,7 +544,7 @@ export class View {
     );
   }
 
-  protected updateScore() {
+  public updateScore() {
     if (
       this.getCurrPlyrScore &&
       this.getOpponentScore &&
@@ -510,7 +581,7 @@ export class View {
       !this.getOpponAvailTokens
     )
       throw new Error('callback methods are undefined');
-    if (this.getAvailCardSpaces().length === 0) {
+    if (this.getRemainingSpaces && this.getRemainingSpaces() === 0) {
       this.disableAllCardDragging();
       this.disableAllTokenDragging();
       this.opponentIcon.classList.remove('active');
@@ -666,6 +737,31 @@ export class View {
     });
   }
 
+  public restoreGame = () => {
+    this.updateScore();
+    const handJSON = localStorage.getItem(`${this.currPlyrID}-hand`);
+    console.log(localStorage.getItem('turnStatus'));
+    const turnState = localStorage.getItem('turnStatus');
+    switch (turnState) {
+      case null:
+        this.enableCardHandDragging();
+        break;
+      case 'playedCard':
+        console.log('playedCardCase!');
+        this.disableAllCardDragging();
+        this.enableTokenDragging();
+        this.undoButton.disabled = false;
+        this.endTurnButton.disabled = false;
+        break;
+      case 'playedToken':
+        this.disableAllCardDragging();
+        this.disableAllTokenDragging();
+        this.undoButton.disabled = false;
+        this.endTurnButton.disabled = false;
+        break;
+    }
+  };
+
   playerDrawCardCB = (card: Card) => {
     const cardDiv = this.createCard(card);
     this.playerHandContainer?.appendChild(cardDiv);
@@ -679,9 +775,12 @@ export class View {
     this.checkForGameEnd();
   };
 
-  nonPlayerTokenPlacementCB = (boardSpace: BoardSpace) => {
+  nonPlayerTokenPlacementCB = (boardSpace: BoardSpace, playerID: PlayerID) => {
     const spaceID = boardSpace.getID();
-    const token = this.createEnemyToken();
+    const token =
+      playerID === this.currPlyrID
+        ? this.createPlayerToken()
+        : this.createEnemyToken();
     const spaceElement = document.getElementById(spaceID);
     spaceElement?.appendChild(token);
   };
@@ -692,6 +791,10 @@ export class View {
 
   bindGetAvailTokenSpaces(availTokenSpacesCB: () => BoardSpace[]) {
     this.getAvailTokenSpaces = availTokenSpacesCB;
+  }
+
+  bindGetRemainingSpaces(remainingSpacesCB: () => number) {
+    this.getRemainingSpaces = remainingSpacesCB;
   }
 
   bindSendCardPlayToModel(
@@ -747,6 +850,10 @@ export class View {
   ) {
     this.getSpacesControlledByToken = getControlledSpacesCB;
   }
+
+  bindResetStorage(resetStorageCB: () => void) {
+    this.resetStorage = resetStorageCB;
+  }
 }
 
 export class SinglePlayerView extends View {
@@ -760,9 +867,14 @@ export class SinglePlayerView extends View {
     this.opponentIcon.classList.add('losing');
     // use single player specific endturn function
     this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
-    // show layout menu
-    this.chooseLayoutMenu.classList.add('active');
-    this.chooseLayoutOverlay.classList.add('active');
+
+    // if no game data in local storage, show new game layout menu.
+    // if there IS game data, the view will be filled with the existing data,
+    // which will be triggered from the controller.
+    if (!localStorage.getItem('layout')) {
+      this.chooseLayoutMenu.classList.add('active');
+      this.chooseLayoutOverlay.classList.add('active');
+    }
 
     this.layoutButtons.forEach((button) => {
       button.addEventListener('click', () => {
@@ -772,8 +884,11 @@ export class SinglePlayerView extends View {
         if (!layoutChoice || !this.chooseLayout) return;
         this.chooseLayout(layoutChoice);
 
-        this.howToPlayInfo.classList.add('active');
-        this.overlay.classList.add('active');
+        if (!localStorage.userHasPlayedBefore) {
+          this.howToPlayInfo.classList.add('active');
+          this.overlay.classList.add('active');
+          localStorage.userHasPlayedBefore = 'true';
+        }
       });
     });
   }
@@ -798,6 +913,9 @@ export class SinglePlayerView extends View {
     this.checkForGameEnd();
     this.currPlyrIcon.classList.add('active');
     this.opponentIcon.classList.remove('active');
+    //set turn status in local storage
+    localStorage.removeItem('turnStatus');
+    localStorage.removeItem('undoMoves');
   };
 }
 

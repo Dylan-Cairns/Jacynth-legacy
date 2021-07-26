@@ -1,3 +1,5 @@
+import { PlayerID } from './player';
+
 export type Suit = 'Knots' | 'Leaves' | 'Moons' | 'Suns' | 'Waves' | 'Wyrms';
 export type DeckType = 'basicDeck' | 'extendedDeck';
 type Rank = 'Ace' | 'Numeral' | 'Crown' | 'Pawn' | 'Court';
@@ -12,6 +14,9 @@ type RawCardObj = {
   suit3: Suit;
 };
 
+// Raw card objects contain the information for each unique card in the deck.
+// They will be used to create objects of the Card class which also have
+// getter methods.
 const RAW_CARD_OBJECTS = [
   {
     name: 'Ace of Knots',
@@ -470,19 +475,24 @@ export class Decktet {
   constructor(deckType: DeckType) {
     this.cards = [];
     this.referenceDeck = new Map();
-
+    // if creating a basic deck, exclude pawn cards and court cards
     if (deckType === 'basicDeck') {
       for (const obj of RAW_CARD_OBJECTS) {
         if (['Ace', 'Numeral', 'Crown'].includes(obj.rank)) {
           const card = new Card(obj);
           this.cards.push(card);
+          // create a reference deck which will be used when it is necessary
+          // to get a specific card by id, during multiplayer or when restoring
+          // a game from local storage
           this.referenceDeck.set(card.getId(), card);
         }
       }
     } else {
+      // if not basic deck, include all cards
       for (const obj of RAW_CARD_OBJECTS) {
         const card = new Card(obj);
         this.cards.push(card);
+        this.referenceDeck.set(card.getId(), card);
       }
     }
     this.shuffle();
@@ -511,5 +521,27 @@ export class Decktet {
 
   getReferenceDeck() {
     return this.referenceDeck;
+  }
+  // check if there is playedCards info in local storage. If so, remove those cards.
+  restoreDeck(p1ID: PlayerID, p2ID: PlayerID) {
+    // remove cards that were used in the intitial layout from the deck
+    const layoutJSON = localStorage.getItem('layout');
+    if (layoutJSON) {
+      const layoutArr = JSON.parse(layoutJSON).map(
+        (obj: { cardID: string; spaceID: string }) => obj.cardID
+      );
+
+      this.cards = this.cards.filter(
+        (card) => !layoutArr.includes(card.getId())
+      );
+    }
+    // use cards that have been played from the deck
+    const playedCardsJSON = localStorage.getItem('playedCards');
+    if (playedCardsJSON) {
+      const playedCardsArr = JSON.parse(playedCardsJSON);
+      this.cards = this.cards.filter(
+        (card) => !playedCardsArr.includes(card.getId())
+      );
+    }
   }
 }

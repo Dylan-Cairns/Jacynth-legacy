@@ -1,3 +1,6 @@
+const newGameButton = document.getElementById(
+  'newGameBttn'
+) as HTMLAnchorElement;
 const menu = document.getElementById('menu-popup') as HTMLElement;
 const rulesButton = document.getElementById('rulesButton') as HTMLButtonElement;
 const closeRulesButton = document.getElementById(
@@ -20,3 +23,18 @@ rules.addEventListener('click', (event) => {
     rules.classList.remove('active');
   }
 });
+
+newGameButton.addEventListener('click', (event) => {
+  event.preventDefault();
+  // removing the layout item from localStorage will cause the game app to
+  // reset the rest of the storage as well.
+  // (We don't reset it directly here to avoid duplication,
+  // and we don't have the playerIDs in order to delete card hands.)
+  localStorage.removeItem('layout');
+  location.href = newGameButton.href;
+});
+
+// remove 'resume game' button if there is no stored game info
+if (!localStorage.getItem('layout')) {
+  document.getElementById('singlePlayerResumeBttn')?.remove();
+}

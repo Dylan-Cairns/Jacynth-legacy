@@ -57,6 +57,9 @@ export class GameBoard {
                 return this.spaces.get(spaceID);
             }
         };
+        this.getRemainingSpacesNumber = () => {
+            return this.remainingSpaces;
+        };
         this.getAvailableSpaces = () => {
             const results = [];
             this.spaces.forEach((space) => {
@@ -231,9 +234,6 @@ export class GameBoard {
     getControllingSpace(spaceID, suit) {
         var _a;
         return (_a = this.spaces.get(spaceID)) === null || _a === void 0 ? void 0 : _a.getControllingSpaceID(suit);
-    }
-    getRemainingSpacesNumber() {
-        return this.remainingSpaces;
     }
     setCard(spaceID, card) {
         const space = this.getSpace(spaceID);
