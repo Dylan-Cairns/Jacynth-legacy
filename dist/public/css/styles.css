@@ -760,7 +760,8 @@ a:hover {
   background-blend-mode: multiply;
   background-repeat: repeat;
   background-position: top left;
-
+  opacity: 0;
+  pointer-events: none;
   position: absolute;
   top: 0px;
   width: 100vw;
@@ -773,7 +774,12 @@ a:hover {
   font-size: 3em;
   color: white;
   justify-items: center;
-  transition: 200ms ease-in-out;
+  transition: 600ms ease-in-out;
+}
+
+#loadScreen.active {
+  opacity: 1;
+  pointer-events: all;
 }
 
 #spinner {

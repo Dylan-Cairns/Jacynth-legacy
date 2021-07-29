@@ -30,5 +30,3 @@ newGameButton.addEventListener('click', (event) => {
 if (!localStorage.getItem('layout')) {
     (_a = document.getElementById('singlePlayerResumeBttn')) === null || _a === void 0 ? void 0 : _a.remove();
 }
-// remove loading screen
-document.getElementById('loadScreen').style.visibility = 'hidden';

@@ -61,9 +61,8 @@ export class View {
             ];
             preloadImages(srcArr).then((imgs) => {
                 // remove loading screen
-                document.getElementById('loadScreen').style.visibility = 'hidden';
+                document.getElementById('loadScreen').classList.remove('active');
                 console.log('image preloading success');
-                console.log(this.preloadedImagesArr);
             }, function (errImg) {
                 console.log('image preloading failed!');
                 console.log(errImg);
