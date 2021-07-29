@@ -777,7 +777,7 @@ a:hover {
 }
 
 #spinner {
-  animation: spin 4s linear infinite;
+  animation: spin 8s linear infinite;
   /* background-color: #d93b18; */
 }
 
