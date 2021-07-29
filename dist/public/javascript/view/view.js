@@ -61,6 +61,7 @@ export class View {
             ];
             preloadImages(srcArr).then((imgs) => {
                 // remove loading screen
+                document.getElementById('spinner').style.visibility = 'hidden';
                 document.getElementById('loadScreen').classList.remove('active');
                 console.log('image preloading success');
             }, function (errImg) {
