@@ -754,7 +754,7 @@ a:hover {
 }
 
 #loadScreen {
-  background-color: #143950;
+  background-color: #0e517a;
   opacity: 0;
   pointer-events: none;
   position: absolute;
