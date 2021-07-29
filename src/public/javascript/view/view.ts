@@ -21,6 +21,7 @@ export class View {
   opponentIcon: HTMLElement;
   gameOverBox: HTMLElement;
   winnerText: HTMLElement;
+  preloadedImagesArr: HTMLImageElement[];
   disconnectedAlert: HTMLElement;
   pickupSound: HTMLMediaElement;
   dropSound: HTMLMediaElement;
@@ -89,6 +90,7 @@ export class View {
     this.currPlyrHUDID = document.getElementById('playerID') as HTMLElement;
     this.opponentHUDID = document.getElementById('enemyID') as HTMLElement;
     this.gameOverBox = document.getElementById('gameOverBox') as HTMLElement;
+    this.preloadedImagesArr = [];
     this.disconnectedAlert = document.getElementById(
       'disconnectedBox'
     ) as HTMLElement;
@@ -424,10 +426,10 @@ export class View {
   };
 
   //preload game images
-  protected preload_images() {
-    function preloadImages(srcArr: string[]) {
-      function loadImage(src: string) {
-        return new Promise(function (resolve, reject) {
+  protected preload_images = () => {
+    const preloadImages = (srcArr: string[]) => {
+      const loadImage = (src: string) => {
+        return new Promise((resolve, reject) => {
           const img = new Image();
           img.onload = function () {
             resolve(img);
@@ -436,14 +438,15 @@ export class View {
             reject(src);
           };
           img.src = src;
+          this.preloadedImagesArr.push(img);
         });
-      }
+      };
       const promises = [];
       for (let i = 0; i < srcArr.length; i++) {
         promises.push(loadImage(srcArr[i]));
       }
       return Promise.all(promises);
-    }
+    };
     const srcArr = [
       '../assets/suns.svg',
       '../assets/moons.svg',
@@ -461,7 +464,7 @@ export class View {
       '../assets/suits_ranks_basic.png'
     ];
     preloadImages(srcArr).then(
-      function (imgs) {
+      (imgs) => {
         // remove loading screen
         document.getElementById('loadScreen')!.style.visibility = 'hidden';
         console.log('image preloading success');
@@ -471,7 +474,7 @@ export class View {
         console.log(errImg);
       }
     );
-  }
+  };
 
   createElement(tag: string, ...classNames: string[]) {
     const element = document.createElement(tag);

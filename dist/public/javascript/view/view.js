@@ -21,6 +21,54 @@ export class View {
             }
             this.pickupSound.play();
         };
+        //preload game images
+        this.preload_images = () => {
+            const preloadImages = (srcArr) => {
+                const loadImage = (src) => {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = function () {
+                            resolve(img);
+                        };
+                        img.onerror = img.onabort = function () {
+                            reject(src);
+                        };
+                        img.src = src;
+                        this.preloadedImagesArr.push(img);
+                    });
+                };
+                const promises = [];
+                for (let i = 0; i < srcArr.length; i++) {
+                    promises.push(loadImage(srcArr[i]));
+                }
+                return Promise.all(promises);
+            };
+            const srcArr = [
+                '../assets/suns.svg',
+                '../assets/moons.svg',
+                '../assets/wyrms.svg',
+                '../assets/knots.svg',
+                '../assets/leaves.svg',
+                '../assets/waves.svg',
+                '../assets/meeple_player.svg',
+                '../assets/meeple_enemy.svg',
+                '../assets/sailor_losing.svg',
+                '../assets/penitent_losing.svg',
+                '../assets/sailor_winning.svg',
+                '../assets/penitent_winning.svg',
+                '../assets/dinner.png',
+                '../assets/suits_ranks_basic.png'
+            ];
+            preloadImages(srcArr).then((imgs) => {
+                // remove loading screen
+                document.getElementById('loadScreen').style.visibility = 'hidden';
+                console.log('image preloading success');
+                console.log(this.preloadedImagesArr);
+            }, function (errImg) {
+                console.log('image preloading failed!');
+                console.log(errImg);
+            });
+        };
         this.createCard = (card) => {
             // get the values from the card
             const id = card.getId();
@@ -152,6 +200,7 @@ export class View {
         this.currPlyrHUDID = document.getElementById('playerID');
         this.opponentHUDID = document.getElementById('enemyID');
         this.gameOverBox = document.getElementById('gameOverBox');
+        this.preloadedImagesArr = [];
         this.disconnectedAlert = document.getElementById('disconnectedBox');
         this.winnerText = document.getElementById('winnerText');
         this.pickupSound = document.getElementById('clickSound');
@@ -396,52 +445,6 @@ export class View {
             if (this.resetStorage)
                 this.resetStorage();
             location.href = this.newGameButton.href;
-        });
-    }
-    //preload game images
-    preload_images() {
-        function preloadImages(srcArr) {
-            function loadImage(src) {
-                return new Promise(function (resolve, reject) {
-                    const img = new Image();
-                    img.onload = function () {
-                        resolve(img);
-                    };
-                    img.onerror = img.onabort = function () {
-                        reject(src);
-                    };
-                    img.src = src;
-                });
-            }
-            const promises = [];
-            for (let i = 0; i < srcArr.length; i++) {
-                promises.push(loadImage(srcArr[i]));
-            }
-            return Promise.all(promises);
-        }
-        const srcArr = [
-            '../assets/suns.svg',
-            '../assets/moons.svg',
-            '../assets/wyrms.svg',
-            '../assets/knots.svg',
-            '../assets/leaves.svg',
-            '../assets/waves.svg',
-            '../assets/meeple_player.svg',
-            '../assets/meeple_enemy.svg',
-            '../assets/sailor_losing.svg',
-            '../assets/penitent_losing.svg',
-            '../assets/sailor_winning.svg',
-            '../assets/penitent_winning.svg',
-            '../assets/dinner.png',
-            '../assets/suits_ranks_basic.png'
-        ];
-        preloadImages(srcArr).then(function (imgs) {
-            // remove loading screen
-            document.getElementById('loadScreen').style.visibility = 'hidden';
-            console.log('image preloading success');
-        }, function (errImg) {
-            console.log('image preloading failed!');
-            console.log(errImg);
         });
     }
     createElement(tag, ...classNames) {
