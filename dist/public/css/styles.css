@@ -754,19 +754,13 @@ a:hover {
 }
 
 #loadScreen {
-  background-image: url('../assets/funky-lines.png');
-  background-color: var(--body-background);
-  background-size: auto;
-  background-blend-mode: multiply;
-  background-repeat: repeat;
-  background-position: top left;
+  background-color: #143950;
   opacity: 0;
   pointer-events: none;
   position: absolute;
   top: 0px;
   width: 100vw;
   height: 100vh;
-  background-color: var(--body-background);
   z-index: 10;
   display: grid;
   align-content: center;
