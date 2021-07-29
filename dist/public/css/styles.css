@@ -754,7 +754,6 @@ a:hover {
 }
 
 #loadScreen {
-  /* background image is duplicate from body.. find some way to prevent duplication? */
   background-image: url('../assets/funky-lines.png');
   background-color: var(--body-background);
   background-size: auto;
@@ -774,6 +773,7 @@ a:hover {
   font-size: 3em;
   color: white;
   justify-items: center;
+  transition: 200ms ease-in-out;
 }
 
 #spinner {
