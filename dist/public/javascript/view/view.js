@@ -397,39 +397,52 @@ export class View {
                 this.resetStorage();
             location.href = this.newGameButton.href;
         });
-        // remove loading screen
-        document.getElementById('loadScreen').style.visibility = 'hidden';
     }
     //preload game images
     preload_images() {
-        const suns = new Image();
-        suns.src = '../assets/suns.svg';
-        const moons = new Image();
-        moons.src = '../assets/moons.svg';
-        const wyrms = new Image();
-        wyrms.src = '../assets/wyrms.svg';
-        const knots = new Image();
-        knots.src = '../assets/knots.svg';
-        const leaves = new Image();
-        leaves.src = '../assets/leaves.svg';
-        const waves = new Image();
-        waves.src = '../assets/waves.svg';
-        const meeple_player1 = new Image();
-        meeple_player1.src = '../assets/meeple_player.svg';
-        const meeple_player2 = new Image();
-        meeple_player2.src = '../assets/meeple_enemy.svg';
-        const sailorLosing = new Image();
-        sailorLosing.src = '../assets/sailor_losing.svg';
-        const penitentLosing = new Image();
-        penitentLosing.src = '../assets/penitent_losing.svg';
-        const sailorWinning = new Image();
-        sailorWinning.src = '../assets/sailor_winning.svg';
-        const penitentWinning = new Image();
-        penitentWinning.src = '../assets/penitent_winning.svg';
-        const dinner = new Image();
-        dinner.src = '../assets/dinner.svg';
-        const suits_ranks = new Image();
-        suits_ranks.src = '../assets/suits_ranks_basic.svg';
+        function preloadImages(srcArr) {
+            function loadImage(src) {
+                return new Promise(function (resolve, reject) {
+                    const img = new Image();
+                    img.onload = function () {
+                        resolve(img);
+                    };
+                    img.onerror = img.onabort = function () {
+                        reject(src);
+                    };
+                    img.src = src;
+                });
+            }
+            const promises = [];
+            for (let i = 0; i < srcArr.length; i++) {
+                promises.push(loadImage(srcArr[i]));
+            }
+            return Promise.all(promises);
+        }
+        const srcArr = [
+            '../assets/suns.svg',
+            '../assets/moons.svg',
+            '../assets/wyrms.svg',
+            '../assets/knots.svg',
+            '../assets/leaves.svg',
+            '../assets/waves.svg',
+            '../assets/meeple_player.svg',
+            '../assets/meeple_enemy.svg',
+            '../assets/sailor_losing.svg',
+            '../assets/penitent_losing.svg',
+            '../assets/sailor_winning.svg',
+            '../assets/penitent_winning.svg',
+            '../assets/dinner.png',
+            '../assets/suits_ranks_basic.png'
+        ];
+        preloadImages(srcArr).then(function (imgs) {
+            // remove loading screen
+            document.getElementById('loadScreen').style.visibility = 'hidden';
+            console.log('image preloading success');
+        }, function (errImg) {
+            console.log('image preloading failed!');
+            console.log(errImg);
+        });
     }
     createElement(tag, ...classNames) {
         const element = document.createElement(tag);
