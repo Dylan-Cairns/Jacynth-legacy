@@ -30,6 +30,5 @@ newGameButton.addEventListener('click', (event) => {
 if (!localStorage.getItem('layout')) {
     (_a = document.getElementById('singlePlayerResumeBttn')) === null || _a === void 0 ? void 0 : _a.remove();
 }
-// use location reload to force the browser to update each time the page is visited,
-// to make sure the resume button appears when appropriate
-// location.reload();
+// remove loading screen
+document.getElementById('loadScreen').style.visibility = 'hidden';

@@ -400,7 +400,12 @@ export class View {
       if (this.resetStorage) this.resetStorage();
       location.href = this.newGameButton.href;
     });
+
+    // remove loading screen
+    document.getElementById('loadScreen')!.style.visibility = 'hidden';
   }
+
+  // END OF CONSTRUCTOR
 
   protected dragstartHandler = (event: any) => {
     this.removeControlledSpacesHighlighting();

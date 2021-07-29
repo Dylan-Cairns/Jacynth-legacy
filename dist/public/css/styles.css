@@ -753,6 +753,32 @@ a:hover {
   font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
 }
 
+#loadScreen {
+  position: absolute;
+  top: 0px;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--body-background);
+  z-index: 10;
+  display: grid;
+  align-content: center;
+  justify-content: center;
+  font-size: 3em;
+  justify-items: center;
+}
+
+#spinner {
+  animation: spin 4s linear infinite;
+  /* background-color: #d93b18; */
+}
+
+@keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
 /* Drag and drop mobile polyfill */
 
 .dnd-poly-drag-image {

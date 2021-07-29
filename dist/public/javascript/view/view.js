@@ -1,5 +1,6 @@
 export class View {
     constructor(board, currPlyrID, opposPlyrID) {
+        // END OF CONSTRUCTOR
         this.dragstartHandler = (event) => {
             this.removeControlledSpacesHighlighting();
             this.removeSpaceHighlighting();
@@ -396,6 +397,8 @@ export class View {
                 this.resetStorage();
             location.href = this.newGameButton.href;
         });
+        // remove loading screen
+        document.getElementById('loadScreen').style.visibility = 'hidden';
     }
     //preload game images
     preload_images() {

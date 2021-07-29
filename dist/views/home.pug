@@ -1,4 +1,4 @@
-include header.pug
+include ../components/header.pug
 .main-grid
 img#titlePageBackground(src='./assets/homebackground.png')
 #menu-popup.menu-popup.modal.title-menu
@@ -13,5 +13,5 @@ img#titlePageBackground(src='./assets/homebackground.png')
     a(href='/multiplayer') New Multiplayer Game
   #rulesButton.menu-button
     button(href='#') Rules &amp; Credits
-include rules.pug
+include ../components/rules.pug
 script(type='module' src='/javascript/home.js')
