@@ -206,6 +206,17 @@ export class GameBoard {
             }
             return resultsTuples;
         };
+        // return an array of all played cards on the board.
+        // used by the computer player.
+        this.getAllPlayedCards = () => {
+            const cards = [];
+            for (const [, space] of this.spaces) {
+                const card = space.getCard();
+                if (card)
+                    cards.push(card);
+            }
+            return cards;
+        };
         this.boardSize = boardSize;
         this.remainingSpaces = boardSize * boardSize;
         this.spaces = new Map();

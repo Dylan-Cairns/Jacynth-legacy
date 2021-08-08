@@ -63,7 +63,6 @@ export class View {
                 // remove loading screen
                 document.getElementById('spinner').style.visibility = 'hidden';
                 document.getElementById('loadScreen').classList.remove('active');
-                console.log('image preloading success');
             }, function (errImg) {
                 console.log('image preloading failed!');
                 console.log(errImg);
@@ -142,14 +141,12 @@ export class View {
         this.restoreGame = () => {
             this.updateScore();
             const handJSON = localStorage.getItem(`${this.currPlyrID}-hand`);
-            console.log(localStorage.getItem('turnStatus'));
             const turnState = localStorage.getItem('turnStatus');
             switch (turnState) {
                 case null:
                     this.enableCardHandDragging();
                     break;
                 case 'playedCard':
-                    console.log('playedCardCase!');
                     this.disableAllCardDragging();
                     this.enableTokenDragging();
                     this.undoButton.disabled = false;
@@ -372,11 +369,9 @@ export class View {
                     //  card or token class name to find the right div in the page.
                     // after this the moveObj can be used as normal.
                     const undoMoves = JSON.parse(localStorage.getItem('undoMoves'));
-                    console.log(undoMoves);
                     moveObj = undoMoves.pop();
                     localStorage.setItem('undoMoves', JSON.stringify(undoMoves));
                     moveObj.targetSpace = this.gameBoard.querySelector(`#${moveObj.targetSpace}`);
-                    console.log(moveObj.targetSpace);
                     moveObj.draggedEle =
                         moveObj.draggedEle === 'influenceToken'
                             ? moveObj.targetSpace.querySelector('.influenceToken')

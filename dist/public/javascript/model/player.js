@@ -2,7 +2,7 @@
 const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 // initial minimum values used in AI move selection
-const CARD_VALUE_THRESHOLD = 7;
+const CARD_VALUE_THRESHOLD = 3;
 const SCORE_INCREASE_THRESHOLD = 4.5;
 // values used in scoring more ambigious moves
 const ADJ_SPACE_SAME_SUIT = 0.25;
@@ -239,6 +239,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         this.computerTakeTurn = () => {
             const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
             this.blockTheft(false, allMoves);
+            this.blockDiagTheft(false, allMoves);
             // remove token moves, then sort by score, if same score then randomize
             // (otherwise the computer will fill spaces in the board from top
             // left to bottom right sequentially)
@@ -310,15 +311,17 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 const changeInHumanScore = this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
                 const changeInComputerScore = this.gameBoard.getPlayerScore(playerID) - currentComputerScore;
                 let cardOnlyScore = changeInComputerScore - changeInHumanScore;
-                // if there is a theft risk, reduce the score of this move by a large number.
-                // TODO: adjust the score by the num of cards in the at risk district instead
+                // if there is a theft risk, reduce the score of this move
+                // by the number of cards in the at risk district.
                 cardOnlyScore -= this.blockTheft(true);
+                cardOnlyScore -= this.blockDiagTheft(true);
                 const cardOnlyScoreObj = {
                     cardToPlay: card,
                     spaceToPlaceCard: availCardSpace,
                     score: cardOnlyScore,
                     spaceToPlaceToken: undefined,
-                    tokenSpaceCardValue: undefined
+                    tokenSpaceCardValue: undefined,
+                    log: ''
                 };
                 this.scoreintermediateMoves(cardOnlyScoreObj);
                 resultsArr.push(cardOnlyScoreObj);
@@ -339,17 +342,33 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                             const tokenChangeInHumanScore = this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
                             const tokenChangeInComputerScore = this.gameBoard.getPlayerScore(playerID) -
                                 currentComputerScore;
-                            let withTokenScore = tokenChangeInComputerScore - tokenChangeInHumanScore;
-                            withTokenScore -= this.blockTheft(true);
-                            withTokenScore +=
-                                this.getDistrictsGrowthPotential(availTokenSpace);
+                            const withTokenScore = tokenChangeInComputerScore - tokenChangeInHumanScore;
                             const withTokenScoreObj = {
                                 cardToPlay: card,
                                 spaceToPlaceCard: availCardSpace,
                                 score: withTokenScore,
                                 spaceToPlaceToken: availTokenSpace,
-                                tokenSpaceCardValue: tokenSpaceCardValue
+                                tokenSpaceCardValue: tokenSpaceCardValue,
+                                log: ''
                             };
+                            const blockTheftAdjustment = this.blockTheft(true);
+                            withTokenScoreObj.score -= blockTheftAdjustment;
+                            withTokenScoreObj.log =
+                                blockTheftAdjustment > 0
+                                    ? (withTokenScoreObj.log += `blocktheft -${blockTheftAdjustment} `)
+                                    : withTokenScoreObj.log;
+                            const blockDiagTheft = this.blockDiagTheft(true);
+                            withTokenScoreObj.score -= blockDiagTheft;
+                            withTokenScoreObj.log =
+                                blockDiagTheft > 0
+                                    ? (withTokenScoreObj.log += `blockdiagtheft -${blockDiagTheft} `)
+                                    : withTokenScoreObj.log;
+                            const growth = this.getDistrictsGrowthPotential(availTokenSpace);
+                            withTokenScoreObj.score += growth;
+                            withTokenScoreObj.log =
+                                growth > 0
+                                    ? (withTokenScoreObj.log += `growth potential +${growth} `)
+                                    : withTokenScoreObj.log;
                             this.extraPtforCardinHand(withTokenScoreObj);
                             this.scoreintermediateMoves(withTokenScoreObj);
                             this.searchForTheftOpportunity(withTokenScoreObj);
@@ -393,8 +412,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     }
     // Method to detect and avoid territories being stolen.
     // Boolean checkforSelfKill determines wether the method adjusts the values of
-    // an array of potential moves, or wether it returns the size of the largest
-    // found at risk district. The former is used to avoid a district being stolen
+    // an array of potential moves (raising the score of moves that avoid theft),
+    //  or wether it returns the size of the largest found at risk district.
+    // The former is used to avoid a district being stolen
     // by the enemies initiative. The latter is used to avoid making a move that
     // will provide an enemy a perfect opportunity to steal.
     blockTheft(checkforSelfKill, movesArr = []) {
@@ -410,7 +430,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         for (const space of this.gameBoard.getAvailableSpaces()) {
             const adjSpaces = this.gameBoard.getAdjacentSpaces(space.getID());
             // for each suit, check if there are adjacent spaces controlled by
-            // different opponents.
+            // an opponent.
             for (const suit of suitArr) {
                 const spacesWSuit = adjSpaces.filter((adjSpace) => adjSpace.getControlledSuitsMap().get(suit));
                 const controllingSpaces = [];
@@ -431,9 +451,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 // if we found 2 different player IDs, next move someone could
                 // get their territory stolen. check whose card is higher.
                 if (playerIDs.length > 1) {
-                    const sortedSpaces = controllingSpaces.sort((spaceA, spaceB) => { var _a, _b; 
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                    return ((_a = spaceB.getCard()) === null || _a === void 0 ? void 0 : _a.getValue()) - ((_b = spaceA.getCard()) === null || _b === void 0 ? void 0 : _b.getValue()); });
+                    const sortedSpaces = controllingSpaces.sort((spaceA, spaceB) => spaceB.getCard().getValue() - spaceA.getCard().getValue());
                     const highValueSpace = sortedSpaces[0];
                     if ((highValueSpace === null || highValueSpace === void 0 ? void 0 : highValueSpace.getPlayerToken()) !== this.playerID) {
                         // if theft risk found, increase the score of any moves which will
@@ -450,13 +468,101 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                 }
                                 return false;
                             });
-                            blockingMoves.forEach((move) => (move.score += atRiskDistrictSize));
+                            console.log('blockingMoves', blockingMoves);
+                            blockingMoves.forEach((move) => {
+                                move.score += atRiskDistrictSize;
+                                move.log += `atRiskDistrict + ${atRiskDistrictSize} `;
+                            });
                         }
                     }
                 }
             }
         }
         return largestAtRiskDistrictSize;
+    }
+    // search for diagonal theft risks
+    blockDiagTheft(checkForSelfKill, movesArr = []) {
+        var _a;
+        // create an array unplayedCards
+        const referenceDeck = Array.from(this.deck.getReferenceDeck().values());
+        const playedCards = this.gameBoard
+            .getAllPlayedCards()
+            .concat(this.hand)
+            .map((card) => card.getId());
+        const unplayedCards = referenceDeck.filter((card) => !playedCards.includes(card.getId()));
+        // get an array of all spaces on the board that are controlled by
+        // the computer in any suit.
+        const computerOwnedSpaces = Array.from(this.gameBoard.getAllSpaces().values()).filter((space) => {
+            const card = space.getCard();
+            if (!card)
+                return false;
+            const suits = card.getAllSuits();
+            for (const suit of suits) {
+                const controlSpaceID = this.gameBoard.getControllingSpace(space.getID(), suit);
+                if (!controlSpaceID)
+                    continue;
+                const controllingPlayer = this.gameBoard
+                    .getSpace(controlSpaceID)
+                    .getPlayerToken();
+                if (controllingPlayer === this.playerID)
+                    return true;
+            }
+        });
+        // track the largest at risk district.
+        let atRiskDistrictSize = 0;
+        // for each space, check if it's at risk of diagonal theft
+        for (const space of computerOwnedSpaces) {
+            const spaceID = space.getID();
+            const card = space.getCard();
+            const adjSpaces = this.gameBoard.getAdjacentSpaces(spaceID);
+            const diagSpaces = this.gameBoard.getDiagonalSpaces(spaceID);
+            for (const diagSpace of diagSpaces) {
+                // if a diagonal space is unplayable ignore it
+                if (!this.gameBoard.isPlayableSpace(diagSpace.getID()))
+                    continue;
+                // check whether the diagspace shares 2 open adj spaces
+                // with our potential move space.
+                const commonadjSpaces = adjSpaces.filter((adjSpace) => {
+                    return (this.gameBoard.isPlayableSpace(adjSpace.getID()) &&
+                        this.gameBoard
+                            .getAdjacentSpaces(diagSpace.getID())
+                            .includes(adjSpace));
+                });
+                // if there are less than 2 common adj available spaces, not a risk.
+                if (commonadjSpaces.length < 2)
+                    continue;
+                // at this point we have found a diagSpace which is potentially a theft risk.
+                for (const suit of card.getAllSuits()) {
+                    const controlSpaceID = space.getControllingSpaceID(suit);
+                    // if this suit is not controlled by the computer, continue
+                    if (!controlSpaceID ||
+                        this.gameBoard.getSpace(controlSpaceID).getPlayerToken() !==
+                            this.playerID)
+                        continue;
+                    const district = this.gameBoard.getDistrict(spaceID, suit);
+                    const controlCardValue = (_a = this.gameBoard
+                        .getCard(controlSpaceID)) === null || _a === void 0 ? void 0 : _a.getValue();
+                    // if an unplayed card exists whith a higher value than our control card,
+                    // and there are at least 2 unplayed cards in that suit remaining,
+                    // the district is at risk of diagonal theft. update the atRiskDistrictSize
+                    // if this district is the largest yet seen.
+                    if (unplayedCards.some((card) => card.getValue() > controlCardValue) &&
+                        unplayedCards.filter((card) => card.getAllSuits().includes(suit))
+                            .length >= 2) {
+                        atRiskDistrictSize = Math.max(atRiskDistrictSize, district.length);
+                    }
+                    if (!checkForSelfKill) {
+                        for (const move of movesArr) {
+                            if (adjSpaces.includes(move.spaceToPlaceCard)) {
+                                move.score += district.length;
+                                move.log += `block diag - ${district.length} `;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return atRiskDistrictSize;
     }
     searchForTheftOpportunity(tokenMove) {
         var _a, _b, _c;
@@ -509,6 +615,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 console.log('suit: ', suit);
                 console.log('cards in hand:', this.hand);
                 tokenMove.score += 2 * enemyDistrictSize;
+                tokenMove.log += `diagTheft + ${2 * enemyDistrictSize} `;
             }
         }
     }
@@ -565,12 +672,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                     if (adjControlPlayerID === 'Computer')
                         continue;
                     move.score -= ADJ_SPACE_SAME_SUIT;
-                    // console.log(
-                    //   'reduce score of placing a tile near an uncontrolled tile of same suit'
-                    // );
-                    // console.log('adjspace', adjSpace);
-                    // console.log('moveSpace', move.spaceToPlaceCard);
-                    // console.log('cardToPlay', move.cardToPlay);
+                    move.log += `adj space enemy same suit - ${ADJ_SPACE_SAME_SUIT}`;
                 }
             }
             // next, check for territories or cards that are 1 space away.
@@ -581,16 +683,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                 const suits = card.getAllSuits();
                 for (const suit of suits) {
                     if (cardSuits.includes(suit)) {
-                        // found a card 1 space away with the same suit as
-                        // the card we are considering playing.
-                        // if it's controlled by us, increase score.
-                        // otherwise decrease score.
-                        // console.log(
-                        //   'found a card that is one away from another card of same suit'
-                        // );
-                        // console.log('spacetoPlay: ', move.spaceToPlaceCard);
-                        // console.log('cardtoPlay', move.cardToPlay);
-                        // console.log('oneawayspace', oneAwaySpace);
                         const oneawcontrolSpaceID = oneAwaySpace.getControllingSpaceID(suit);
                         const oneawControlSpace = oneawcontrolSpaceID
                             ? this.gameBoard.getSpace(oneawcontrolSpaceID)
@@ -598,10 +690,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                         const oneawControlPlayerID = oneawControlSpace
                             ? oneawControlSpace.getPlayerToken()
                             : undefined;
-                        // console.log('oneawaycontrollingPID', oneawControlPlayerID);
                         if (oneawControlPlayerID === 'Computer') {
-                            // console.log('helps us, increase score');
                             move.score += ADJ_SPACE_SAME_SUIT;
+                            move.log += `adj space computer + ${ADJ_SPACE_SAME_SUIT} `;
                         }
                         else if (oneawControlPlayerID === 'Player 1') {
                             const moveControlSpaceID = move.spaceToPlaceCard.getControllingSpaceID(suit);
@@ -619,12 +710,14 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                 moveControlCard.getRank() > card.getRank()) {
                                 // console.log('found a longshot theft opportunity');
                                 move.score += LONG_SHOT_THEFT;
+                                move.log += `long shot theft + ${LONG_SHOT_THEFT}`;
                                 // console.log('movespace', move.spaceToPlaceCard);
                                 // console.log('cardToPlay', move.cardToPlay);
                                 // console.log('oneawaySpace', oneAwaySpace);
                             }
                             // console.log('helps opp, decrease score');
                             move.score -= ADJ_SPACE_SAME_SUIT;
+                            move.log += `oneawayspace same suit -${ADJ_SPACE_SAME_SUIT} `;
                         }
                     }
                 }
@@ -649,6 +742,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             }
         }
         move.score += points;
+        move.log += `same suit in hand + ${points}`;
     }
     // helper fn to test wether a potential token placement meets minimum reqs
     filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {

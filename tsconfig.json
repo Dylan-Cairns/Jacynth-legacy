@@ -2,6 +2,7 @@
   "extends": "@tsconfig/node12/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist/",
+    "target": "es6",
     "rootDir": "src/",
     "lib": ["dom"],
     "module": "esnext",

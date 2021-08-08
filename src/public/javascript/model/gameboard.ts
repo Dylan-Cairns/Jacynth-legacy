@@ -163,7 +163,7 @@ export class GameBoard {
 
   // To be available, a space must be empty
   // and adjacent to an already played card
-  isPlayableSpace(spaceID: string): boolean {
+  public isPlayableSpace(spaceID: string): boolean {
     const space = this.spaces.get(spaceID);
     if (!space) return false;
     if (space.getCard()) return false;
@@ -350,5 +350,18 @@ export class GameBoard {
       }
     }
     return resultsTuples;
+  };
+
+  // return an array of all played cards on the board.
+  // used by the computer player.
+  public getAllPlayedCards = () => {
+    const cards = [] as Card[];
+
+    for (const [, space] of this.spaces) {
+      const card = space.getCard();
+      if (card) cards.push(card);
+    }
+
+    return cards;
   };
 }
