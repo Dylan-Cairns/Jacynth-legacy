@@ -724,7 +724,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             for (const move of movesArr) {
               if (adjSpaces.includes(move.spaceToPlaceCard)) {
                 move.score += district.length;
-                move.log += `block diag - ${district.length} `;
+                move.log += `block diag + ${district.length} `;
               }
             }
           }
