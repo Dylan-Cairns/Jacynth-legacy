@@ -418,6 +418,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     // by the enemies initiative. The latter is used to avoid making a move that
     // will provide an enemy a perfect opportunity to steal.
     blockTheft(checkforSelfKill, movesArr = []) {
+        // if opponent has no tokens, no need to worry about theft.
+        if (this.getOpponentTokensNum() === 0)
+            return 0;
         const suitArr = [
             'Knots',
             'Leaves',
@@ -483,6 +486,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     // search for diagonal theft risks
     blockDiagTheft(checkForSelfKill, movesArr = []) {
         var _a;
+        // if opponent has no tokens, no need to worry about theft.
+        if (this.getOpponentTokensNum() === 0)
+            return 0;
         // create an array unplayedCards
         const referenceDeck = Array.from(this.deck.getReferenceDeck().values());
         const playedCards = this.gameBoard
@@ -517,8 +523,17 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             const adjSpaces = this.gameBoard.getAdjacentSpaces(spaceID);
             const diagSpaces = this.gameBoard.getDiagonalSpaces(spaceID);
             for (const diagSpace of diagSpaces) {
-                // if a diagonal space is unplayable ignore it
-                if (!this.gameBoard.isPlayableSpace(diagSpace.getID()))
+                // check whether a diagonal space either:
+                // 1. is playable.
+                // 2. has a card which matches any suit of our card and is unclaimed.
+                // if it matches neither of these cases, it is not a risk. continue
+                const diagCard = diagSpace.getCard();
+                if (!(this.gameBoard.isPlayableSpace(diagSpace.getID()) ||
+                    (diagCard &&
+                        diagCard
+                            .getAllSuits()
+                            .some((suit) => card.getAllSuits().includes(suit)) &&
+                        diagSpace.getControlledSuitsMap().size === 0)))
                     continue;
                 // check whether the diagspace shares 2 open adj spaces
                 // with our potential move space.
@@ -555,7 +570,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                         for (const move of movesArr) {
                             if (adjSpaces.includes(move.spaceToPlaceCard)) {
                                 move.score += district.length;
-                                move.log += `block diag - ${district.length} `;
+                                move.log += `block diag + ${district.length} `;
                             }
                         }
                     }

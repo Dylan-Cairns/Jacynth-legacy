@@ -548,6 +548,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     checkforSelfKill: boolean,
     movesArr: AiMoveSearchResultsObj[] = []
   ) {
+    // if opponent has no tokens, no need to worry about theft.
+    if (this.getOpponentTokensNum() === 0) return 0;
+
     const suitArr = [
       'Knots',
       'Leaves',
@@ -635,6 +638,8 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     checkForSelfKill: boolean,
     movesArr: AiMoveSearchResultsObj[] = []
   ) {
+    // if opponent has no tokens, no need to worry about theft.
+    if (this.getOpponentTokensNum() === 0) return 0;
     // create an array unplayedCards
     const referenceDeck = Array.from(this.deck.getReferenceDeck().values());
     const playedCards = this.gameBoard
@@ -677,8 +682,22 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
       const diagSpaces = this.gameBoard.getDiagonalSpaces(spaceID);
 
       for (const diagSpace of diagSpaces) {
-        // if a diagonal space is unplayable ignore it
-        if (!this.gameBoard.isPlayableSpace(diagSpace.getID())) continue;
+        // check whether a diagonal space either:
+        // 1. is playable.
+        // 2. has a card which matches any suit of our card and is unclaimed.
+        // if it matches neither of these cases, it is not a risk. continue
+        const diagCard = diagSpace.getCard();
+        if (
+          !(
+            this.gameBoard.isPlayableSpace(diagSpace.getID()) ||
+            (diagCard &&
+              diagCard
+                .getAllSuits()
+                .some((suit) => card.getAllSuits().includes(suit)) &&
+              diagSpace.getControlledSuitsMap().size === 0)
+          )
+        )
+          continue;
         // check whether the diagspace shares 2 open adj spaces
         // with our potential move space.
         const commonadjSpaces = adjSpaces.filter((adjSpace) => {
