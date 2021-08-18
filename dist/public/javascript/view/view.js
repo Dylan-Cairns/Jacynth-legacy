@@ -118,7 +118,11 @@ export class View {
                 else {
                     this.winnerText.innerHTML = "It's a tie!";
                 }
+                // show game over message
                 this.gameOverBox.style.visibility = 'visible';
+                // reset local storage copy of in progress game
+                if (this.resetStorage)
+                    this.resetStorage();
                 return true;
             }
             return false;
@@ -158,6 +162,23 @@ export class View {
                     this.undoButton.disabled = false;
                     this.endTurnButton.disabled = false;
                     break;
+            }
+            // check wether there is move information stored in local backup. If so,
+            // check wether a token has been played this turn. If a token was *not*
+            // played this turn, and the user still has tokens,
+            // then create a token in the users hand.
+            const undoMovesJSON = localStorage.getItem('undoMoves');
+            const undoMove = undoMovesJSON
+                ? JSON.parse(undoMovesJSON).pop()
+                : undefined;
+            console.log(this.getCurrPlyrAvailTokens);
+            if (this.getCurrPlyrAvailTokens)
+                console.log(this.getCurrPlyrAvailTokens());
+            console.log(undoMove);
+            if (!(undoMove && undoMove.draggedEle === 'influenceToken') &&
+                this.getCurrPlyrAvailTokens &&
+                this.getCurrPlyrAvailTokens() > 0) {
+                this.addInfluenceTokenToHand();
             }
         };
         this.playerDrawCardCB = (card) => {
@@ -231,15 +252,8 @@ export class View {
         }
         this.movesArr = [];
         this.createBoardSpaces(board);
-        // check wether there is move information stored in local backup. If so,
-        // check wether a token has been played this turn. If a token was *not*
-        // played this turn, then create a token in the users hand.
-        const undoMovesJSON = localStorage.getItem('undoMoves');
-        const undoMove = undoMovesJSON
-            ? JSON.parse(undoMovesJSON).pop()
-            : undefined;
-        if (!(undoMove && undoMove.draggedEle === 'influenceToken')) {
-            // create initial influence token
+        // create initial influence token, only if not restoring from backup.
+        if (!localStorage.getItem('layout')) {
             const token = this.createPlayerToken();
             this.influenceTokenContainer.appendChild(token);
         }
