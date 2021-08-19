@@ -188,6 +188,7 @@ export class View {
             cardDiv.draggable = false;
         };
         this.nonPlayerCardPlacementCB = (card, boardSpace) => {
+            this.removeControlledSpacesHighlighting();
             const cardDiv = this.createCard(card);
             cardDiv.classList.add('roll-in-top');
             this.addCardToSpace(cardDiv, boardSpace.getID());

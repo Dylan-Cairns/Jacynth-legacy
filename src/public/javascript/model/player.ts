@@ -413,11 +413,9 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
           this.gameBoard.getPlayerScore(opponentID) - currentHumanScore;
         const changeInComputerScore =
           this.gameBoard.getPlayerScore(playerID) - currentComputerScore;
-        let cardOnlyScore = changeInComputerScore - changeInHumanScore;
+        const cardOnlyScore = changeInComputerScore - changeInHumanScore;
         // if there is a theft risk, reduce the score of this move
         // by the number of cards in the at risk district.
-        cardOnlyScore -= this.blockTheft(true);
-        cardOnlyScore -= this.blockDiagTheft(true);
 
         const cardOnlyScoreObj = {
           cardToPlay: card,
@@ -427,6 +425,20 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
           tokenSpaceCardValue: undefined,
           log: ''
         } as AiMoveSearchResultsObj;
+
+        const blockTheftAdjustment = this.blockTheft(true);
+        cardOnlyScoreObj.score -= blockTheftAdjustment;
+        cardOnlyScoreObj.log =
+          blockTheftAdjustment > 0
+            ? (cardOnlyScoreObj.log += `blocktheft -${blockTheftAdjustment} `)
+            : cardOnlyScoreObj.log;
+
+        const blockDiagTheft = this.blockDiagTheft(true);
+        cardOnlyScoreObj.score -= blockDiagTheft;
+        cardOnlyScoreObj.log =
+          blockDiagTheft > 0
+            ? (cardOnlyScoreObj.log += `blockdiagtheft -${blockDiagTheft} `)
+            : cardOnlyScoreObj.log;
 
         this.scoreintermediateMoves(cardOnlyScoreObj);
 
@@ -829,8 +841,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
   // don't put good cards near opponent or next to uncontrolled cards of the same suit.
   // do put good cards near us.
   private scoreintermediateMoves(move: AiMoveSearchResultsObj) {
-    // if we control the current card, nothing to do here.
-
     const cardSuits = move.cardToPlay.getAllSuits();
     const moveCombinedDistrict = [] as BoardSpace[];
     // get an array of all the spaces that are adjacent or one away
@@ -847,9 +857,11 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
       });
     }
     // get an array of adjacent spaces
-    const adjSpaces = this.gameBoard.getAdjacentSpaces(
-      move.spaceToPlaceCard.getID()
-    );
+    const adjSpaces = this.gameBoard
+      .getAdjacentSpaces(move.spaceToPlaceCard.getID())
+      .filter((space) => !moveCombinedDistrict.includes(space));
+    // console.log('adjacent spaces arr for intermediate move scoring', adjSpaces);
+
     // create oneaway array for later use.
     // if the adjacent space is playable, add *it's* adjacent spaces
     // to the list of spaces that are 1 space away
@@ -866,7 +878,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             oneSpaceAwayArr.push(oneawaySpace);
         }
       }
-      if (oneSpaceAwayArr.includes(adjSpace)) continue;
+
       // if we find an adjacent card that is the same suit that's not controlled by us,
       // reduce the value of this move.
       const card = adjSpace.getCard();
@@ -882,10 +894,15 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             ? adjControlSpace.getPlayerToken()
             : undefined;
 
-          if (adjControlPlayerID === 'Computer') continue;
+          if (adjControlPlayerID === 'Computer') {
+            console.log(
+              'intermediate scoring method, found adj card with same suit, but not controlled by computer. this message should never be seen. '
+            );
+            continue;
+          }
 
           move.score -= ADJ_SPACE_SAME_SUIT;
-          move.log += `adj space enemy same suit - ${ADJ_SPACE_SAME_SUIT}`;
+          move.log += `same suit in adj space that's not ours: - ${ADJ_SPACE_SAME_SUIT} `;
         }
       }
 
@@ -907,7 +924,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
 
             if (oneawControlPlayerID === 'Computer') {
               move.score += ADJ_SPACE_SAME_SUIT;
-              move.log += `adj space computer + ${ADJ_SPACE_SAME_SUIT} `;
+              move.log += `oneaway space w same suit that is controlled by us + ${ADJ_SPACE_SAME_SUIT} `;
             } else if (oneawControlPlayerID === 'Player 1') {
               const moveControlSpaceID =
                 move.spaceToPlaceCard.getControllingSpaceID(suit);
@@ -928,15 +945,14 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
               ) {
                 // console.log('found a longshot theft opportunity');
                 move.score += LONG_SHOT_THEFT;
-                move.log += `long shot theft + ${LONG_SHOT_THEFT}`;
+                move.log += `long shot theft + ${LONG_SHOT_THEFT} `;
                 // console.log('movespace', move.spaceToPlaceCard);
                 // console.log('cardToPlay', move.cardToPlay);
                 // console.log('oneawaySpace', oneAwaySpace);
+              } else {
+                move.score -= ADJ_SPACE_SAME_SUIT;
+                move.log += `oneawayspace same suit (${suit}) -${ADJ_SPACE_SAME_SUIT} `;
               }
-
-              // console.log('helps opp, decrease score');
-              move.score -= ADJ_SPACE_SAME_SUIT;
-              move.log += `oneawayspace same suit -${ADJ_SPACE_SAME_SUIT} `;
             }
           }
         }

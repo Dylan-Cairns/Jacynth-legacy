@@ -802,6 +802,7 @@ export class View {
   };
 
   nonPlayerCardPlacementCB = (card: Card, boardSpace: BoardSpace) => {
+    this.removeControlledSpacesHighlighting();
     const cardDiv = this.createCard(card);
     cardDiv.classList.add('roll-in-top');
     this.addCardToSpace(cardDiv, boardSpace.getID());
