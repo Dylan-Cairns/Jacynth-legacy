@@ -102,8 +102,6 @@ export class View {
                 !this.getCurrPlyrAvailTokens ||
                 !this.getOpponAvailTokens)
                 throw new Error('callback methods are undefined');
-            if (this.getRemainingSpaces)
-                console.log(this.getRemainingSpaces());
             if (this.getRemainingSpaces && this.getRemainingSpaces() === 0) {
                 this.disableAllCardDragging();
                 this.disableAllTokenDragging();

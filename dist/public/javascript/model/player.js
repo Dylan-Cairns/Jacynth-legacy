@@ -3,7 +3,7 @@ const PLAYER_INFLUENCE_TOKENS = 4;
 const PLAYER_HAND_SIZE = 3;
 // initial minimum values used in AI move selection
 const CARD_VALUE_THRESHOLD = 3;
-const SCORE_INCREASE_THRESHOLD = 4.5;
+const SCORE_INCREASE_THRESHOLD = 3;
 // values used in scoring more ambigious moves
 const ADJ_SPACE_SAME_SUIT = 0.25;
 const LONG_SHOT_THEFT = 0.5;
@@ -375,6 +375,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                     : withTokenScoreObj.log;
                             const growth = this.getDistrictsGrowthPotential(availTokenSpace);
                             withTokenScoreObj.score += growth;
+                            withTokenScoreObj.tokenSpaceBonuses = growth;
                             withTokenScoreObj.log =
                                 growth > 0
                                     ? (withTokenScoreObj.log += `growth potential +${growth} `)
@@ -418,7 +419,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         }
         // filter for spaces that are available
         const availableAdjSpaces = adjacentSpaces.filter((space) => this.gameBoard.getAvailableSpaces().includes(space));
-        return availableAdjSpaces.length * GROWTH_POTENTIAL;
+        return Number((availableAdjSpaces.length * GROWTH_POTENTIAL).toPrecision(2));
     }
     // Method to detect and avoid territories being stolen.
     // Boolean checkforSelfKill determines wether the method adjusts the values of
@@ -770,15 +771,22 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             }
         }
         move.score += points;
+        if (move.tokenSpaceBonuses)
+            move.tokenSpaceBonuses += points;
         move.log += `same suit in hand + ${points}`;
     }
     // helper fn to test wether a potential token placement meets minimum reqs
     filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
         const adjustedScoreThreshold = this.adjustMinThreshold(SCORE_INCREASE_THRESHOLD);
-        // check for withTokenScore to remove card-only results from the list.
-        // Then remove results which don't raise the score by the minimum threshold
-        // versus just playing a card
-        tokenScoreArr = tokenScoreArr.filter((ele) => ele.score - topCardScore >= adjustedScoreThreshold);
+        // Remove results which don't raise the score by the minimum threshold
+        // versus just playing a card. For this check we also temporarily remove the
+        // growth potential bonus and card in hand w same suit bonus
+        //  - otherwise the higher score created by this for placing
+        // bonus causes the AI to place a token even when the same game
+        // score would be achieved without placing a token.
+        tokenScoreArr = tokenScoreArr.filter((ele) => ele.tokenSpaceBonuses &&
+            ele.score - topCardScore - ele.tokenSpaceBonuses >=
+                adjustedScoreThreshold);
         // sort the array first by score,
         // then by the value of the card the token will be placed on
         return tokenScoreArr.sort((a, b) => b.score - a.score || b.tokenSpaceCardValue - a.tokenSpaceCardValue);
