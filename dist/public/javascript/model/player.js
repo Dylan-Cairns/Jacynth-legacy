@@ -485,7 +485,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                             console.log('blockingMoves', blockingMoves);
                             blockingMoves.forEach((move) => {
                                 move.score += atRiskDistrictSize;
-                                move.log += `atRiskDistrict + ${atRiskDistrictSize} `;
+                                move.log += `block theft + ${atRiskDistrictSize} `;
                             });
                         }
                     }

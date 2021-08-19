@@ -639,7 +639,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
               console.log('blockingMoves', blockingMoves);
               blockingMoves.forEach((move) => {
                 move.score += atRiskDistrictSize;
-                move.log += `atRiskDistrict + ${atRiskDistrictSize} `;
+                move.log += `block theft + ${atRiskDistrictSize} `;
               });
             }
           }
@@ -986,7 +986,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     }
     move.score += points;
     if (move.tokenSpaceBonuses) move.tokenSpaceBonuses += points;
-    move.log += `same suit in hand + ${points}`;
+    move.log += `same suit in hand + ${points} `;
   }
 
   // helper fn to test wether a potential token placement meets minimum reqs
