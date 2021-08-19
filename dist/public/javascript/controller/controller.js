@@ -52,6 +52,7 @@ export class MultiPlayerController {
         this.model.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
         this.view.bindGetAvailCardSpaces(this.model.board.getAvailableSpaces);
         this.view.bindGetAvailTokenSpaces(this.model.currPlyr.getAvailableTokenSpaces);
+        this.view.bindGetRemainingSpaces(this.model.board.getRemainingSpacesNumber);
         this.view.bindSendCardPlayToModel(this.model.currPlyr.playCard);
         this.view.bindSendTokenPlayToModel(this.model.currPlyr.placeToken);
         this.view.bindUndoPlayCard(this.model.currPlyr.undoPlayCard);

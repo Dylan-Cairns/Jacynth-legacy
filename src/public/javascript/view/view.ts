@@ -4,6 +4,9 @@ import { Card } from '../model/decktet.js';
 import { PlayerID } from '../model/player.js';
 import { Socket } from 'socket.io-client';
 
+// gametype variable passed in by express route
+declare const gameType: 'singleplayer' | 'multiplayer';
+
 export class View {
   currPlyrID: PlayerID;
   opposPlrID: PlayerID;
@@ -154,8 +157,11 @@ export class View {
     this.movesArr = [];
     this.createBoardSpaces(board);
 
-    // create initial influence token, only if not restoring from backup.
-    if (!localStorage.getItem('layout')) {
+    // create initial influence token, only if this is:
+    // - a new single player game (not restoring from backup)
+    // - a multiplayer game
+
+    if (!localStorage.getItem('layout') || gameType === 'multiplayer') {
       const token = this.createPlayerToken();
       this.influenceTokenContainer.appendChild(token);
     }
@@ -610,8 +616,8 @@ export class View {
       }
       // show game over message
       this.gameOverBox.style.visibility = 'visible';
-      // reset local storage copy of in progress game
-      if (this.resetStorage) this.resetStorage();
+      // if this was a single player game, reset local storage copy of in progress game
+      if (this.resetStorage && gameType === 'singleplayer') this.resetStorage();
       return true;
     }
     return false;
