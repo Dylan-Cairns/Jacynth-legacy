@@ -36,16 +36,18 @@ export class SinglePlayerGameModel extends GameModel {
         this.currPlyr = new Player_SinglePlayer('Player 1', this.board, this.deck);
         this.opposPlyr = new Player_ComputerPlayer('Computer', this.board, this.deck, 'Player 1', this.currPlyr.getInfluenceTokensNo, this.currPlyr.placeToken, this.currPlyr.undoPlaceToken);
     }
-    startGame(layout) {
+    startGame(layout, aiDifficulty = 'Easy') {
         this.createLayout(this.deck, layout);
         this.currPlyr.drawStartingHand();
         this.opposPlyr.drawStartingHand();
+        this.opposPlyr.aiDifficulty = aiDifficulty;
     }
     restoreGame() {
         this.restoreLayout();
         this.restorePlayedMoves();
         this.currPlyr.restoreHand();
         this.opposPlyr.restoreHand();
+        this.opposPlyr.aiDifficulty = localStorage.getItem('difficulty');
         this.deck.restoreDeck(this.currPlyr.playerID, this.opposPlyr.playerID);
         this.board.resolveInflunceForEntireBoard();
     }

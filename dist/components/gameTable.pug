@@ -1,0 +1,36 @@
+.main-grid
+  .menuBar
+    .menuBar-item.title Jacynth
+    #roomNumber.menuBar-item
+    .menuBar-item
+      button#menuButton
+        span
+          <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+          </svg>
+  .gameboard
+  .HUD-container.enemyHUD
+    #enemyIcon.playerIcon
+    .HUDText
+      #enemyID.HUDelement.name.enemy waiting
+      #enemyHUD.HUDelement Score 0 Tokens 4
+  .HUD-container.playerHUD
+    #playerIcon.playerIcon
+    .HUDText
+      #playerID.HUDelement.name.player waiting
+      #playerHUD.HUDelement Score 0 Tokens 4
+  .player-hand-container
+    #gameOverBox
+      span Game Over
+      span#winnerText
+    #disconnectedBox
+      span Disconnected
+      span#disconnectedInfo Game aborted. Yourself or the opponent disconnected.
+    .player-hand
+      .influenceTokenContainer
+    .button-container
+      button#undoButton.inGameButton(type='button' disabled='') undo
+      button#endTurnButton.inGameButton(type='button' disabled='')
+        | end
+        br
+        | turn

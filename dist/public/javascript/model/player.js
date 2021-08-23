@@ -237,9 +237,13 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     constructor(playerID, gameBoard, deck, opponentID, getOpponentTokensNumCB, placeOpponentTokenCB, removeOpponentTokenCB) {
         super(playerID, gameBoard, deck);
         this.computerTakeTurn = () => {
+            console.log(this.aiDifficulty);
             const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
-            this.blockTheft(false, allMoves);
-            this.blockDiagTheft(false, allMoves);
+            // don't use additional AI rules for easy difficulty
+            if (this.aiDifficulty !== 'Easy') {
+                this.blockTheft(false, allMoves);
+                this.blockDiagTheft(false, allMoves);
+            }
             // remove token moves, then sort by score, if same score then randomize
             // (otherwise the computer will fill spaces in the board from top
             // left to bottom right sequentially)
@@ -277,6 +281,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         this.getOpponentTokensNum = getOpponentTokensNumCB;
         this.placeOpponentToken = placeOpponentTokenCB;
         this.removeOpponentToken = removeOpponentTokenCB;
+        this.aiDifficulty = 'Easy'; // default value
     }
     // helper fn to adjust requirements for placing an influence
     // token as the game progresses
@@ -321,19 +326,22 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                     tokenSpaceCardValue: undefined,
                     log: ''
                 };
-                const blockTheftAdjustment = this.blockTheft(true);
-                cardOnlyScoreObj.score -= blockTheftAdjustment;
-                cardOnlyScoreObj.log =
-                    blockTheftAdjustment > 0
-                        ? (cardOnlyScoreObj.log += `blocktheft -${blockTheftAdjustment} `)
-                        : cardOnlyScoreObj.log;
-                const blockDiagTheft = this.blockDiagTheft(true);
-                cardOnlyScoreObj.score -= blockDiagTheft;
-                cardOnlyScoreObj.log =
-                    blockDiagTheft > 0
-                        ? (cardOnlyScoreObj.log += `blockdiagtheft -${blockDiagTheft} `)
-                        : cardOnlyScoreObj.log;
-                this.scoreintermediateMoves(cardOnlyScoreObj);
+                // don't use additional AI rules for easy difficulty
+                if (this.aiDifficulty !== 'Easy') {
+                    const blockTheftAdjustment = this.blockTheft(true);
+                    cardOnlyScoreObj.score -= blockTheftAdjustment;
+                    cardOnlyScoreObj.log =
+                        blockTheftAdjustment > 0
+                            ? (cardOnlyScoreObj.log += `blocktheft -${blockTheftAdjustment} `)
+                            : cardOnlyScoreObj.log;
+                    const blockDiagTheft = this.blockDiagTheft(true);
+                    cardOnlyScoreObj.score -= blockDiagTheft;
+                    cardOnlyScoreObj.log =
+                        blockDiagTheft > 0
+                            ? (cardOnlyScoreObj.log += `blockdiagtheft -${blockDiagTheft} `)
+                            : cardOnlyScoreObj.log;
+                    this.scoreintermediateMoves(cardOnlyScoreObj);
+                }
                 resultsArr.push(cardOnlyScoreObj);
                 // then also check what the change in score will be when placing a token
                 // in any space meeting the minimum card valuerequirements
@@ -361,18 +369,22 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                 tokenSpaceCardValue: tokenSpaceCardValue,
                                 log: ''
                             };
-                            const blockTheftAdjustment = this.blockTheft(true);
-                            withTokenScoreObj.score -= blockTheftAdjustment;
-                            withTokenScoreObj.log =
-                                blockTheftAdjustment > 0
-                                    ? (withTokenScoreObj.log += `blocktheft -${blockTheftAdjustment} `)
-                                    : withTokenScoreObj.log;
-                            const blockDiagTheft = this.blockDiagTheft(true);
-                            withTokenScoreObj.score -= blockDiagTheft;
-                            withTokenScoreObj.log =
-                                blockDiagTheft > 0
-                                    ? (withTokenScoreObj.log += `blockdiagtheft -${blockDiagTheft} `)
-                                    : withTokenScoreObj.log;
+                            // don't use additional AI rules for easy difficulty
+                            if (this.aiDifficulty !== 'Easy') {
+                                const blockTheftAdjustment = this.blockTheft(true);
+                                withTokenScoreObj.score -= blockTheftAdjustment;
+                                withTokenScoreObj.log =
+                                    blockTheftAdjustment > 0
+                                        ? (withTokenScoreObj.log += `blocktheft -${blockTheftAdjustment} `)
+                                        : withTokenScoreObj.log;
+                                const blockDiagTheft = this.blockDiagTheft(true);
+                                withTokenScoreObj.score -= blockDiagTheft;
+                                withTokenScoreObj.log =
+                                    blockDiagTheft > 0
+                                        ? (withTokenScoreObj.log += `blockdiagtheft -${blockDiagTheft} `)
+                                        : withTokenScoreObj.log;
+                                this.searchForTheftOpportunity(withTokenScoreObj);
+                            }
                             const growth = this.getDistrictsGrowthPotential(availTokenSpace);
                             withTokenScoreObj.score += growth;
                             withTokenScoreObj.tokenSpaceBonuses = growth;
@@ -382,7 +394,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                     : withTokenScoreObj.log;
                             this.extraPtforCardinHand(withTokenScoreObj);
                             this.scoreintermediateMoves(withTokenScoreObj);
-                            this.searchForTheftOpportunity(withTokenScoreObj);
                             resultsArr.push(withTokenScoreObj);
                             // reset score after each token removal
                             this.gameBoard.removePlayerTokenAndResolveBoard(availTokenSpace.getID());
@@ -773,7 +784,8 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         move.score += points;
         if (move.tokenSpaceBonuses)
             move.tokenSpaceBonuses += points;
-        move.log += `same suit in hand + ${points}`;
+        if (points > 0)
+            move.log += `same suit in hand + ${points} `;
     }
     // helper fn to test wether a potential token placement meets minimum reqs
     filterAndSortTokenScoreResults(topCardScore, tokenScoreArr) {
@@ -781,12 +793,14 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         // Remove results which don't raise the score by the minimum threshold
         // versus just playing a card. For this check we also temporarily remove the
         // growth potential bonus and card in hand w same suit bonus
-        //  - otherwise the higher score created by this for placing
+        //  - otherwise the higher score created by this
         // bonus causes the AI to place a token even when the same game
         // score would be achieved without placing a token.
-        tokenScoreArr = tokenScoreArr.filter((ele) => ele.tokenSpaceBonuses &&
-            ele.score - topCardScore - ele.tokenSpaceBonuses >=
-                adjustedScoreThreshold);
+        tokenScoreArr = tokenScoreArr.filter((ele) => {
+            return (ele.tokenSpaceBonuses &&
+                ele.score - topCardScore - ele.tokenSpaceBonuses >=
+                    adjustedScoreThreshold);
+        });
         // sort the array first by score,
         // then by the value of the card the token will be placed on
         return tokenScoreArr.sort((a, b) => b.score - a.score || b.tokenSpaceCardValue - a.tokenSpaceCardValue);

@@ -1,76 +1,21 @@
 include ../components/header.pug
 audio#pickupSound(src='assets/pickupsound.wav' preload='auto')
 audio#dropSound(src='assets/switch8.wav' preload='auto')
-audio#clickSound(src='assets/pickupsound.wav' preload='auto')
 script.
     const gameType = JSON.parse('!{JSON.stringify(gameType)}');
 
-.main-grid
-  .menuBar
-    .menuBar-item.title Jacynth
-    #roomNumber.menuBar-item
-    .menuBar-item
-      button#menuButton
-        span
-          <svg style="width:24px;height:24px" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
-          </svg>
-  .gameboard
-  .HUD-container.enemyHUD
-    #enemyIcon.playerIcon
-    .HUDText
-      #enemyID.HUDelement.name.enemy waiting
-      #enemyHUD.HUDelement Score 0 Tokens 4
-  .HUD-container.playerHUD
-    #playerIcon.playerIcon
-    .HUDText
-      #playerID.HUDelement.name.player waiting
-      #playerHUD.HUDelement Score 0 Tokens 4
-  .player-hand-container
-    #gameOverBox
-      span Game Over
-      span#winnerText
-    #disconnectedBox
-      span Disconnected
-      span#disconnectedInfo Game aborted. Yourself or the opponent disconnected.
-    .player-hand
-      .influenceTokenContainer
-    .button-container
-      button#undoButton.inGameButton(type='button' disabled='') undo
-      button#endTurnButton.inGameButton(type='button' disabled='')
-        | end
-        br
-        | turn
-#overlay
-#menu-popup.menu-popup.modal
-  button#closeMenuButton.close(href='#') &times;
-  .menu-header Jacynth
-      br
-      span.subheader A Decktet Game
-  #singlePlayerBttn.menu-button
-    a(href='/singleplayer')#newGameBttn New Singleplayer Game
-  #multiPlayerBttn.menu-button
-    a(href='/multiplayer') New Multiplayer Game
-  #rulesButton.menu-button
-    button Rules &amp; Credits
-#chooseLayoutOverlay
-#howToPlayInfo.menu-popup.modal
-  | Drag a card from your hand to the board to play.
-  | After placing a card you may optionally place 1 of your 4 influence tokens.
-  | Click any influence token already on the board to see the district under it's control.
-  | The full game rules are available in the menu.
-  #howToPlayButton.menu-button
-    button OK
-#chooseLayout.menu-popup.modal
-  #layoutTitle.menu-header Choose starting layout
-  button#razeway.layoutButton(data-layout="razeway")
-    img(src="./assets/razeway.png")
-  button#twotowers.layoutButton(data-layout="towers")
-    img(src="./assets/towers.png")
-  button#oldcity.layoutButton(data-layout="oldcity")
-    img(src="./assets/oldcity.png")
+include ../components/gameTable.pug
+
+include ../components/mainMenu.pug
+
+include ../components/howToPlay.pug
+
+include ../components/newGameOptions.pug
+
 include ../components/rules.pug
+
 include ../components/loadscreen.pug
+
 script(src='/socket.io/socket.io.js')
 script(type='module' src='/javascript/app.js')
 script(src='/javascript/DragDropTouch.js')

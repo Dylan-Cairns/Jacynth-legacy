@@ -4,7 +4,7 @@ import {
   SinglePlayerGameModel
 } from '../model/model.js';
 import { DeckType } from '../model/decktet.js';
-import { PlayerID } from '../model/player.js';
+import { AIDifficulty, PlayerID } from '../model/player.js';
 import { MultiPlayerView, SinglePlayerView, View } from '../view/view.js';
 import { Socket } from 'socket.io-client';
 
@@ -51,7 +51,7 @@ export class SinglePlayerController {
     );
     this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
     this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
-    this.view.bindCreateLayout(this.startGame);
+    this.view.bindStartGame(this.startGame);
     this.view.bindGetControlledSpaces(
       this.model.board.getSpacesControlledByToken
     );
@@ -65,9 +65,9 @@ export class SinglePlayerController {
     }
   }
 
-  startGame = (layout: Layout) => {
+  startGame = (layout: Layout, aiDifficulty?: AIDifficulty) => {
     this.model.resetStorage();
-    this.model.startGame(layout);
+    this.model.startGame(layout, aiDifficulty);
     this.view.enableCardHandDragging();
   };
 }
@@ -117,7 +117,7 @@ export class MultiPlayerController {
     this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
     this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
 
-    this.view.bindCreateLayout(this.model.createLayout);
+    this.view.bindStartGame(this.model.createLayout);
 
     this.view.bindGetControlledSpaces(
       this.model.board.getSpacesControlledByToken

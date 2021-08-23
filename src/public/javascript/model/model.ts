@@ -6,7 +6,8 @@ import {
   Player_SinglePlayer,
   Player_ComputerPlayer,
   SendCardPlaytoViewCB,
-  SendTokenPlayToViewCB
+  SendTokenPlayToViewCB,
+  AIDifficulty
 } from './player.js';
 import { io, Socket } from 'socket.io-client';
 
@@ -60,10 +61,11 @@ export class SinglePlayerGameModel extends GameModel {
     );
   }
 
-  public startGame(layout: Layout) {
+  public startGame(layout: Layout, aiDifficulty: AIDifficulty = 'Easy') {
     this.createLayout(this.deck, layout);
     this.currPlyr.drawStartingHand();
     this.opposPlyr.drawStartingHand();
+    this.opposPlyr.aiDifficulty = aiDifficulty;
   }
 
   public restoreGame() {
@@ -71,6 +73,9 @@ export class SinglePlayerGameModel extends GameModel {
     this.restorePlayedMoves();
     this.currPlyr.restoreHand();
     this.opposPlyr.restoreHand();
+    this.opposPlyr.aiDifficulty = localStorage.getItem(
+      'difficulty'
+    ) as AIDifficulty;
     this.deck.restoreDeck(this.currPlyr.playerID, this.opposPlyr.playerID);
     this.board.resolveInflunceForEntireBoard();
   }

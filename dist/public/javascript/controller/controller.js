@@ -4,9 +4,9 @@ export class Controller {
 }
 export class SinglePlayerController {
     constructor(deckType) {
-        this.startGame = (layout) => {
+        this.startGame = (layout, aiDifficulty) => {
             this.model.resetStorage();
-            this.model.startGame(layout);
+            this.model.startGame(layout, aiDifficulty);
             this.view.enableCardHandDragging();
         };
         this.model = new SinglePlayerGameModel(deckType);
@@ -29,7 +29,7 @@ export class SinglePlayerController {
         this.view.bindGetOpponAvailTokens(this.model.opposPlyr.getInfluenceTokensNo);
         this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
-        this.view.bindCreateLayout(this.startGame);
+        this.view.bindStartGame(this.startGame);
         this.view.bindGetControlledSpaces(this.model.board.getSpacesControlledByToken);
         this.view.bindResetStorage(this.model.resetStorage);
         // if there is existing game data in local storage, restore the
@@ -62,7 +62,7 @@ export class MultiPlayerController {
         this.view.bindGetOpponAvailTokens(this.model.opposPlyr.getInfluenceTokensNo);
         this.view.bindGetCurrPlyrScore(this.model.currPlyr.getScore);
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
-        this.view.bindCreateLayout(this.model.createLayout);
+        this.view.bindStartGame(this.model.createLayout);
         this.view.bindGetControlledSpaces(this.model.board.getSpacesControlledByToken);
         if (this.currentPlayer === 'Player 1')
             socket.emit('playerReady', currentPlayer);

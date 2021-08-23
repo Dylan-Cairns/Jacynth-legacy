@@ -222,7 +222,7 @@ export class View {
         this.preloadedImagesArr = [];
         this.disconnectedAlert = document.getElementById('disconnectedBox');
         this.winnerText = document.getElementById('winnerText');
-        this.pickupSound = document.getElementById('clickSound');
+        this.pickupSound = document.getElementById('pickupSound');
         this.dropSound = document.getElementById('dropSound');
         this.menuButton = document.getElementById('menuButton');
         this.closeMenuButton = document.getElementById('closeMenuButton');
@@ -231,9 +231,9 @@ export class View {
         this.closeRulesButton = document.getElementById('closeRulesButton');
         this.rules = document.getElementById('rules');
         this.overlay = document.getElementById('overlay');
-        this.chooseLayoutOverlay = document.getElementById('chooseLayoutOverlay');
-        this.chooseLayoutMenu = document.getElementById('chooseLayout');
-        this.layoutButtons = document.querySelectorAll('.layoutButton');
+        this.newGameOptionsOverlay = document.getElementById('newGameOptionsOverlay');
+        this.newGameMenu = document.getElementById('newGameOptionsModal');
+        this.gameOptionsForm = document.getElementById('gameOptionsForm');
         this.howToPlayInfo = document.getElementById('howToPlayInfo');
         this.howToPlayButton = document.getElementById('howToPlayButton');
         this.newGameButton = document.getElementById('newGameBttn');
@@ -677,8 +677,8 @@ export class View {
     bindGetOpponentScore(getOpponentScoreCB) {
         this.getOpponentScore = getOpponentScoreCB;
     }
-    bindCreateLayout(createLayoutCB) {
-        this.chooseLayout = createLayoutCB;
+    bindStartGame(startGameCB) {
+        this.startGame = startGameCB;
     }
     bindGetControlledSpaces(getControlledSpacesCB) {
         this.getSpacesControlledByToken = getControlledSpacesCB;
@@ -722,27 +722,47 @@ export class SinglePlayerView extends View {
         this.opponentIcon.classList.add('losing');
         // use single player specific endturn function
         this.endTurnButton.addEventListener('click', this.endTurnButtonCB);
+        // set last used difficulty and layout setting as checked in menu
+        const aiDifficulty = localStorage.getItem('difficulty');
+        if (aiDifficulty) {
+            const radioElement = document.getElementById(aiDifficulty);
+            radioElement.checked = true;
+        }
+        const layout = localStorage.getItem('layoutChoice');
+        if (layout) {
+            const radioElement = document.getElementById(layout);
+            radioElement.checked = true;
+        }
         // if no game data in local storage, show new game layout menu.
         // if there IS game data, the view will be filled with the existing data,
         // which will be triggered from the controller.
         if (!localStorage.getItem('layout')) {
-            this.chooseLayoutMenu.classList.add('active');
-            this.chooseLayoutOverlay.classList.add('active');
+            this.newGameMenu.classList.add('active');
+            this.newGameOptionsOverlay.classList.add('active');
         }
-        this.layoutButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                this.chooseLayoutMenu.classList.remove('active');
-                this.chooseLayoutOverlay.classList.remove('active');
-                const layoutChoice = button.dataset.layout;
-                if (!layoutChoice || !this.chooseLayout)
-                    return;
-                this.chooseLayout(layoutChoice);
-                if (!localStorage.userHasPlayedBefore) {
-                    this.howToPlayInfo.classList.add('active');
-                    this.overlay.classList.add('active');
-                    localStorage.userHasPlayedBefore = 'true';
-                }
-            });
+        // handle the new game options menu
+        this.gameOptionsForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            this.newGameMenu.classList.remove('active');
+            this.newGameOptionsOverlay.classList.remove('active');
+            const formData = new FormData(this.gameOptionsForm);
+            const layoutChoice = formData.get('layout');
+            const aiDifficulty = formData.get('difficulty');
+            console.log(aiDifficulty);
+            if (!layoutChoice || !aiDifficulty || !this.startGame)
+                return;
+            // set difficulty setting in localstorage, for restoring
+            // in progress games, as well as setting the default
+            // in the new game menu
+            localStorage.setItem('difficulty', aiDifficulty);
+            localStorage.setItem('layoutChoice', layoutChoice);
+            this.startGame(layoutChoice, aiDifficulty);
+            // show tips for new players if it's the users first time playing.
+            if (!localStorage.userHasPlayedBefore) {
+                this.howToPlayInfo.classList.add('active');
+                this.overlay.classList.add('active');
+                localStorage.userHasPlayedBefore = 'true';
+            }
         });
     }
 }
@@ -789,19 +809,20 @@ export class MultiPlayerView extends View {
         }
         // get player 2 to choose layout
         if (currPlyrID === 'Player 2') {
-            this.chooseLayoutMenu.classList.add('active');
-            this.chooseLayoutOverlay.classList.add('active');
-            this.layoutButtons.forEach((button) => {
-                button.addEventListener('click', () => {
-                    this.chooseLayoutMenu.classList.remove('active');
-                    this.chooseLayoutOverlay.classList.remove('active');
-                    const layoutChoice = button.dataset.layout;
-                    if (!layoutChoice || !this.chooseLayout)
-                        return;
-                    this.chooseLayout(layoutChoice);
-                    this.howToPlayInfo.classList.add('active');
-                    this.overlay.classList.add('active');
-                });
+            this.newGameMenu.classList.add('active');
+            this.newGameOptionsOverlay.classList.add('active');
+            this.gameOptionsForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                this.newGameMenu.classList.remove('active');
+                this.newGameOptionsOverlay.classList.remove('active');
+                // TODO: remove single player options from multiplayer menu
+                const formData = new FormData(this.gameOptionsForm);
+                const layoutChoice = formData.get('layout');
+                if (!layoutChoice || !this.startGame)
+                    return;
+                this.startGame(layoutChoice);
+                this.howToPlayInfo.classList.add('active');
+                this.overlay.classList.add('active');
             });
         }
         this.roomNumber = document.getElementById('roomNumber');

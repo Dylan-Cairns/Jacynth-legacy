@@ -1,0 +1,30 @@
+#newGameOptionsOverlay
+
+#newGameOptionsModal.menu-popup.modal
+  form#gameOptionsForm
+    p Difficulty
+    #difficulty
+      input#Easy(type='radio', name='difficulty', value='Easy' checked)
+      label(for='Easy')
+        .layoutButton Easy
+
+      input#Medium(type='radio', name='difficulty', value='Medium')
+      label(for='Medium') 
+        .layoutButton Medium
+
+    p Starting layout
+    #layoutRadioBttns
+      input#razeway(type='radio', name='layout', value='razeway' checked)
+      label(for='razeway')
+        img.layoutButton(src="./assets/razeway.png" alt='razeway')
+
+      input#towers(type='radio', name='layout', value='towers')
+      label(for='towers')
+        img.layoutButton(src="./assets/towers.png" alt='towers')
+
+      input#oldcity(type='radio', name='layout', value='oldcity')
+      label(for='oldcity')
+        img.layoutButton(src="./assets/oldcity.png" alt='oldcity')
+
+    p
+      button.menu-button(type='submit') Start game
