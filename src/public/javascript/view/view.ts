@@ -1019,6 +1019,14 @@ export class MultiPlayerView extends View {
       this.currPlyrIcon.classList.add('player2Icon');
       this.currPlyrIcon.classList.add('losing');
     }
+    // Remove single player options from multiplayer menu
+    const title = document.getElementById('difficultyTitle') as HTMLElement;
+    title.remove();
+    const difficultyRadios = document.getElementById(
+      'difficulty'
+    ) as HTMLElement;
+    difficultyRadios.remove();
+
     // get player 2 to choose layout
     if (currPlyrID === 'Player 2') {
       this.newGameMenu.classList.add('active');
@@ -1029,7 +1037,6 @@ export class MultiPlayerView extends View {
 
         this.newGameMenu.classList.remove('active');
         this.newGameOptionsOverlay.classList.remove('active');
-        // TODO: remove single player options from multiplayer menu
 
         const formData = new FormData(this.gameOptionsForm);
         const layoutChoice = formData.get('layout') as Layout;
