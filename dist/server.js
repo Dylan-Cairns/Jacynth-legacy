@@ -8,8 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 // some game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
-import { getUsers } from './queries.js';
-console.log(process.env.DB_user, process.env.DB_password);
+import { storeGameResult, getUsers } from './queries.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -20,6 +19,7 @@ app.set('view engine', 'pug');
 // middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/favicon.ico', express.static('assets/favicon.ico'));
+app.use(express.json());
 // routes
 app.get('/', (req, res) => {
     res.render('home');
@@ -30,8 +30,8 @@ app.get('/singleplayer', (req, res) => {
 app.get('/multiplayer', (req, res) => {
     res.render('game', { gameType: 'multiplayer' });
 });
-console.log('app loaded');
 app.get('/users', getUsers);
+app.post('/storeGameResult', storeGameResult);
 const roomsGameData = [];
 io.on('connection', (socket) => {
     console.log('a user connected');

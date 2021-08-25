@@ -14,7 +14,6 @@ const pool = new Pool({
 });
 
 export const getUsers = (request: Request, response: Response) => {
-  console.log(process.env.DB_user, process.env.DB_password);
   pool.query(
     'SELECT * FROM users ORDER BY id ASC',
     (error: Error, results: { rows: any }) => {
@@ -22,6 +21,28 @@ export const getUsers = (request: Request, response: Response) => {
         throw error;
       }
       response.status(200).json(results.rows);
+    }
+  );
+};
+
+export const storeGameResult = (request: Request, response: Response) => {
+  // const user1ID = request.body.id1;
+  // const user1Score = request.body.user1score;
+  // const user2ID = request.body.id2;
+  // const user2Score = request.body.user1score;
+
+  const { user1ID, user1Score, user2ID, user2Score } = request.body;
+
+  console.log(user1ID, user1Score, user2ID, user2Score);
+
+  pool.query(
+    'SELECT add_game_record($1, $2, $3, $4)',
+    [user1ID, user1Score, user2ID, user2Score],
+    (error: Error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(201).send(`game record added`);
     }
   );
 };

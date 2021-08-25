@@ -56,3 +56,27 @@ if (!localStorage.getItem('layout')) {
         console.log(error);
     }
 }))();
+const gameResults = {
+    user1ID: 'dylanious',
+    user1Score: 25,
+    user2ID: 'easyAI',
+    user2Score: 18
+};
+console.log(JSON.stringify(gameResults));
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield fetch('/storeGameResult', {
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'post',
+            body: JSON.stringify(gameResults)
+        });
+        const message = yield response;
+        console.log(response);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}))();

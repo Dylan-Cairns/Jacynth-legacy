@@ -11,9 +11,7 @@ dotenv.config();
 import { Card, Decktet } from './public/javascript/model/decktet.js';
 import { BoardSpace } from './public/javascript/model/gameboard.js';
 
-import { getUsers } from './queries.js';
-
-console.log(process.env.DB_user, process.env.DB_password);
+import { storeGameResult, getUsers } from './queries.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -28,6 +26,7 @@ app.set('view engine', 'pug');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/favicon.ico', express.static('assets/favicon.ico'));
+app.use(express.json());
 
 // routes
 
@@ -43,8 +42,9 @@ app.get('/multiplayer', (req, res) => {
   res.render('game', { gameType: 'multiplayer' });
 });
 
-console.log('app loaded');
 app.get('/users', getUsers);
+
+app.post('/storeGameResult', storeGameResult);
 
 // app.use((req, res) => {
 //   res.status(404).redirect('/');
