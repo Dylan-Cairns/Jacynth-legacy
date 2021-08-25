@@ -46,3 +46,14 @@ newGameButton.addEventListener('click', (event) => {
 if (!localStorage.getItem('layout')) {
   document.getElementById('singlePlayerResumeBttn')?.remove();
 }
+
+(async () => {
+  try {
+    const response = await fetch('/users');
+    const books = await response.json();
+
+    console.log(books);
+  } catch (error) {
+    console.log(error);
+  }
+})();

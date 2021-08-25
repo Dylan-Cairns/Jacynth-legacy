@@ -4,16 +4,17 @@ import http from 'http';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
+import dotenv from 'dotenv';
+dotenv.config();
+// some game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
+import { getUsers } from './queries.js';
+console.log(process.env.DB_user, process.env.DB_password);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-// Put this code before `app.set("views", "./views");`
-const clone = (object) => {
-    return JSON.parse(JSON.stringify(object));
-};
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 // middleware
@@ -29,9 +30,8 @@ app.get('/singleplayer', (req, res) => {
 app.get('/multiplayer', (req, res) => {
     res.render('game', { gameType: 'multiplayer' });
 });
-app.use((req, res) => {
-    res.status(404).redirect('/');
-});
+console.log('app loaded');
+app.get('/users', getUsers);
 const roomsGameData = [];
 io.on('connection', (socket) => {
     console.log('a user connected');
