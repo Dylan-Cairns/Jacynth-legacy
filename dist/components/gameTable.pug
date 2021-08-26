@@ -29,8 +29,10 @@
     .player-hand
       .influenceTokenContainer
     .button-container
-      button#undoButton.inGameButton(type='button' disabled='') undo
-      button#endTurnButton.inGameButton(type='button' disabled='')
-        | end
-        br
-        | turn
+      #undoButton.inGameButton
+        button(type='button' disabled='') undo
+      #endTurnButton.inGameButton
+        button(type='button' disabled='')
+          | end
+          br
+          | turn

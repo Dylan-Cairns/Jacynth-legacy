@@ -36,10 +36,6 @@
   box-sizing: border-box;
 }
 
-html {
-  background-color: var(--body-background);
-}
-
 body {
   margin: 0;
   background-image: url('../assets/building_grey2.png'),
@@ -53,15 +49,6 @@ body {
   border-style: none;
 }
 
-/* deal with safari not supporting background blend mode */
-@supports not (background-blend-mode: multiply) {
-  body {
-    background-color: var(--body-background);
-    background-image: url('funky-lines-blue.png');
-    background-repeat: repeat;
-  }
-}
-
 button {
   all: unset;
   font-family: 'Fortune Letters';
@@ -70,6 +57,15 @@ button {
 button:hover {
   color: var(--link-hover);
   cursor: pointer;
+}
+
+/* safari has problems with align/center on buttons directly.
+that makes it necessary to style the div around the endgame
+buttons instead of the button itself. This rules allows for the different 
+hover color for menu vs in game buttons */
+
+.inGameButton:hover > button:hover {
+  color: white;
 }
 
 .main-grid {
