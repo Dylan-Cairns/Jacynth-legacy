@@ -7,10 +7,10 @@ const { Pool } = pkg;
 
 const pool = new Pool({
   user: process.env.DB_user,
-  host: 'localhost',
+  host: process.env.DB_host,
   database: 'jacynth',
   password: process.env.DB_password,
-  port: 5432
+  port: process.env.DB_port ? parseInt(process.env.DB_port) : 5432
 });
 
 export const getUsers = (request: Request, response: Response) => {
