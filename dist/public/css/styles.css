@@ -43,8 +43,8 @@ html {
 body {
   margin: 0;
   background-image: url('../assets/building_grey2.png'),
-    url('../assets/funky-lines.png');
-  background-color: var(--body-background);
+    url('../assets/funky-lines-blue.png');
+  /* background-color: var(--body-background); */
   background-size: 100vw, auto;
   background-blend-mode: multiply;
   background-repeat: no-repeat, repeat;
