@@ -46,6 +46,7 @@ body {
   background-repeat: no-repeat, repeat;
   background-position: bottom center, top left;
   font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+  border-style: none;
 }
 
 button {
