@@ -5,10 +5,13 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
-dotenv.config();
-// some game objects used by server side multiplayer code
+import pkg from 'express-openid-connect';
+const { auth } = pkg;
+// game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
-import { storeGameResult, getUsers } from './queries.js';
+import { storeGameResult } from './queries.js';
+// configuration
+dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -20,6 +23,20 @@ app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/favicon.ico', express.static('assets/favicon.ico'));
 app.use(express.json());
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth({
+    authRequired: false,
+    auth0Logout: true,
+    secret: process.env.AUTH0_session_secret,
+    baseURL: process.env.AUTH0_baseURL,
+    clientID: process.env.AUTH0_clientID,
+    issuerBaseURL: process.env.AUTH0_issuerBaseURL
+}));
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.oidc.isAuthenticated();
+    res.locals.activeRoute = req.originalUrl;
+    next();
+});
 // routes
 app.get('/', (req, res) => {
     res.render('home');
@@ -30,8 +47,43 @@ app.get('/singleplayer', (req, res) => {
 app.get('/multiplayer', (req, res) => {
     res.render('game', { gameType: 'multiplayer' });
 });
-app.get('/users', getUsers);
-app.post('/storeGameResult', storeGameResult);
+app.get('/profile', (req, res) => {
+    res.render('profile', {
+        user: req.oidc.user
+    });
+});
+// rest api routes
+app.post('/storeSPGameResult', (req, res) => {
+    let user1ID = 'guest';
+    let user1Nick = 'guest';
+    if (res.locals.isAuthenticated && req.oidc.user) {
+        user1ID = req.oidc.user.sub;
+        user1Nick = req.oidc.user.nickname;
+    }
+    req.body['user1ID'] = user1ID;
+    req.body['user1Nick'] = user1Nick;
+    storeGameResult(req, res);
+});
+// authentication routes
+app.get('/sign-up/:page', (req, res) => {
+    res.oidc.login({
+        authorizationParams: {
+            screen_hint: 'signup'
+        }
+    });
+});
+app.get('/login/:page', (req, res) => {
+    const { page } = req.params;
+    res.oidc.login({
+        returnTo: page
+    });
+});
+app.get('/logout/:page', (req, res) => {
+    const { page } = req.params;
+    res.oidc.logout({
+        returnTo: page
+    });
+});
 const roomsGameData = [];
 io.on('connection', (socket) => {
     console.log('a user connected');

@@ -10,18 +10,19 @@ import {
   AIDifficulty
 } from './player.js';
 import { io, Socket } from 'socket.io-client';
+import { auth } from 'express-openid-connect';
 
 export type GameType = 'multiPlayer' | 'singlePlayer' | 'solitaire';
 export type Layout = 'razeway' | 'towers' | 'oldcity' | 'solitaire';
-
-const SOLITAIRE_BOARD_DIMENSIONS = 4;
-const TWOPLAYER_BOARD_DIMENSIONS = 6;
 export const BOARD_LAYOUTS = {
   razeway: ['x0y0', 'x1y1', 'x2y2', 'x3y3', 'x4y4', 'x5y5'],
   towers: ['x1y1', 'x4y1', 'x1y4', 'x4y4'],
   oldcity: ['x2y0', 'x4y1', 'x0y2', 'x5y3', 'x1y4', 'x3y5'],
   solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
+
+const SOLITAIRE_BOARD_DIMENSIONS = 4;
+const TWOPLAYER_BOARD_DIMENSIONS = 6;
 
 export class GameModel {
   board: GameBoard;
@@ -61,7 +62,7 @@ export class SinglePlayerGameModel extends GameModel {
     );
   }
 
-  public startGame(layout: Layout, aiDifficulty: AIDifficulty = 'Easy') {
+  public startGame(layout: Layout, aiDifficulty: AIDifficulty = 'easyAI') {
     this.createLayout(this.deck, layout);
     this.currPlyr.drawStartingHand();
     this.opposPlyr.drawStartingHand();
@@ -151,6 +152,36 @@ export class SinglePlayerGameModel extends GameModel {
       });
     }
   }
+
+  public addRecordtoDB = async () => {
+    // user1 score will either be guest or authenticated user ID.
+    // that determination is handled server side,
+    // so user1ID is not added here.
+    const gameResults = {
+      user1Score: this.currPlyr.getScore(),
+      user2ID: this.opposPlyr.aiDifficulty,
+      user2Score: this.opposPlyr.getScore(),
+      user2Nick: 'empty'
+    };
+
+    (async () => {
+      try {
+        const response = await fetch('/storeSPGameResult', {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: 'post',
+          body: JSON.stringify(gameResults)
+        });
+
+        const message = await response;
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  };
 }
 
 export class MultiplayerGameModel extends GameModel {

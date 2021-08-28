@@ -240,7 +240,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
             console.log(this.aiDifficulty);
             const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
             // don't use additional AI rules for easy difficulty
-            if (this.aiDifficulty !== 'Easy') {
+            if (this.aiDifficulty !== 'easyAI') {
                 this.blockTheft(false, allMoves);
                 this.blockDiagTheft(false, allMoves);
             }
@@ -281,7 +281,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
         this.getOpponentTokensNum = getOpponentTokensNumCB;
         this.placeOpponentToken = placeOpponentTokenCB;
         this.removeOpponentToken = removeOpponentTokenCB;
-        this.aiDifficulty = 'Easy'; // default value
+        this.aiDifficulty = 'easyAI'; // default value
     }
     // helper fn to adjust requirements for placing an influence
     // token as the game progresses
@@ -327,7 +327,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                     log: ''
                 };
                 // don't use additional AI rules for easy difficulty
-                if (this.aiDifficulty !== 'Easy') {
+                if (this.aiDifficulty !== 'easyAI') {
                     const blockTheftAdjustment = this.blockTheft(true);
                     cardOnlyScoreObj.score -= blockTheftAdjustment;
                     cardOnlyScoreObj.log =
@@ -370,7 +370,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
                                 log: ''
                             };
                             // don't use additional AI rules for easy difficulty
-                            if (this.aiDifficulty !== 'Easy') {
+                            if (this.aiDifficulty !== 'easyAI') {
                                 const blockTheftAdjustment = this.blockTheft(true);
                                 withTokenScoreObj.score -= blockTheftAdjustment;
                                 withTokenScoreObj.log =

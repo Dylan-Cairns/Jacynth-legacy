@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var _a;
 // disable bfcache to force the page to reload every time,
 // even when visited from back button. This is to
@@ -46,37 +37,29 @@ newGameButton.addEventListener('click', (event) => {
 if (!localStorage.getItem('layout')) {
     (_a = document.getElementById('singlePlayerResumeBttn')) === null || _a === void 0 ? void 0 : _a.remove();
 }
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield fetch('/users');
-        const books = yield response.json();
-        console.log(books);
-    }
-    catch (error) {
-        console.log(error);
-    }
-}))();
-const gameResults = {
-    user1ID: 'dylanious',
-    user1Score: 25,
-    user2ID: 'easyAI',
-    user2Score: 18
-};
-console.log(JSON.stringify(gameResults));
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield fetch('/storeGameResult', {
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method: 'post',
-            body: JSON.stringify(gameResults)
-        });
-        const message = yield response;
-        console.log(response);
-    }
-    catch (error) {
-        console.log(error);
-    }
-}))();
+// (async () => {
+//   try {
+//     const response = await fetch('/users');
+//     const books = await response.json();
+//     console.log(books);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// })();
+// console.log(JSON.stringify(gameResults));
+// (async () => {
+//   try {
+//     const response = await fetch('/storeSPGameResult', {
+//       headers: {
+//         Accept: 'application/json',
+//         'Content-Type': 'application/json'
+//       },
+//       method: 'post',
+//       body: JSON.stringify(gameResults)
+//     });
+//     const message = await response;
+//     console.log(response);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// })();

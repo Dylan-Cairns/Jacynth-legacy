@@ -32,6 +32,7 @@ export class SinglePlayerController {
         this.view.bindStartGame(this.startGame);
         this.view.bindGetControlledSpaces(this.model.board.getSpacesControlledByToken);
         this.view.bindResetStorage(this.model.resetStorage);
+        this.view.bindAddRecordtoDB(this.model.addRecordtoDB);
         // if there is existing game data in local storage, restore the
         // in progress game.
         if (localStorage.getItem('layout')) {

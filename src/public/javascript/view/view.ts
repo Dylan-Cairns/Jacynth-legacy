@@ -66,6 +66,7 @@ export class View {
     | ((spaceID: string) => [string, string][])
     | undefined;
   resetStorage: (() => void) | undefined;
+  addRecordtoDB: (() => void) | undefined;
 
   constructor(board: GameBoard, currPlyrID: PlayerID, opposPlyrID: PlayerID) {
     this.currPlyrID = currPlyrID;
@@ -617,6 +618,7 @@ export class View {
       this.gameOverBox.style.visibility = 'visible';
       // if this was a single player game, reset local storage copy of in progress game
       if (this.resetStorage && gameType === 'singleplayer') this.resetStorage();
+      if (this.addRecordtoDB) this.addRecordtoDB();
       return true;
     }
     return false;
@@ -896,6 +898,10 @@ export class View {
   bindResetStorage(resetStorageCB: () => void) {
     this.resetStorage = resetStorageCB;
   }
+
+  bindAddRecordtoDB(addRecordtoDBCB: () => void) {
+    this.addRecordtoDB = addRecordtoDBCB;
+  }
 }
 
 export class SinglePlayerView extends View {
@@ -969,9 +975,6 @@ export class SinglePlayerView extends View {
     this.pickupSound.play();
     this.currPlyrIcon.classList.remove('active');
     this.opponentIcon.classList.add('active');
-    if (this.computerTakeTurn) {
-      this.computerTakeTurn();
-    }
     if (this.getCardDrawFromModel) {
       this.getCardDrawFromModel();
     }
@@ -981,12 +984,15 @@ export class SinglePlayerView extends View {
     this.undoButton.disabled = true;
     this.endTurnButton.disabled = true;
     this.updateScore();
-    this.checkForGameEnd();
     this.currPlyrIcon.classList.add('active');
     this.opponentIcon.classList.remove('active');
     //set turn status in local storage
     localStorage.removeItem('turnStatus');
     localStorage.removeItem('undoMoves');
+    if (!this.checkForGameEnd() && this.computerTakeTurn) {
+      this.computerTakeTurn();
+    }
+    this.updateScore();
   };
 }
 

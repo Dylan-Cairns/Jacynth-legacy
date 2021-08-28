@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
-import { auth } from 'express-openid-connect';
+import pkg from 'express-openid-connect';
+const { auth } = pkg;
 
 // game objects used by server side multiplayer code
 import { Card, Decktet } from './public/javascript/model/decktet.js';
@@ -43,6 +44,12 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.oidc.isAuthenticated();
+  res.locals.activeRoute = req.originalUrl;
+  next();
+});
+
 // routes
 
 app.get('/', (req, res) => {
@@ -57,13 +64,56 @@ app.get('/multiplayer', (req, res) => {
   res.render('game', { gameType: 'multiplayer' });
 });
 
-app.get('/users', getUsers);
-
-app.post('/storeGameResult', storeGameResult);
-
-app.use((req, res) => {
-  res.status(404).redirect('/');
+app.get('/profile', (req, res) => {
+  res.render('profile', {
+    user: req.oidc.user
+  });
 });
+
+// rest api routes
+
+app.post('/storeSPGameResult', (req, res) => {
+  let user1ID = 'guest';
+  let user1Nick = 'guest';
+  if (res.locals.isAuthenticated && req.oidc.user) {
+    user1ID = req.oidc.user.sub;
+    user1Nick = req.oidc.user.nickname;
+  }
+  req.body['user1ID'] = user1ID;
+  req.body['user1Nick'] = user1Nick;
+  storeGameResult(req, res);
+});
+// authentication routes
+
+app.get('/sign-up/:page', (req, res) => {
+  res.oidc.login({
+    authorizationParams: {
+      screen_hint: 'signup'
+    }
+  });
+});
+
+app.get('/login/:page', (req, res) => {
+  const { page } = req.params;
+
+  res.oidc.login({
+    returnTo: page
+  });
+});
+
+app.get('/logout/:page', (req, res) => {
+  const { page } = req.params;
+
+  res.oidc.logout({
+    returnTo: page
+  });
+});
+
+// redirect 404
+
+// app.use((req, res) => {
+//   res.status(404).redirect('/');
+// });
 
 // socket.io
 

@@ -1,3 +1,5 @@
+include ../components/authentication-buttons.pug
+
 include ../components/header.pug
 .main-grid
 img#titlePageBackground(src='./assets/homebackground.png')
@@ -8,9 +10,10 @@ img#titlePageBackground(src='./assets/homebackground.png')
   #singlePlayerBttn.menu-button
     a(href='/singleplayer')#newGameBttn New Singleplayer Game
   #singlePlayerResumeBttn.menu-button
-    a(href='/singleplayer') Resume SP Game
+    a(href='/singleplayer') Resume Game
   #multiPlayerBttn.menu-button
     a(href='/multiplayer') New Multiplayer Game
+  +authentication-buttons(isAuthenticated)
   #rulesButton.menu-button
     button(href='#') Rules &amp; Credits
 include ../components/rules.pug

@@ -1,14 +1,23 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { GameBoard } from './gameboard.js';
 import { Decktet } from './decktet.js';
 import { Player_MultiPlayer, Player_SinglePlayer, Player_ComputerPlayer } from './player.js';
-const SOLITAIRE_BOARD_DIMENSIONS = 4;
-const TWOPLAYER_BOARD_DIMENSIONS = 6;
 export const BOARD_LAYOUTS = {
     razeway: ['x0y0', 'x1y1', 'x2y2', 'x3y3', 'x4y4', 'x5y5'],
     towers: ['x1y1', 'x4y1', 'x1y4', 'x4y4'],
     oldcity: ['x2y0', 'x4y1', 'x0y2', 'x5y3', 'x1y4', 'x3y5'],
     solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
+const SOLITAIRE_BOARD_DIMENSIONS = 4;
+const TWOPLAYER_BOARD_DIMENSIONS = 6;
 export class GameModel {
     constructor(deckType) {
         this.board = new GameBoard(TWOPLAYER_BOARD_DIMENSIONS);
@@ -33,10 +42,38 @@ export class SinglePlayerGameModel extends GameModel {
             localStorage.removeItem(`${this.currPlyr.playerID}-hand`);
             localStorage.removeItem(`${this.opposPlyr.playerID}-hand`);
         };
+        this.addRecordtoDB = () => __awaiter(this, void 0, void 0, function* () {
+            // user1 score will either be guest or authenticated user ID.
+            // that determination is handled server side,
+            // so user1ID is not added here.
+            const gameResults = {
+                user1Score: this.currPlyr.getScore(),
+                user2ID: this.opposPlyr.aiDifficulty,
+                user2Score: this.opposPlyr.getScore(),
+                user2Nick: 'empty'
+            };
+            (() => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    const response = yield fetch('/storeSPGameResult', {
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'post',
+                        body: JSON.stringify(gameResults)
+                    });
+                    const message = yield response;
+                    console.log(response);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }))();
+        });
         this.currPlyr = new Player_SinglePlayer('Player 1', this.board, this.deck);
         this.opposPlyr = new Player_ComputerPlayer('Computer', this.board, this.deck, 'Player 1', this.currPlyr.getInfluenceTokensNo, this.currPlyr.placeToken, this.currPlyr.undoPlaceToken);
     }
-    startGame(layout, aiDifficulty = 'Easy') {
+    startGame(layout, aiDifficulty = 'easyAI') {
         this.createLayout(this.deck, layout);
         this.currPlyr.drawStartingHand();
         this.opposPlyr.drawStartingHand();

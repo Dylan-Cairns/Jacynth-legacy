@@ -123,6 +123,8 @@ export class View {
                 // if this was a single player game, reset local storage copy of in progress game
                 if (this.resetStorage && gameType === 'singleplayer')
                     this.resetStorage();
+                if (this.addRecordtoDB)
+                    this.addRecordtoDB();
                 return true;
             }
             return false;
@@ -686,6 +688,9 @@ export class View {
     bindResetStorage(resetStorageCB) {
         this.resetStorage = resetStorageCB;
     }
+    bindAddRecordtoDB(addRecordtoDBCB) {
+        this.addRecordtoDB = addRecordtoDBCB;
+    }
 }
 export class SinglePlayerView extends View {
     constructor(board, currPlyrID, opposPlyrID) {
@@ -695,9 +700,6 @@ export class SinglePlayerView extends View {
             this.pickupSound.play();
             this.currPlyrIcon.classList.remove('active');
             this.opponentIcon.classList.add('active');
-            if (this.computerTakeTurn) {
-                this.computerTakeTurn();
-            }
             if (this.getCardDrawFromModel) {
                 this.getCardDrawFromModel();
             }
@@ -707,12 +709,15 @@ export class SinglePlayerView extends View {
             this.undoButton.disabled = true;
             this.endTurnButton.disabled = true;
             this.updateScore();
-            this.checkForGameEnd();
             this.currPlyrIcon.classList.add('active');
             this.opponentIcon.classList.remove('active');
             //set turn status in local storage
             localStorage.removeItem('turnStatus');
             localStorage.removeItem('undoMoves');
+            if (!this.checkForGameEnd() && this.computerTakeTurn) {
+                this.computerTakeTurn();
+            }
+            this.updateScore();
         };
         this.currPlyrHUDID.innerHTML = `Player`;
         this.opponentHUDID.innerHTML = `Computer`;

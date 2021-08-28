@@ -58,18 +58,11 @@ if (!localStorage.getItem('layout')) {
 //   }
 // })();
 
-// const gameResults = {
-//   user1ID: 'dylanious',
-//   user1Score: 25,
-//   user2ID: 'easyAI',
-//   user2Score: 18
-// };
-
 // console.log(JSON.stringify(gameResults));
 
 // (async () => {
 //   try {
-//     const response = await fetch('/storeGameResult', {
+//     const response = await fetch('/storeSPGameResult', {
 //       headers: {
 //         Accept: 'application/json',
 //         'Content-Type': 'application/json'

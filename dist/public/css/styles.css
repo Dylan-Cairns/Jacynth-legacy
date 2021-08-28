@@ -49,14 +49,81 @@ body {
   border-style: none;
 }
 
+/* main menu and in game button styling */
+
 button {
   all: unset;
   font-family: 'Fortune Letters';
 }
 
 button:hover {
-  color: var(--link-hover);
   cursor: pointer;
+  color: var(--icon-text-color);
+}
+
+/* in game button container */
+
+.button-Container {
+  display: grid;
+  grid-template-columns: auto auto;
+  background-color: var(--box-background);
+  border-radius: var(--border-radius);
+  padding: 5px;
+}
+
+.inGameButton {
+  position: relative;
+  color: var(--icon-text-color);
+  background-color: var(--box-background);
+  border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
+  border-radius: var(--border-radius);
+  margin: 0px;
+  width: var(--card-size);
+  height: var(--card-size);
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  font-size: var(--text-large);
+  user-select: none;
+  cursor: pointer;
+}
+
+.inGameButton:hover {
+  color: white;
+}
+
+.inGameButton:disabled {
+  color: rgb(107, 107, 107);
+  cursor: unset;
+}
+
+.menu-button {
+  font-size: 1.5rem;
+  background-color: var(--box-background);
+  padding: 6px;
+  color: white;
+  border-radius: calc(var(--border-radius) * 0.5);
+  margin: 5px;
+  text-justify: center;
+  cursor: pointer;
+}
+
+.menu_button:hover {
+  color: var(--icon-text-color);
+}
+
+.auth-buttons {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: stretch;
+}
+
+/* .menuBar-item .auth-button {
+  font-size: 1.2rem;
+} */
+
+.menuBar-item button {
+  font-size: 1.2rem;
 }
 
 .main-grid {
@@ -161,17 +228,17 @@ button:hover {
 .menuBar {
   grid-area: menuBar;
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 100fr auto auto auto;
   align-items: center;
   align-content: start;
-  justify-items: center;
-  justify-content: space-between;
+  justify-items: start;
+  justify-content: start;
   padding: 0.25em 0em;
 }
 
 .menuBar-item {
   color: rgb(255, 255, 255);
-  padding: 0.2em;
+  padding: 0em;
   font-size: var(--text-large);
   text-align: center;
 }
@@ -198,40 +265,6 @@ button:hover {
   padding: 3px;
   align-items: center;
   justify-content: stretch;
-}
-
-.button-Container {
-  display: grid;
-  grid-template-columns: auto auto;
-  background-color: var(--box-background);
-  border-radius: var(--border-radius);
-  padding: 5px;
-}
-
-.inGameButton {
-  position: relative;
-  color: var(--icon-text-color);
-  background-color: var(--box-background);
-  border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
-  border-radius: var(--border-radius);
-  margin: 0px;
-  width: var(--card-size);
-  height: var(--card-size);
-  display: grid;
-  justify-content: center;
-  align-content: center;
-  font-size: var(--text-large);
-  user-select: none;
-  cursor: pointer;
-}
-
-.inGameButton:hover {
-  color: white;
-}
-
-.inGameButton:disabled {
-  color: rgb(107, 107, 107);
-  cursor: unset;
 }
 
 .gameboard {
@@ -602,21 +635,6 @@ a:hover {
 
 .subheader {
   font-size: 2rem;
-}
-
-.menu-button {
-  font-size: 1.5em;
-  background-color: var(--box-background);
-  padding: 10px;
-  color: white;
-  border-radius: var(--border-radius);
-  margin: 5px;
-  text-justify: center;
-  cursor: pointer;
-}
-
-.menu-button:hover {
-  color: var(--icon-text-color);
 }
 
 .menu-popup .close {
@@ -1033,10 +1051,6 @@ input[type='radio']:checked + label > img {
   .gameboard {
     grid-row-start: span 8;
   }
-
-  /* .endTurnbutton {
-    font-size: 2em;
-  } */
 
   .card {
     box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),
