@@ -237,7 +237,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     constructor(playerID, gameBoard, deck, opponentID, getOpponentTokensNumCB, placeOpponentTokenCB, removeOpponentTokenCB) {
         super(playerID, gameBoard, deck);
         this.computerTakeTurn = () => {
-            console.log(this.aiDifficulty);
             const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
             // don't use additional AI rules for easy difficulty
             if (this.aiDifficulty !== 'easyAI') {

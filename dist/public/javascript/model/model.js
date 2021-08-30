@@ -50,7 +50,7 @@ export class SinglePlayerGameModel extends GameModel {
                 user1Score: this.currPlyr.getScore(),
                 user2ID: this.opposPlyr.aiDifficulty,
                 user2Score: this.opposPlyr.getScore(),
-                user2Nick: 'empty'
+                layout: this.layout
             };
             (() => __awaiter(this, void 0, void 0, function* () {
                 try {
@@ -118,6 +118,7 @@ export class SinglePlayerGameModel extends GameModel {
         }
     }
     createLayout(deck, layout) {
+        this.layout = layout;
         const layoutStorArr = [];
         const handleInitialPlacementCB = (spaceID) => {
             const card = deck.drawCard();
@@ -136,6 +137,7 @@ export class SinglePlayerGameModel extends GameModel {
     restoreLayout() {
         // check for stored layout info
         const layoutJSON = localStorage.getItem('layout');
+        this.layout = localStorage.getItem('layoutChoice');
         if (layoutJSON) {
             const layoutArr = JSON.parse(layoutJSON);
             layoutArr.forEach((obj) => {
@@ -152,6 +154,7 @@ export class MultiplayerGameModel extends GameModel {
     constructor(deckType, socket, currPlyrID) {
         super(deckType);
         this.createLayout = (layout) => {
+            this.layout = layout;
             const layoutArr = BOARD_LAYOUTS[layout];
             this.socket.emit('createStartingLayout', layoutArr);
             this.socket.emit('playerReady', 'Player 2');

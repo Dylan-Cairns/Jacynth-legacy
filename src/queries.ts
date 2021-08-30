@@ -26,14 +26,13 @@ export const getUsers = (request: Request, response: Response) => {
 };
 
 export const storeGameResult = (request: Request, response: Response) => {
-  const { user1ID, user1Nick, user1Score, user2ID, user2Nick, user2Score } =
-    request.body;
+  const { user1ID, user1Score, user2ID, user2Score, layout } = request.body;
 
-  console.log(user1ID, user1Nick, user1Score, user2ID, user2Nick, user2Score);
+  console.log(user1ID, user1Score, user2ID, user2Score, layout);
 
   pool.query(
-    'SELECT add_game_record($1, $2, $3, $4, $5, $6)',
-    [user1ID, user1Nick, user1Score, user2ID, user2Nick, user2Score],
+    'SELECT add_game_record($1, $2, $3, $4, $5)',
+    [user1ID, user1Score, user2ID, user2Score, layout],
     (error: Error, results) => {
       if (error) {
         throw error;

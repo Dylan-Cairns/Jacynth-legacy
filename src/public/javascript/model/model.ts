@@ -27,6 +27,7 @@ const TWOPLAYER_BOARD_DIMENSIONS = 6;
 export class GameModel {
   board: GameBoard;
   deck: Decktet;
+  layout: Layout | undefined;
   sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
   sendTokenPlaytoView: SendTokenPlayToViewCB | undefined;
 
@@ -121,6 +122,7 @@ export class SinglePlayerGameModel extends GameModel {
   }
 
   private createLayout(deck: Decktet, layout: Layout) {
+    this.layout = layout;
     const layoutStorArr = [] as { cardID: string; spaceID: string }[];
 
     const handleInitialPlacementCB = (spaceID: string) => {
@@ -142,6 +144,7 @@ export class SinglePlayerGameModel extends GameModel {
   private restoreLayout() {
     // check for stored layout info
     const layoutJSON = localStorage.getItem('layout');
+    this.layout = localStorage.getItem('layoutChoice') as Layout;
     if (layoutJSON) {
       const layoutArr = JSON.parse(layoutJSON);
       layoutArr.forEach((obj: { cardID: string; spaceID: string }) => {
@@ -161,7 +164,7 @@ export class SinglePlayerGameModel extends GameModel {
       user1Score: this.currPlyr.getScore(),
       user2ID: this.opposPlyr.aiDifficulty,
       user2Score: this.opposPlyr.getScore(),
-      user2Nick: 'empty'
+      layout: this.layout
     };
 
     (async () => {
@@ -219,6 +222,7 @@ export class MultiplayerGameModel extends GameModel {
   }
 
   public createLayout = (layout: Layout) => {
+    this.layout = layout;
     const layoutArr = BOARD_LAYOUTS[layout];
     this.socket.emit('createStartingLayout', layoutArr);
     this.socket.emit('playerReady', 'Player 2');

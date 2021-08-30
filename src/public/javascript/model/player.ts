@@ -328,8 +328,6 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
   }
 
   computerTakeTurn = () => {
-    console.log(this.aiDifficulty);
-
     const allMoves = this.getAllAvailableMoves(this.playerID, this.hand);
 
     // don't use additional AI rules for easy difficulty
