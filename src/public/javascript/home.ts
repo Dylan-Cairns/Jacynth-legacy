@@ -1,3 +1,5 @@
+import { MainMenuHandler } from './view/utils.js';
+
 // disable bfcache to force the page to reload every time,
 // even when visited from back button. This is to
 // Ensure that the single player resume button displays
@@ -6,74 +8,45 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 window.onunload = function () {};
 
-const newGameButton = document.getElementById(
-  'newGameBttn'
-) as HTMLAnchorElement;
-const menu = document.getElementById('menu-popup') as HTMLElement;
-const rulesButton = document.getElementById('rulesButton') as HTMLButtonElement;
-const closeRulesButton = document.getElementById(
-  'closeRulesButton'
-) as HTMLButtonElement;
-const rules = document.getElementById('rules') as HTMLElement;
+const mainMenuHandler = new MainMenuHandler(true, true);
 
-menu.classList.add('active');
+// const newGameButton = document.getElementById(
+//   'newGameBttn'
+// ) as HTMLAnchorElement;
+// const menu = document.getElementById('menu-popup') as HTMLElement;
+// const rulesButton = document.getElementById('rulesButton') as HTMLButtonElement;
+// const closeRulesButton = document.getElementById(
+//   'closeRulesButton'
+// ) as HTMLButtonElement;
+// const rules = document.getElementById('rules') as HTMLElement;
 
-rulesButton.addEventListener('click', () => {
-  rules.classList.add('active');
-});
+// menu.classList.add('active');
 
-closeRulesButton.addEventListener('click', () => {
-  rules.classList.remove('active');
-});
+// rulesButton.addEventListener('click', () => {
+//   rules.classList.add('active');
+// });
 
-rules.addEventListener('click', (event) => {
-  if (event.target === rules) {
-    rules.classList.remove('active');
-  }
-});
+// closeRulesButton.addEventListener('click', () => {
+//   rules.classList.remove('active');
+// });
 
-newGameButton.addEventListener('click', (event) => {
-  event.preventDefault();
-  // removing the layout item from localStorage will cause the game app to
-  // reset the rest of the storage as well.
-  // (We don't reset it directly here to avoid duplication,
-  // and we don't have the playerIDs in order to delete card hands.)
-  localStorage.removeItem('layout');
-  location.href = newGameButton.href;
-});
-
-// remove 'resume game' button if there is no stored game info
-if (!localStorage.getItem('layout')) {
-  document.getElementById('singlePlayerResumeBttn')?.remove();
-}
-
-// (async () => {
-//   try {
-//     const response = await fetch('/users');
-//     const books = await response.json();
-
-//     console.log(books);
-//   } catch (error) {
-//     console.log(error);
+// rules.addEventListener('click', (event) => {
+//   if (event.target === rules) {
+//     rules.classList.remove('active');
 //   }
-// })();
+// });
 
-// console.log(JSON.stringify(gameResults));
+// newGameButton.addEventListener('click', (event) => {
+//   event.preventDefault();
+//   // removing the layout item from localStorage will cause the game app to
+//   // reset the rest of the storage as well.
+//   // (We don't reset it directly here to avoid duplication,
+//   // and we don't have the playerIDs in order to delete card hands.)
+//   localStorage.removeItem('layout');
+//   location.href = newGameButton.href;
+// });
 
-// (async () => {
-//   try {
-//     const response = await fetch('/storeSPGameResult', {
-//       headers: {
-//         Accept: 'application/json',
-//         'Content-Type': 'application/json'
-//       },
-//       method: 'post',
-//       body: JSON.stringify(gameResults)
-//     });
-
-//     const message = await response;
-//     console.log(response);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// })();
+// // remove 'resume game' button if there is no stored game info
+// if (!localStorage.getItem('layout')) {
+//   document.getElementById('singlePlayerResumeBttn')?.remove();
+// }

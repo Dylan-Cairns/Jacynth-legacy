@@ -39,8 +39,8 @@ export class SinglePlayerGameModel extends GameModel {
             localStorage.removeItem('movesArr');
             localStorage.removeItem('undoMoves');
             localStorage.removeItem('turnStatus');
-            localStorage.removeItem(`${this.currPlyr.playerID}-hand`);
-            localStorage.removeItem(`${this.opposPlyr.playerID}-hand`);
+            localStorage.removeItem(`Player 1-hand`);
+            localStorage.removeItem(`Computer-hand`);
         };
         this.addRecordtoDB = () => __awaiter(this, void 0, void 0, function* () {
             // user1 score will either be guest or authenticated user ID.

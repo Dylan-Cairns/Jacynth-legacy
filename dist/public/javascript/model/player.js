@@ -218,7 +218,8 @@ export class Player_SinglePlayer extends Player {
     }
     restoreHand() {
         // restore hand from local storage
-        const handJSON = localStorage.getItem(`${this.playerID}-hand`);
+        const playerID = this.playerID === 'Player 1' ? 'Player 1' : 'Computer';
+        const handJSON = localStorage.getItem(`${playerID}-hand`);
         if (handJSON) {
             const handArr = JSON.parse(handJSON);
             handArr.forEach((cardID) => {

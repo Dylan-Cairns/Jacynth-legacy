@@ -462,6 +462,25 @@ button:hover {
   animation: ripple 3s linear infinite;
 }
 
+/* profile page CSS */
+
+#profile-grid {
+  display: grid;
+  grid-gap: 0.5em;
+  width: 100vw;
+  height: 100vh;
+  justify-content: stretch;
+  align-items: start;
+  align-content: stretch;
+  /* grid-template-rows: auto auto auto auto auto; */
+  /* grid-template-areas:
+    'menuBar'
+    'enemyHUD'
+    'gameboard'
+    'playerHUD'
+    'playerHandContainer'; */
+}
+
 @keyframes ripple {
   0% {
     box-shadow: 0 0 0 0rem rgba(255, 255, 255, 0.6),

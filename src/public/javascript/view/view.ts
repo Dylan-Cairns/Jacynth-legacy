@@ -28,19 +28,19 @@ export class View {
   disconnectedAlert: HTMLElement;
   pickupSound: HTMLMediaElement;
   dropSound: HTMLMediaElement;
-  menuButton: HTMLButtonElement;
-  closeMenuButton: HTMLButtonElement;
-  menu: HTMLElement;
-  rulesButton: HTMLButtonElement;
-  closeRulesButton: HTMLButtonElement;
-  rules: HTMLElement;
+  // menuButton: HTMLButtonElement;
+  // closeMenuButton: HTMLButtonElement;
+  // menu: HTMLElement;
+  // rulesButton: HTMLButtonElement;
+  // closeRulesButton: HTMLButtonElement;
+  // rules: HTMLElement;
+  // newGameButton: HTMLAnchorElement;
   overlay: HTMLElement;
   newGameOptionsOverlay: HTMLElement;
   newGameMenu: HTMLElement;
   gameOptionsForm: HTMLFormElement;
   howToPlayInfo: HTMLElement;
   howToPlayButton: HTMLButtonElement;
-  newGameButton: HTMLAnchorElement;
   draggedElement: HTMLElement | undefined;
   movesArr: {
     draggedEle: HTMLElement;
@@ -103,20 +103,23 @@ export class View {
       'pickupSound'
     ) as HTMLMediaElement;
     this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
-    this.menuButton = document.getElementById(
-      'menuButton'
-    ) as HTMLButtonElement;
-    this.closeMenuButton = document.getElementById(
-      'closeMenuButton'
-    ) as HTMLButtonElement;
-    this.menu = document.getElementById('menu-popup') as HTMLElement;
-    this.rulesButton = document.getElementById(
-      'rulesButton'
-    ) as HTMLButtonElement;
-    this.closeRulesButton = document.getElementById(
-      'closeRulesButton'
-    ) as HTMLButtonElement;
-    this.rules = document.getElementById('rules') as HTMLElement;
+    // this.menuButton = document.getElementById(
+    //   'menuButton'
+    // ) as HTMLButtonElement;
+    // this.closeMenuButton = document.getElementById(
+    //   'closeMenuButton'
+    // ) as HTMLButtonElement;
+    // this.menu = document.getElementById('menu-popup') as HTMLElement;
+    // this.rulesButton = document.getElementById(
+    //   'rulesButton'
+    // ) as HTMLButtonElement;
+    // this.closeRulesButton = document.getElementById(
+    //   'closeRulesButton'
+    // ) as HTMLButtonElement;
+    // this.rules = document.getElementById('rules') as HTMLElement;
+    // this.newGameButton = document.getElementById(
+    //   'newGameBttn'
+    // ) as HTMLAnchorElement;
     this.overlay = document.getElementById('overlay') as HTMLElement;
     this.newGameOptionsOverlay = document.getElementById(
       'newGameOptionsOverlay'
@@ -133,9 +136,6 @@ export class View {
     this.howToPlayButton = document.getElementById(
       'howToPlayButton'
     ) as HTMLButtonElement;
-    this.newGameButton = document.getElementById(
-      'newGameBttn'
-    ) as HTMLAnchorElement;
 
     //preload images
     this.preload_images();
@@ -366,42 +366,42 @@ export class View {
     });
 
     // menu modals and buttons
-    this.menuButton.addEventListener('click', () => {
-      this.removeControlledSpacesHighlighting();
-      this.removeSpaceHighlighting();
-      this.openModal(this.menu);
-    });
+    // this.menuButton.addEventListener('click', () => {
+    //   this.removeControlledSpacesHighlighting();
+    //   this.removeSpaceHighlighting();
+    //   this.openModal(this.menu);
+    // });
 
-    this.closeMenuButton.addEventListener('click', () => {
-      this.closeModal(this.menu);
-    });
+    // this.closeMenuButton.addEventListener('click', () => {
+    //   this.closeModal(this.menu);
+    // });
 
-    this.overlay.addEventListener('click', () => {
-      const modals = document.querySelectorAll('.modal.active');
-      modals.forEach((modal) => {
-        this.closeModal(modal);
-      });
-    });
+    // this.overlay.addEventListener('click', () => {
+    //   const modals = document.querySelectorAll('.modal.active');
+    //   modals.forEach((modal) => {
+    //     this.closeModal(modal);
+    //   });
+    // });
 
-    this.rulesButton.addEventListener('click', () => {
-      this.openModal(this.rules);
-    });
+    // this.rulesButton.addEventListener('click', () => {
+    //   this.openModal(this.rules);
+    // });
 
-    this.closeRulesButton.addEventListener('click', () => {
-      rules.classList.remove('active');
-    });
+    // this.closeRulesButton.addEventListener('click', () => {
+    //   rules.classList.remove('active');
+    // });
 
-    this.rules.addEventListener('click', (event) => {
-      if (event.target === this.rules) {
-        rules.classList.remove('active');
-      }
-    });
+    // this.rules.addEventListener('click', (event) => {
+    //   if (event.target === this.rules) {
+    //     rules.classList.remove('active');
+    //   }
+    // });
 
-    this.newGameButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      if (this.resetStorage) this.resetStorage();
-      location.href = this.newGameButton.href;
-    });
+    // this.newGameButton.addEventListener('click', (event) => {
+    //   event.preventDefault();
+    //   if (this.resetStorage) this.resetStorage();
+    //   location.href = this.newGameButton.href;
+    // });
   }
 
   // END OF CONSTRUCTOR

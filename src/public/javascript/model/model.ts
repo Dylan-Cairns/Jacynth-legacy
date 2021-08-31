@@ -88,8 +88,8 @@ export class SinglePlayerGameModel extends GameModel {
     localStorage.removeItem('movesArr');
     localStorage.removeItem('undoMoves');
     localStorage.removeItem('turnStatus');
-    localStorage.removeItem(`${this.currPlyr.playerID}-hand`);
-    localStorage.removeItem(`${this.opposPlyr.playerID}-hand`);
+    localStorage.removeItem(`Player 1-hand`);
+    localStorage.removeItem(`Computer-hand`);
   };
 
   private restorePlayedMoves() {

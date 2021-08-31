@@ -226,19 +226,29 @@ export class View {
         this.winnerText = document.getElementById('winnerText');
         this.pickupSound = document.getElementById('pickupSound');
         this.dropSound = document.getElementById('dropSound');
-        this.menuButton = document.getElementById('menuButton');
-        this.closeMenuButton = document.getElementById('closeMenuButton');
-        this.menu = document.getElementById('menu-popup');
-        this.rulesButton = document.getElementById('rulesButton');
-        this.closeRulesButton = document.getElementById('closeRulesButton');
-        this.rules = document.getElementById('rules');
+        // this.menuButton = document.getElementById(
+        //   'menuButton'
+        // ) as HTMLButtonElement;
+        // this.closeMenuButton = document.getElementById(
+        //   'closeMenuButton'
+        // ) as HTMLButtonElement;
+        // this.menu = document.getElementById('menu-popup') as HTMLElement;
+        // this.rulesButton = document.getElementById(
+        //   'rulesButton'
+        // ) as HTMLButtonElement;
+        // this.closeRulesButton = document.getElementById(
+        //   'closeRulesButton'
+        // ) as HTMLButtonElement;
+        // this.rules = document.getElementById('rules') as HTMLElement;
+        // this.newGameButton = document.getElementById(
+        //   'newGameBttn'
+        // ) as HTMLAnchorElement;
         this.overlay = document.getElementById('overlay');
         this.newGameOptionsOverlay = document.getElementById('newGameOptionsOverlay');
         this.newGameMenu = document.getElementById('newGameOptionsModal');
         this.gameOptionsForm = document.getElementById('gameOptionsForm');
         this.howToPlayInfo = document.getElementById('howToPlayInfo');
         this.howToPlayButton = document.getElementById('howToPlayButton');
-        this.newGameButton = document.getElementById('newGameBttn');
         //preload images
         this.preload_images();
         // make sure board and hand are empty
@@ -429,37 +439,36 @@ export class View {
             }
         });
         // menu modals and buttons
-        this.menuButton.addEventListener('click', () => {
-            this.removeControlledSpacesHighlighting();
-            this.removeSpaceHighlighting();
-            this.openModal(this.menu);
-        });
-        this.closeMenuButton.addEventListener('click', () => {
-            this.closeModal(this.menu);
-        });
-        this.overlay.addEventListener('click', () => {
-            const modals = document.querySelectorAll('.modal.active');
-            modals.forEach((modal) => {
-                this.closeModal(modal);
-            });
-        });
-        this.rulesButton.addEventListener('click', () => {
-            this.openModal(this.rules);
-        });
-        this.closeRulesButton.addEventListener('click', () => {
-            rules.classList.remove('active');
-        });
-        this.rules.addEventListener('click', (event) => {
-            if (event.target === this.rules) {
-                rules.classList.remove('active');
-            }
-        });
-        this.newGameButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            if (this.resetStorage)
-                this.resetStorage();
-            location.href = this.newGameButton.href;
-        });
+        // this.menuButton.addEventListener('click', () => {
+        //   this.removeControlledSpacesHighlighting();
+        //   this.removeSpaceHighlighting();
+        //   this.openModal(this.menu);
+        // });
+        // this.closeMenuButton.addEventListener('click', () => {
+        //   this.closeModal(this.menu);
+        // });
+        // this.overlay.addEventListener('click', () => {
+        //   const modals = document.querySelectorAll('.modal.active');
+        //   modals.forEach((modal) => {
+        //     this.closeModal(modal);
+        //   });
+        // });
+        // this.rulesButton.addEventListener('click', () => {
+        //   this.openModal(this.rules);
+        // });
+        // this.closeRulesButton.addEventListener('click', () => {
+        //   rules.classList.remove('active');
+        // });
+        // this.rules.addEventListener('click', (event) => {
+        //   if (event.target === this.rules) {
+        //     rules.classList.remove('active');
+        //   }
+        // });
+        // this.newGameButton.addEventListener('click', (event) => {
+        //   event.preventDefault();
+        //   if (this.resetStorage) this.resetStorage();
+        //   location.href = this.newGameButton.href;
+        // });
     }
     createElement(tag, ...classNames) {
         const element = document.createElement(tag);

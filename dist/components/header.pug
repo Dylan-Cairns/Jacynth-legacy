@@ -9,19 +9,4 @@ head
   link(href="../assets/fortune_widgets.ttf" rel="stylesheet preload" as="font" type="font/woff2" crossorigin="anonymous")
   link(href="../assets/fortune-letters.ttf" rel="stylesheet preload" as="font" type="font/woff2" crossorigin="anonymous")
   link(rel='icon' href='assets/favicon.ico')
-  script(src='https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.21/ua-parser.min.js')
-  script.
-    window.workaroundBackgroundBlendMode = (function() {
-      var ua = UAParser()
-      var isWebKit = (ua.engine.name === "WebKit")
-      var isIOS = (ua.os.name === "iOS")
-      var debug = false //|| true
-      var shouldActivate = (isWebKit && isIOS) || debug;
-
-      if (shouldActivate) {
-        document.body.classList.add("is-ios-webkit")
-      }
-
-      // You can inspect this returned object afterwards
-      return {isWebKit, isIOS, debug, shouldActivate, ua}
-    })()
+  

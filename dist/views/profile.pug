@@ -1,0 +1,12 @@
+include ../components/header.pug
+include ../components/mainMenu.pug
+include ../components/rules.pug
+include ../components/loadscreen.pug
+
+.profile-grid
+  include ../components/menubar.pug 
+
+script(type='module' src='/javascript/profile.js')
+script(type='module' src='tablesort.min.js')
+script(type='module' src='tablesort.number.js')
+script(type='module' src='tablesort.date.js')

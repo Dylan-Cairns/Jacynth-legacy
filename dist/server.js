@@ -48,9 +48,7 @@ app.get('/multiplayer', (req, res) => {
     res.render('game', { gameType: 'multiplayer' });
 });
 app.get('/profile', (req, res) => {
-    res.render('profile', {
-        user: req.oidc.user
-    });
+    res.render('profile');
 });
 // rest api routes
 app.post('/storeSPGameResult', (req, res) => {

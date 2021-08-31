@@ -1,7 +1,8 @@
 import { SinglePlayerController, MultiPlayerController } from './controller/controller.js';
-let controller;
+import { MainMenuHandler } from './view/utils.js';
+const mainMenuHandler = new MainMenuHandler(false, false);
 if (gameType === 'singleplayer') {
-    controller = new SinglePlayerController('basicDeck');
+    const controller = new SinglePlayerController('basicDeck');
 }
 if (gameType === 'multiplayer') {
     const socket = io();

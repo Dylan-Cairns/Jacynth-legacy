@@ -12,7 +12,7 @@ const { auth } = pkg;
 import { Card, Decktet } from './public/javascript/model/decktet.js';
 import { BoardSpace } from './public/javascript/model/gameboard.js';
 
-import { storeGameResult, getUsers } from './queries.js';
+import { storeGameResult } from './queries.js';
 
 // configuration
 
@@ -65,9 +65,7 @@ app.get('/multiplayer', (req, res) => {
 });
 
 app.get('/profile', (req, res) => {
-  res.render('profile', {
-    user: req.oidc.user
-  });
+  res.render('profile');
 });
 
 // rest api routes
