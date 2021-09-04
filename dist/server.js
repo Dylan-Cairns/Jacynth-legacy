@@ -6,10 +6,10 @@ import { dirname } from 'path';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import pkg from 'express-openid-connect';
-const { auth } = pkg;
+const { auth, requiresAuth } = pkg;
 // game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
-import { storeGameResult } from './queries.js';
+import { storeGameResult, getSPGameRecords } from './queries.js';
 // configuration
 dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -47,7 +47,7 @@ app.get('/singleplayer', (req, res) => {
 app.get('/multiplayer', (req, res) => {
     res.render('game', { gameType: 'multiplayer' });
 });
-app.get('/profile', (req, res) => {
+app.get('/profile', requiresAuth(), (req, res) => {
     res.render('profile');
 });
 // rest api routes
@@ -59,9 +59,14 @@ app.post('/storeSPGameResult', (req, res) => {
         user1Nick = req.oidc.user.nickname;
     }
     req.body['user1ID'] = user1ID;
-    req.body['user1Nick'] = user1Nick;
     storeGameResult(req, res);
 });
+app.get('/getSPgameRecords', requiresAuth(), (req, res) => {
+    var _a;
+    req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
+    getSPGameRecords(req, res);
+});
+app.get('/getMPgameRecords', requiresAuth(), getSPGameRecords);
 // authentication routes
 app.get('/sign-up/:page', (req, res) => {
     res.oidc.login({
