@@ -3,10 +3,16 @@ include ../components/mainMenu.pug
 include ../components/rules.pug
 include ../components/loadscreen.pug
 
-.profile-grid
-  include ../components/menubar.pug 
+#profile-grid
+  include ../components/menubar.pug
+  #spData.tableDiv
+    table#SPGameRecords.dataDiv
+      tbody
+  #spPieChart.dataDiv.pieChart
+  #spPieChart2.dataDiv.pieChart
 
-script(type='module' src='/javascript/profile.js')
-script(type='module' src='tablesort.min.js')
-script(type='module' src='tablesort.number.js')
-script(type='module' src='tablesort.date.js')
+
+footer
+  script(type="text/javascript" src="https://cdn.plot.ly/plotly-2.4.2.min.js")
+  script(type='module' src='/javascript/profile.js')
+  

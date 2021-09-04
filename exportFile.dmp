@@ -1,0 +1,200 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 12.7 (Ubuntu 12.7-0ubuntu0.20.04.1)
+-- Dumped by pg_dump version 12.7 (Ubuntu 12.7-0ubuntu0.20.04.1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: add_game_record(character varying, integer, character varying, integer, character varying); Type: FUNCTION; Schema: public; Owner: jacynth_user
+--
+
+CREATE FUNCTION public.add_game_record(u1_id character varying, u1_score integer, u2_id character varying, u2_score integer, layout character varying) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE gameid int;
+        BEGIN
+                INSERT INTO users (id) VALUES (u1_id), (u2_id) ON CONFLICT (id) DO NOTHING;
+                INSERT INTO games (id, end_time, layout_id) VALUES (default, default, (select (id) FROM layouts WHERE name = layout)) RETURNING id INTO gameid;
+                INSERT INTO users_games (user_id, game_id, score) VALUES (u1_id, gameid, u1_score), (u2_id, gameid, u2_score);
+        END;
+$$;
+
+
+ALTER FUNCTION public.add_game_record(u1_id character varying, u1_score integer, u2_id character varying, u2_score integer, layout character varying) OWNER TO jacynth_user;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: games; Type: TABLE; Schema: public; Owner: jacynth_user
+--
+
+CREATE TABLE public.games (
+    id integer NOT NULL,
+    end_time timestamp without time zone DEFAULT now() NOT NULL,
+    layout_id integer NOT NULL
+);
+
+
+ALTER TABLE public.games OWNER TO jacynth_user;
+
+--
+-- Name: games_id_seq; Type: SEQUENCE; Schema: public; Owner: jacynth_user
+--
+
+CREATE SEQUENCE public.games_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.games_id_seq OWNER TO jacynth_user;
+
+--
+-- Name: games_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: jacynth_user
+--
+
+ALTER SEQUENCE public.games_id_seq OWNED BY public.games.id;
+
+
+--
+-- Name: layouts; Type: TABLE; Schema: public; Owner: jacynth_user
+--
+
+CREATE TABLE public.layouts (
+    id integer NOT NULL,
+    name character varying(15) NOT NULL
+);
+
+
+ALTER TABLE public.layouts OWNER TO jacynth_user;
+
+--
+-- Name: layouts_id_seq; Type: SEQUENCE; Schema: public; Owner: jacynth_user
+--
+
+CREATE SEQUENCE public.layouts_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.layouts_id_seq OWNER TO jacynth_user;
+
+--
+-- Name: layouts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: jacynth_user
+--
+
+ALTER SEQUENCE public.layouts_id_seq OWNED BY public.layouts.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: jacynth_user
+--
+
+CREATE TABLE public.users (
+    id character varying(255) NOT NULL,
+    nickname character varying(20)
+);
+
+
+ALTER TABLE public.users OWNER TO jacynth_user;
+
+--
+-- Name: users_games; Type: TABLE; Schema: public; Owner: jacynth_user
+--
+
+CREATE TABLE public.users_games (
+    user_id character varying(255) NOT NULL,
+    game_id integer NOT NULL,
+    score integer NOT NULL
+);
+
+
+ALTER TABLE public.users_games OWNER TO jacynth_user;
+
+--
+-- Name: games id; Type: DEFAULT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.games ALTER COLUMN id SET DEFAULT nextval('public.games_id_seq'::regclass);
+
+
+--
+-- Name: layouts id; Type: DEFAULT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.layouts ALTER COLUMN id SET DEFAULT nextval('public.layouts_id_seq'::regclass);
+
+
+--
+-- Name: games games_pkey; Type: CONSTRAINT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT games_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: layouts layouts_pkey; Type: CONSTRAINT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.layouts
+    ADD CONSTRAINT layouts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users_games fk_game; Type: FK CONSTRAINT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.users_games
+    ADD CONSTRAINT fk_game FOREIGN KEY (game_id) REFERENCES public.games(id);
+
+
+--
+-- Name: users_games fk_user; Type: FK CONSTRAINT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.users_games
+    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: games games_fk_layout; Type: FK CONSTRAINT; Schema: public; Owner: jacynth_user
+--
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT games_fk_layout FOREIGN KEY (layout_id) REFERENCES public.layouts(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+

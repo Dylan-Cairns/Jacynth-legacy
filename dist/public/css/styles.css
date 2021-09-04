@@ -47,6 +47,7 @@ body {
   background-position: bottom center, top left;
   font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
   border-style: none;
+  overflow-x: hidden;
 }
 
 /* main menu and in game button styling */
@@ -232,8 +233,55 @@ button:hover {
   align-items: center;
   align-content: start;
   justify-items: start;
-  justify-content: start;
+  justify-content: stretch;
+  justify-self: stretch;
   padding: 0.25em 0em;
+}
+
+/* profile page CSS */
+
+#profile-grid {
+  display: grid;
+  grid-gap: 0em;
+  width: 95vw;
+  height: 95vh;
+  padding-left: 5vw;
+  padding-right: 5vw;
+  padding-bottom: 5vw;
+  margin-bottom: 20px;
+  justify-content: stretch;
+  justify-items: center;
+  align-items: start;
+  align-content: start;
+  grid-template-columns: auto;
+  grid-template-areas:
+    'menuBar'
+    'spData'
+    'spPieChart1'
+    'spPieChart2';
+}
+
+#spData {
+  grid-area: spData;
+  display: none;
+}
+
+#spPieChart {
+  grid-area: spPieChart1;
+}
+
+#spPieChart {
+  grid-area: spPieChart2;
+}
+
+.pieChart {
+  margin-bottom: 1em;
+  width: 100%;
+  height: 300px;
+}
+
+.dataDiv {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .menuBar-item {
@@ -242,6 +290,54 @@ button:hover {
   font-size: var(--text-large);
   text-align: center;
 }
+
+.tableDiv {
+  display: grid;
+  align-items: center;
+  align-content: stretch;
+  justify-items: stretch;
+  justify-content: stretch;
+  justify-self: stretch;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 0.9em;
+  font-family: 'Open Sans', sans-serif;
+  min-width: 400px;
+  border-radius: var(--border-radius);
+}
+
+tbody {
+  border-radius: var(--border-radius);
+}
+
+thead tr {
+  background-color: var(--box-background);
+  color: #ffffff;
+  text-align: left;
+}
+
+thead td {
+  font-weight: 800;
+}
+
+th,
+td {
+  padding: 12px 15px;
+}
+
+tbody tr {
+  border-bottom: 1px solid #dddddd;
+  background-color: white;
+}
+
+tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+/* end profile page css*/
 
 #roomNumber {
   font-size: 1em;
@@ -460,25 +556,6 @@ button:hover {
   bottom: -0.1em;
   border-radius: 1000px;
   animation: ripple 3s linear infinite;
-}
-
-/* profile page CSS */
-
-#profile-grid {
-  display: grid;
-  grid-gap: 0.5em;
-  width: 100vw;
-  height: 100vh;
-  justify-content: stretch;
-  align-items: start;
-  align-content: stretch;
-  /* grid-template-rows: auto auto auto auto auto; */
-  /* grid-template-areas:
-    'menuBar'
-    'enemyHUD'
-    'gameboard'
-    'playerHUD'
-    'playerHandContainer'; */
 }
 
 @keyframes ripple {
@@ -1060,6 +1137,17 @@ input[type='radio']:checked + label > img {
       '. . gameboard'
       '. . gameboard'
       '. . gameboard';
+  }
+
+  #profile-grid {
+    grid-template-areas:
+      'menuBar menuBar'
+      'spData spData'
+      'spPieChart1 spPieChart2';
+  }
+
+  #spData {
+    display: inherit;
   }
 
   .HUDText {
