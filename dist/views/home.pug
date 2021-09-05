@@ -2,19 +2,19 @@ include ../components/authentication-buttons.pug
 
 include ../components/header.pug
 .main-grid
-img#titlePageBackground(src='./assets/homebackground.png')
-#menu-popup.menu-popup.modal.title-menu
+img#titlePageBackground.dark_shadow(src='./assets/homebackground.png')
+#menu-popup.menu-popup.modal.title-menu.dark_shadow
   .menu-header Jacynth
     br
     span.subheader A Decktet Game
-  #singlePlayerBttn.menu-button
+  #singlePlayerBttn.menu-button.light_shadow
     a(href='/singleplayer')#newGameBttn New Singleplayer Game
-  #singlePlayerResumeBttn.menu-button
+  #singlePlayerResumeBttn.menu-button.light_shadow
     a(href='/singleplayer') Resume Game
-  #multiPlayerBttn.menu-button
+  #multiPlayerBttn.menu-button.light_shadow
     a(href='/multiplayer') New Multiplayer Game
   +authentication-buttons(isAuthenticated)
-  #rulesButton.menu-button
+  #rulesButton.menu-button.light_shadow
     button(href='#') Rules &amp; Credits
 include ../components/rules.pug
 script(type='module' src='/javascript/home.js')

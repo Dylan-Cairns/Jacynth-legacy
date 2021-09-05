@@ -12,7 +12,11 @@ const { auth, requiresAuth } = pkg;
 import { Card, Decktet } from './public/javascript/model/decktet.js';
 import { BoardSpace } from './public/javascript/model/gameboard.js';
 
-import { storeGameResult, getSPGameRecords } from './queries.js';
+import {
+  storeGameResult,
+  getSPGameRecords,
+  getMPGameRecords
+} from './queries.js';
 
 // configuration
 
@@ -88,7 +92,11 @@ app.get('/getSPgameRecords', requiresAuth(), (req, res) => {
   getSPGameRecords(req, res);
 });
 
-app.get('/getMPgameRecords', requiresAuth(), getSPGameRecords);
+app.get('/getMPgameRecords', requiresAuth(), (req, res) => {
+  req.body['userID'] = req.oidc.user?.sub;
+
+  getMPGameRecords(req, res);
+});
 
 // authentication routes
 

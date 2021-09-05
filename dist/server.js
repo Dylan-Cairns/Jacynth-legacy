@@ -9,7 +9,7 @@ import pkg from 'express-openid-connect';
 const { auth, requiresAuth } = pkg;
 // game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
-import { storeGameResult, getSPGameRecords } from './queries.js';
+import { storeGameResult, getSPGameRecords, getMPGameRecords } from './queries.js';
 // configuration
 dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -66,7 +66,11 @@ app.get('/getSPgameRecords', requiresAuth(), (req, res) => {
     req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
     getSPGameRecords(req, res);
 });
-app.get('/getMPgameRecords', requiresAuth(), getSPGameRecords);
+app.get('/getMPgameRecords', requiresAuth(), (req, res) => {
+    var _a;
+    req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
+    getMPGameRecords(req, res);
+});
 // authentication routes
 app.get('/sign-up/:page', (req, res) => {
     res.oidc.login({
