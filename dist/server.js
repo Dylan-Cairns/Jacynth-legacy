@@ -9,7 +9,7 @@ import pkg from 'express-openid-connect';
 const { auth, requiresAuth } = pkg;
 // game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
-import { storeGameResult, getSPGameRecords, getMPGameRecords } from './queries.js';
+import { storeGameResult, getSPGameRecords, getMPGameRecords, getSPHighScore, getMPHighScore } from './queries.js';
 // configuration
 dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -50,6 +50,9 @@ app.get('/multiplayer', (req, res) => {
 app.get('/profile', requiresAuth(), (req, res) => {
     res.render('profile');
 });
+app.get('/highscores', (req, res) => {
+    res.render('highscores');
+});
 // rest api routes
 app.post('/storeSPGameResult', (req, res) => {
     let user1ID = 'guest';
@@ -61,16 +64,18 @@ app.post('/storeSPGameResult', (req, res) => {
     req.body['user1ID'] = user1ID;
     storeGameResult(req, res);
 });
-app.get('/getSPgameRecords', requiresAuth(), (req, res) => {
+app.get('/getSPGameRecords', requiresAuth(), (req, res) => {
     var _a;
     req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
     getSPGameRecords(req, res);
 });
-app.get('/getMPgameRecords', requiresAuth(), (req, res) => {
+app.get('/getMPGameRecords', requiresAuth(), (req, res) => {
     var _a;
     req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
     getMPGameRecords(req, res);
 });
+app.get('/getSPHighScores', getSPHighScore);
+app.get('/getMPHighScores', getMPHighScore);
 // authentication routes
 app.get('/sign-up/:page', (req, res) => {
     res.oidc.login({

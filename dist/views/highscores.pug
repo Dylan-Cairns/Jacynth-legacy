@@ -1,0 +1,25 @@
+include ../components/header.pug
+include ../components/mainMenu.pug
+include ../components/rules.pug
+include ../components/loadscreen.pug
+
+#profile-grid
+  include ../components/menubar.pug
+  #tabSet.dataDiv
+      .tab.active.dark_shadow(data-tab-target='#spGridContainer') Single Player
+      .tab.dark_shadow(data-tab-target='#mpGridContainer') Multi Player
+  #tabbedContentContainer.dataDiv
+      #spGridContainer.statsGridContainer.active(data-tab-content='')
+        #spData.fullWidth.dark_shadow
+          table#SPGameRecords.fullWidth.dataDiv
+            tbody
+      #mpGridContainer.statsGridContainer(data-tab-content='')
+        #mpData.fullWidth.dark_shadow
+          table#MPGameRecords.fullWidth.dataDiv
+            tbody
+    
+
+
+footer
+  script(type='module' src='/javascript/highscores.js')
+  

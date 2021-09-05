@@ -95,3 +95,69 @@ export class MainMenuHandler {
     if (this.overlay) this.overlay.classList.remove('active');
   }
 }
+
+export class TabsHandler {
+  constructor() {
+    const tabs = document.querySelectorAll(
+      '[data-tab-target]'
+    ) as NodeListOf<HTMLElement>;
+    const tabContents = document.querySelectorAll('[data-tab-content]');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = document.querySelector(tab.dataset.tabTarget!)!;
+        tabContents.forEach((tabContent) => {
+          tabContent.classList.remove('active');
+        });
+        tabs.forEach((tab) => {
+          tab.classList.remove('active');
+        });
+        tab.classList.add('active');
+        target.classList.add('active');
+      });
+    });
+  }
+}
+
+// method to create tables from scores data on profile and high scores pages
+export function populateTable(
+  items: [Record<string, string>],
+  tableName: string
+) {
+  const table = document.getElementById(tableName) as HTMLTableElement;
+  const tBody = table.getElementsByTagName('tbody')[0];
+
+  if (!table.tHead) {
+    const header = table.createTHead();
+    const tr = header.insertRow(0);
+    Object.keys(items[0]).forEach((key) => {
+      const th = document.createElement('th');
+      th.innerHTML = key;
+      tr.appendChild(th);
+    });
+  }
+
+  items.forEach((item: Record<string, string>) => {
+    const row = tBody.insertRow();
+    Object.keys(item).forEach((key) => {
+      const newRow = row.insertCell();
+      // reformat ugly dates
+      if (key === 'Date') {
+        const date = new Date(item[key]);
+        const string = convertDate(date);
+        newRow.innerHTML = string;
+      } else {
+        newRow.innerHTML = item[key];
+      }
+      newRow.setAttribute('data-label', key);
+    });
+  });
+}
+
+function convertDate(dateObj: Date) {
+  const month = dateObj.getUTCMonth() + 1; //months from 1-12
+  const day = dateObj.getUTCDate();
+  const year = dateObj.getUTCFullYear();
+  const newDate = year + '/' + month + '/' + day;
+  return newDate;
+}

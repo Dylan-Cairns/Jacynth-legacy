@@ -44,7 +44,7 @@ body {
   background-size: 100vw, auto;
   background-blend-mode: multiply;
   background-repeat: no-repeat, repeat;
-  background-position: bottom center, top left;
+  background-position: top center, top left;
   font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
   border-style: none;
   overflow-x: hidden;
@@ -238,22 +238,7 @@ button:hover {
   padding: 0.25em 0em;
 }
 
-/* profile page CSS */
-
-#profile-grid {
-  display: grid;
-  padding: 1rem;
-  justify-content: stretch;
-  justify-items: center;
-  align-items: start;
-  align-content: start;
-  grid-gap: 1rem;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    'menuBar'
-    'tabSet'
-    'tabbedContent';
-}
+/* tabs rules */
 
 #tabSet {
   grid-area: tabSet;
@@ -282,9 +267,46 @@ button:hover {
   color: var(--icon-text-color);
 }
 
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  list-style-type: none;
+}
+
+[data-tab-content] {
+  display: none;
+}
+
+.active[data-tab-content] {
+  display: grid;
+}
+
 #tabbedContentContainer {
   grid-area: tabbedContent;
   width: 100%;
+}
+
+/* end tabs rules */
+
+/* profile page CSS */
+
+.hideOnMobile {
+  display: none;
+}
+
+#profile-grid {
+  display: grid;
+  padding: 1rem;
+  justify-content: stretch;
+  justify-items: center;
+  align-items: start;
+  align-content: start;
+  grid-gap: 1rem;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'menuBar'
+    'tabSet'
+    'tabbedContent';
 }
 
 .statsGridContainer {
@@ -294,6 +316,10 @@ button:hover {
   align-content: start;
   grid-gap: 1rem;
   grid-template-columns: 1fr;
+}
+
+.removeGridGaps {
+  grid-gap: none;
 }
 
 #spGridContainer {
@@ -338,12 +364,6 @@ button:hover {
   grid-gap: 1rem;
 }
 
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  list-style-type: none;
-}
-
 .profileHudTitle {
   display: grid;
   grid-column-start: span 2;
@@ -373,11 +393,6 @@ button:hover {
   grid-area: mpData;
 }
 
-.profileDataContainer {
-  display: none;
-  width: 100%;
-}
-
 #spPieChart {
   grid-area: spPieChart;
 }
@@ -396,7 +411,6 @@ button:hover {
 
 .pieChart {
   width: 100%;
-  /* height: 300px; */
   background-color: white;
   overflow: hidden;
 }
@@ -405,13 +419,16 @@ button:hover {
   border-radius: var(--border-radius);
 }
 
+.fullWidth {
+  width: 100%;
+}
+
 table {
   border-collapse: collapse;
   border-radius: var(--border-radius);
   overflow: hidden;
-  font-size: 0.9em;
+  font-size: 1rem;
   font-family: 'Open Sans', sans-serif;
-  min-width: 400px;
 }
 
 thead tr {
@@ -420,8 +437,8 @@ thead tr {
   text-align: left;
 }
 
-thead td {
-  font-weight: 800;
+thead th {
+  font-weight: bold;
 }
 
 th,
@@ -437,13 +454,37 @@ tbody tr:nth-of-type(even) {
   background-color: #f3f3f3;
 }
 
-[data-tab-content] {
+table td:last-child {
+  border-bottom: 0;
+}
+
+/* responsive tables */
+
+table,
+thead,
+tbody,
+th,
+td,
+tr {
+  display: block;
+}
+
+table thead {
   display: none;
 }
 
-.active[data-tab-content] {
-  display: grid;
+table td {
+  border-bottom: 1px solid rgba(221, 221, 221, 0.692);
+  text-align: right;
 }
+
+table td::before {
+  content: attr(data-label);
+  float: left;
+  font-weight: bold;
+}
+
+/* end responsive tables */
 
 /* end profile page css*/
 
@@ -1281,16 +1322,48 @@ input[type='radio']:checked + label > img {
       'mpData mpData';
   }
 
-  .profileDataContainer {
+  /* responsive tables */
+
+  table thead {
+    display: table-header-group;
+  }
+
+  table {
+    display: table;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tbody {
+    display: table-row-group;
+  }
+  th {
+    display: table-cell;
+  }
+  td {
+    display: table-cell;
+  }
+  tr {
+    display: table-row;
+  }
+
+  table td {
+    text-align: left;
+  }
+
+  table td::before {
+    content: none;
+    float: unset;
+  }
+
+  /* end responsive tables */
+
+  .hideOnMobile {
     display: inherit;
   }
 
   .profileHud {
     grid-template-columns: auto auto auto auto;
-  }
-
-  .profileHudTitle {
-    grid-column-start: span 4;
   }
 
   .HUDText {
