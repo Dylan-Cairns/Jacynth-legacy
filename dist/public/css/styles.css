@@ -115,7 +115,7 @@ button:hover {
 
 .auth-buttons {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 1fr 1fr;
   justify-content: stretch;
 }
 
@@ -242,75 +242,176 @@ button:hover {
 
 #profile-grid {
   display: grid;
-  grid-gap: 0em;
-  width: 95vw;
-  height: 95vh;
-  padding-left: 5vw;
-  padding-right: 5vw;
-  padding-bottom: 5vw;
-  margin-bottom: 20px;
+  padding: 1rem;
   justify-content: stretch;
   justify-items: center;
   align-items: start;
   align-content: start;
-  grid-template-columns: auto;
+  grid-gap: 1rem;
+  grid-template-columns: 1fr;
   grid-template-areas:
     'menuBar'
-    'spData'
-    'spPieChart1'
-    'spPieChart2';
+    'tabSet'
+    'tabbedContent';
+}
+
+#tabSet {
+  grid-area: tabSet;
+  grid-gap: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.tab {
+  font-size: 2rem;
+  background-color: var(--icon-label-text);
+  padding: 1rem;
+  color: black;
+  border-radius: var(--border-radius);
+  text-justify: center;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: white;
+}
+
+.tab.active {
+  background-color: white;
+  color: var(--icon-text-color);
+}
+
+#tabbedContentContainer {
+  grid-area: tabbedContent;
+  width: 100%;
+}
+
+.statsGridContainer {
+  justify-content: stretch;
+  justify-items: center;
+  align-items: start;
+  align-content: start;
+  grid-gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+#spGridContainer {
+  grid-template-areas:
+    'spTitle'
+    'spPieChart'
+    'spBarGraph'
+    'spData';
+}
+
+#mpGridContainer {
+  grid-template-areas:
+    'mpTitle'
+    'mpPieChart'
+    'mpBarGraph'
+    'mpData';
+}
+
+#spTitle {
+  grid-area: spTitle;
+}
+
+#mpTitle {
+  grid-area: mpTitle;
+}
+
+.profileTitleContainer {
+  background-color: white;
+  display: grid;
+  width: 100%;
+  justify-content: stretch;
+  justify-items: stretch;
+}
+
+.profileHud {
+  display: grid;
+  justify-content: space-evenly;
+  align-content: center;
+  align-items: center;
+  grid-template-columns: auto auto;
+  padding: 1rem;
+  grid-gap: 1rem;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  list-style-type: none;
+}
+
+.profileHudTitle {
+  display: grid;
+  grid-column-start: span 2;
+  font-size: 1.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.profileHudItem {
+  font-size: 1.5rem;
+}
+
+.hudNumbers {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--icon-text-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--title-text);
 }
 
 #spData {
   grid-area: spData;
+}
+
+#mpData {
+  grid-area: mpData;
+}
+
+.profileDataContainer {
   display: none;
+  width: 100%;
 }
 
 #spPieChart {
-  grid-area: spPieChart1;
+  grid-area: spPieChart;
 }
 
-#spPieChart {
-  grid-area: spPieChart2;
+#spPieChart2 {
+  grid-area: spBarGraph;
+}
+
+#mpPieChart {
+  grid-area: mpPieChart;
+}
+
+#mpPieChart2 {
+  grid-area: mpBarGraph;
 }
 
 .pieChart {
-  margin-bottom: 1em;
   width: 100%;
-  height: 300px;
+  /* height: 300px; */
+  background-color: white;
+  overflow: hidden;
 }
 
 .dataDiv {
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-}
-
-.menuBar-item {
-  color: rgb(255, 255, 255);
-  padding: 0em;
-  font-size: var(--text-large);
-  text-align: center;
-}
-
-.tableDiv {
-  display: grid;
-  align-items: center;
-  align-content: stretch;
-  justify-items: stretch;
-  justify-content: stretch;
-  justify-self: stretch;
+  border-radius: var(--border-radius);
 }
 
 table {
   border-collapse: collapse;
-  margin: 25px 0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
   font-size: 0.9em;
   font-family: 'Open Sans', sans-serif;
   min-width: 400px;
-  border-radius: var(--border-radius);
-}
-
-tbody {
-  border-radius: var(--border-radius);
 }
 
 thead tr {
@@ -329,7 +430,6 @@ td {
 }
 
 tbody tr {
-  border-bottom: 1px solid #dddddd;
   background-color: white;
 }
 
@@ -337,7 +437,33 @@ tbody tr:nth-of-type(even) {
   background-color: #f3f3f3;
 }
 
+[data-tab-content] {
+  display: none;
+}
+
+.active[data-tab-content] {
+  display: grid;
+}
+
 /* end profile page css*/
+
+.light_shadow {
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  overflow: hidden;
+}
+
+.dark_shadow {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 8px;
+  overflow: hidden;
+}
+
+.menuBar-item {
+  color: rgb(255, 255, 255);
+  padding: 0em;
+  font-size: var(--text-large);
+  text-align: center;
+}
 
 #roomNumber {
   font-size: 1em;
@@ -1139,15 +1265,32 @@ input[type='radio']:checked + label > img {
       '. . gameboard';
   }
 
-  #profile-grid {
+  #spGridContainer {
+    grid-template-columns: auto auto;
     grid-template-areas:
-      'menuBar menuBar'
-      'spData spData'
-      'spPieChart1 spPieChart2';
+      'spTitle spTitle'
+      'spPieChart spBarGraph'
+      'spData spData';
   }
 
-  #spData {
+  #mpGridContainer {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      'mpTitle mpTitle'
+      'mpPieChart mpBarGraph'
+      'mpData mpData';
+  }
+
+  .profileDataContainer {
     display: inherit;
+  }
+
+  .profileHud {
+    grid-template-columns: auto auto auto auto;
+  }
+
+  .profileHudTitle {
+    grid-column-start: span 4;
   }
 
   .HUDText {

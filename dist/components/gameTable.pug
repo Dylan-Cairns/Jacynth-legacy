@@ -1,14 +1,14 @@
 .main-grid
   include menubar.pug 
-  .gameboard
+  .gameboard.dark_shadow
   .HUD-container.enemyHUD
-    #enemyIcon.playerIcon
-    .HUDText
+    #enemyIcon.playerIcon.dark_shadow
+    .HUDText.dark_shadow
       #enemyID.HUDelement.name.enemy waiting
       #enemyHUD.HUDelement Score 0 Tokens 4
   .HUD-container.playerHUD
-    #playerIcon.playerIcon
-    .HUDText
+    #playerIcon.playerIcon.dark_shadow
+    .HUDText.dark_shadow
       #playerID.HUDelement.name.player waiting
       #playerHUD.HUDelement Score 0 Tokens 4
   .player-hand-container
@@ -18,9 +18,9 @@
     #disconnectedBox
       span Disconnected
       span#disconnectedInfo Game aborted. Yourself or the opponent disconnected.
-    .player-hand
+    .player-hand.dark_shadow
       .influenceTokenContainer
-    .button-container
+    .button-container.dark_shadow
       button#undoButton.inGameButton(type='button' disabled='') undo
       button#endTurnButton.inGameButton(type='button' disabled='')
         | end
