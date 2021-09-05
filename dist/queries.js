@@ -85,3 +85,81 @@ export const getMPGameRecords = (request, response) => {
         response.status(200).json(results.rows);
     });
 };
+export const getSPHighScore = (request, response) => {
+    pool.query(`SELECT * FROM (
+      SELECT
+    "Score", 
+    "Player Name", 
+    "Layout", 
+    (SELECT users.nickname FROM users WHERE users.id = opp_id) as "Opponent",
+    "Date"
+    FROM
+    (SELECT
+    score as "Score",
+    u.nickname as "Player Name",
+    l.name as "Layout",
+    g.end_time as "Date",
+    (SELECT 
+         users.id
+      FROM users
+      INNER JOIN users_games
+        ON users.id = users_games.user_id
+      WHERE game_id = ug.game_id AND users.id != u.id) as opp_id
+  FROM
+    users_games ug
+  INNER JOIN users u
+    ON ug.user_id = u.id
+  INNER JOIN games g
+    ON ug.game_id = g.id
+  INNER JOIN layouts l
+    ON g.layout_id = l.id
+  WHERE u.id != 'easyAI' AND u.id != 'mediumAI'
+  )_
+  WHERE opp_id = 'mediumAI')_
+  ORDER BY "Score" DESC
+  LIMIT 5;`, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        response.status(200).json(results.rows);
+    });
+};
+export const getMPHighScore = (request, response) => {
+    pool.query(`SELECT * FROM (
+      SELECT
+    "Score", 
+    "Player Name", 
+    "Layout", 
+    (SELECT users.nickname FROM users WHERE users.id = opp_id) as "Opponent",
+    "Date"
+    FROM
+    (SELECT
+    score as "Score",
+    u.nickname as "Player Name",
+    l.name as "Layout",
+    g.end_time as "Date",
+    (SELECT 
+         users.id
+      FROM users
+      INNER JOIN users_games
+        ON users.id = users_games.user_id
+      WHERE game_id = ug.game_id AND users.id != u.id) as opp_id
+  FROM
+    users_games ug
+  INNER JOIN users u
+    ON ug.user_id = u.id
+  INNER JOIN games g
+    ON ug.game_id = g.id
+  INNER JOIN layouts l
+    ON g.layout_id = l.id
+  WHERE u.id != 'easyAI' AND u.id != 'mediumAI'
+  )_
+  WHERE opp_id != 'easyAI' AND opp_id !='mediumAI')_
+  ORDER BY "Score" DESC
+  LIMIT 5;`, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        response.status(200).json(results.rows);
+    });
+};

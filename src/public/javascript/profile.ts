@@ -1,6 +1,7 @@
-import { MainMenuHandler } from './view/utils.js';
+import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
 
 const mainMenuHandler = new MainMenuHandler(false, true);
+const tabsHandler = new TabsHandler();
 
 declare class Plotly {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -8,66 +9,8 @@ declare class Plotly {
   static newPlot(arg0: string, data: any, layout: any, config: any): any;
 }
 
-const tabs = document.querySelectorAll(
-  '[data-tab-target]'
-) as NodeListOf<HTMLElement>;
-const tabContents = document.querySelectorAll('[data-tab-content]');
-
-tabs.forEach((tab) => {
-  tab.addEventListener('click', () => {
-    const target = document.querySelector(tab.dataset.tabTarget!)!;
-    tabContents.forEach((tabContent) => {
-      tabContent.classList.remove('active');
-    });
-    tabs.forEach((tab) => {
-      tab.classList.remove('active');
-    });
-    tab.classList.add('active');
-    target.classList.add('active');
-  });
-});
-
 // // remove profile element on this page
 // document.getElementById('profile-button')!.remove();
-
-function populateTable(items: [Record<string, string>], tableName: string) {
-  const table = document.getElementById(tableName) as HTMLTableElement;
-  const tBody = table.getElementsByTagName('tbody')[0];
-
-  if (!table.tHead) {
-    const header = table.createTHead();
-    const tr = header.insertRow(0);
-    Object.keys(items[0]).forEach((key) => {
-      const th = document.createElement('th');
-      th.innerHTML = key;
-      tr.appendChild(th);
-    });
-  }
-
-  items.forEach((item: Record<string, string>) => {
-    const row = tBody.insertRow();
-    Object.keys(item).forEach((key) => {
-      const newRow = row.insertCell();
-      // reformat ugly dates
-      if (key === 'Date') {
-        const date = new Date(item[key]);
-        const string = convertDate(date);
-        newRow.innerHTML = string;
-      } else {
-        newRow.innerHTML = item[key];
-      }
-      newRow.setAttribute('data-label', key);
-    });
-  });
-}
-
-function convertDate(dateObj: Date) {
-  const month = dateObj.getUTCMonth() + 1; //months from 1-12
-  const day = dateObj.getUTCDate();
-  const year = dateObj.getUTCFullYear();
-  const newDate = year + '/' + month + '/' + day;
-  return newDate;
-}
 
 function getHighScore(records: Record<string, number>[]) {
   return records.reduce((acc: number, row: Record<string, number>) => {
@@ -104,7 +47,7 @@ function getWinsLosses(records: any): Map<string, number> {
 
 (async () => {
   try {
-    const response = await fetch('/getSPgameRecords');
+    const response = await fetch('/getSPGameRecords');
 
     const SPgameData = await response.json();
 
@@ -207,7 +150,7 @@ function getWinsLosses(records: any): Map<string, number> {
 
 (async () => {
   try {
-    const response = await fetch('/getMPgameRecords');
+    const response = await fetch('/getMPGameRecords');
 
     const MPgameData = await response.json();
 
@@ -300,6 +243,10 @@ function getWinsLosses(records: any): Map<string, number> {
         { responsive: true }
       );
 
+      // Remove active class from multiplayer grid container to set it's display to none.
+      // Initially loading the page without the active class will cause plotly
+      // To render the charts at an incorrect size.
+      document.getElementById('mpGridContainer')?.classList.remove('active');
       document.getElementById('spinner')!.style.visibility = 'hidden';
       document.getElementById('loadScreen')!.classList.remove('active');
     }

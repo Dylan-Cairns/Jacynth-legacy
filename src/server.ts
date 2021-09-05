@@ -15,7 +15,9 @@ import { BoardSpace } from './public/javascript/model/gameboard.js';
 import {
   storeGameResult,
   getSPGameRecords,
-  getMPGameRecords
+  getMPGameRecords,
+  getSPHighScore,
+  getMPHighScore
 } from './queries.js';
 
 // configuration
@@ -72,6 +74,10 @@ app.get('/profile', requiresAuth(), (req, res) => {
   res.render('profile');
 });
 
+app.get('/highscores', (req, res) => {
+  res.render('highscores');
+});
+
 // rest api routes
 
 app.post('/storeSPGameResult', (req, res) => {
@@ -86,17 +92,21 @@ app.post('/storeSPGameResult', (req, res) => {
   storeGameResult(req, res);
 });
 
-app.get('/getSPgameRecords', requiresAuth(), (req, res) => {
+app.get('/getSPGameRecords', requiresAuth(), (req, res) => {
   req.body['userID'] = req.oidc.user?.sub;
 
   getSPGameRecords(req, res);
 });
 
-app.get('/getMPgameRecords', requiresAuth(), (req, res) => {
+app.get('/getMPGameRecords', requiresAuth(), (req, res) => {
   req.body['userID'] = req.oidc.user?.sub;
 
   getMPGameRecords(req, res);
 });
+
+app.get('/getSPHighScores', getSPHighScore);
+
+app.get('/getMPHighScores', getMPHighScore);
 
 // authentication routes
 

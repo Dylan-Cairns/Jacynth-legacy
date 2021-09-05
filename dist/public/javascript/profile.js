@@ -7,61 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { MainMenuHandler } from './view/utils.js';
+import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
 const mainMenuHandler = new MainMenuHandler(false, true);
-const tabs = document.querySelectorAll('[data-tab-target]');
-const tabContents = document.querySelectorAll('[data-tab-content]');
-tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-        const target = document.querySelector(tab.dataset.tabTarget);
-        tabContents.forEach((tabContent) => {
-            tabContent.classList.remove('active');
-        });
-        tabs.forEach((tab) => {
-            tab.classList.remove('active');
-        });
-        tab.classList.add('active');
-        target.classList.add('active');
-    });
-});
+const tabsHandler = new TabsHandler();
 // // remove profile element on this page
 // document.getElementById('profile-button')!.remove();
-function populateTable(items, tableName) {
-    const table = document.getElementById(tableName);
-    const tBody = table.getElementsByTagName('tbody')[0];
-    if (!table.tHead) {
-        const header = table.createTHead();
-        const tr = header.insertRow(0);
-        Object.keys(items[0]).forEach((key) => {
-            const th = document.createElement('th');
-            th.innerHTML = key;
-            tr.appendChild(th);
-        });
-    }
-    items.forEach((item) => {
-        const row = tBody.insertRow();
-        Object.keys(item).forEach((key) => {
-            const newRow = row.insertCell();
-            // reformat ugly dates
-            if (key === 'Date') {
-                const date = new Date(item[key]);
-                const string = convertDate(date);
-                newRow.innerHTML = string;
-            }
-            else {
-                newRow.innerHTML = item[key];
-            }
-            newRow.setAttribute('data-label', key);
-        });
-    });
-}
-function convertDate(dateObj) {
-    const month = dateObj.getUTCMonth() + 1; //months from 1-12
-    const day = dateObj.getUTCDate();
-    const year = dateObj.getUTCFullYear();
-    const newDate = year + '/' + month + '/' + day;
-    return newDate;
-}
 function getHighScore(records) {
     return records.reduce((acc, row) => {
         acc = row['Your Score'] > acc ? row['Your Score'] : acc;
@@ -90,7 +40,7 @@ function getWinsLosses(records) {
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch('/getSPgameRecords');
+        const response = yield fetch('/getSPGameRecords');
         const SPgameData = yield response.json();
         if (SPgameData) {
             // create sp game data table
@@ -169,8 +119,9 @@ function getWinsLosses(records) {
     }
 }))();
 (() => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const response = yield fetch('/getMPgameRecords');
+        const response = yield fetch('/getMPGameRecords');
         const MPgameData = yield response.json();
         if (MPgameData) {
             // create sp game data table
@@ -240,6 +191,10 @@ function getWinsLosses(records) {
                 },
                 barmode: 'group'
             }, { responsive: true });
+            // Remove active class from multiplayer grid container to set it's display to none.
+            // Initially loading the page without the active class will cause plotly
+            // To render the charts at an incorrect size.
+            (_a = document.getElementById('mpGridContainer')) === null || _a === void 0 ? void 0 : _a.classList.remove('active');
             document.getElementById('spinner').style.visibility = 'hidden';
             document.getElementById('loadScreen').classList.remove('active');
         }
