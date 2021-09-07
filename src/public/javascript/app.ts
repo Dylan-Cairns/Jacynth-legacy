@@ -12,7 +12,8 @@ declare const io: any;
 // gametype variable passed in by express route
 declare const gameType: 'singleplayer' | 'multiplayer';
 
-declare const isAuthenticated: boolean;
+declare const hasNick: boolean;
+console.log(hasNick);
 
 const mainMenuHandler = new MainMenuHandler(false, false);
 
