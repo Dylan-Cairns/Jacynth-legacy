@@ -3,6 +3,7 @@ audio#pickupSound(src='assets/pickupsound.wav' preload='auto')
 audio#dropSound(src='assets/switch8.wav' preload='auto')
 script.
     const gameType = JSON.parse('!{JSON.stringify(gameType)}');
+    const isAuthenticated = JSON.parse('!{JSON.stringify(isAuthenticated)}');
 
 include ../components/gameTable.pug
 

@@ -5,11 +5,13 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
-import pkg from 'express-openid-connect';
-const { auth, requiresAuth } = pkg;
+import eoc from 'express-openid-connect';
+const { auth, requiresAuth } = eoc;
+import ep from 'express-validator';
+const { body, validationResult } = ep;
 // game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
-import { storeGameResult, getSPGameRecords, getMPGameRecords, getSPHighScore, getMPHighScore } from './queries.js';
+import * as Queries from './queries.js';
 // configuration
 dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -42,10 +44,18 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 app.get('/singleplayer', (req, res) => {
-    res.render('game', { gameType: 'singleplayer' });
+    console.log(req.oidc.isAuthenticated());
+    res.render('game', {
+        gameType: 'singleplayer',
+        isAuthenticated: req.oidc.isAuthenticated(),
+        tacoStand: 'fish taco'
+    });
 });
 app.get('/multiplayer', (req, res) => {
-    res.render('game', { gameType: 'multiplayer' });
+    res.render('game', {
+        gameType: 'multiplayer',
+        isAuthenticated: req.oidc.isAuthenticated()
+    });
 });
 app.get('/profile', requiresAuth(), (req, res) => {
     res.render('profile');
@@ -54,28 +64,48 @@ app.get('/highscores', (req, res) => {
     res.render('highscores');
 });
 // rest api routes
+// custom validator to check for existing username
+const isValidNickname = (nickname) => {
+    return Queries.isExistingNickname(nickname).then((result) => {
+        if (result.rowCount > 0) {
+            return Promise.reject('Nickname already in use');
+        }
+    });
+};
+app.post('/storeUserNick', requiresAuth(), body('nickname')
+    .trim()
+    .exists()
+    .escape()
+    .matches(/^(?=.*[a-z])[a-z0-9_]{3,15}$/)
+    .custom(isValidNickname), (req, res) => {
+    var _a;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
+    Queries.storeUserNick(req, res);
+});
 app.post('/storeSPGameResult', (req, res) => {
     let user1ID = 'guest';
-    let user1Nick = 'guest';
     if (res.locals.isAuthenticated && req.oidc.user) {
         user1ID = req.oidc.user.sub;
-        user1Nick = req.oidc.user.nickname;
     }
     req.body['user1ID'] = user1ID;
-    storeGameResult(req, res);
+    Queries.storeGameResult(req, res);
 });
 app.get('/getSPGameRecords', requiresAuth(), (req, res) => {
     var _a;
     req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
-    getSPGameRecords(req, res);
+    Queries.getSPGameRecords(req, res);
 });
 app.get('/getMPGameRecords', requiresAuth(), (req, res) => {
     var _a;
     req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
-    getMPGameRecords(req, res);
+    Queries.getMPGameRecords(req, res);
 });
-app.get('/getSPHighScores', getSPHighScore);
-app.get('/getMPHighScores', getMPHighScore);
+app.get('/getSPHighScores', Queries.getSPHighScore);
+app.get('/getMPHighScores', Queries.getMPHighScore);
 // authentication routes
 app.get('/sign-up/:page', (req, res) => {
     res.oidc.login({

@@ -648,6 +648,7 @@ table td::before {
   justify-content: center;
   box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.1),
     inset -2px -2px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .draggable {
@@ -1036,6 +1037,7 @@ input[type='radio']:checked + label > img {
 .rules-content {
   margin: 10px 0px;
   font-family: 'Open Sans', sans-serif;
+  font-size: 1.2rem;
   width: var(--gameboard-width);
   background-color: floralwhite;
   padding: 20px;
@@ -1304,6 +1306,11 @@ input[type='radio']:checked + label > img {
       '. . gameboard'
       '. . gameboard'
       '. . gameboard';
+  }
+
+  #profile-grid {
+    width: 80vw;
+    margin: auto;
   }
 
   #spGridContainer {

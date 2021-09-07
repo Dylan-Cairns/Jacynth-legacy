@@ -13,9 +13,27 @@ const pool = new Pool({
   port: process.env.DB_port ? parseInt(process.env.DB_port) : 5432
 });
 
-export const getUsers = (request: Request, response: Response) => {
+export const storeUserNick = (request: Request, response: Response) => {
+  const { nickname, userID } = request.body;
+
   pool.query(
-    'SELECT * FROM users ORDER BY id ASC',
+    'UPDATE users SET nickname = $1 WHERE id = $2',
+    [nickname, userID],
+    (error: Error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(201).send(`game record added`);
+    }
+  );
+};
+
+export const getUserNickname = (request: Request, response: Response) => {
+  const { userID } = request.body;
+
+  pool.query(
+    `SELECT nickname FROM users WHERE id=$1`,
+    [userID],
     (error: Error, results: { rows: any }) => {
       if (error) {
         throw error;
@@ -24,6 +42,24 @@ export const getUsers = (request: Request, response: Response) => {
     }
   );
 };
+
+// export async function isExistingNickname(nickname: string) {
+//   const result = await pool.query(
+//     `SELECT nickname FROM users WHERE nickname=$1`,
+//     [nickname],
+//     (error: Error, results: { rows: any }) => {
+//       if (error) {
+//         throw error;
+//       }
+//       response.status(200).json(results.rows);
+//     };
+// }
+
+export function isExistingNickname(nickname: string) {
+  return pool.query(`SELECT nickname FROM users WHERE nickname = $1`, [
+    nickname
+  ]);
+}
 
 export const storeGameResult = (request: Request, response: Response) => {
   const { user1ID, user1Score, user2ID, user2Score, layout } = request.body;
@@ -114,7 +150,7 @@ export const getMPGameRecords = (request: Request, response: Response) => {
 
 export const getSPHighScore = (request: Request, response: Response) => {
   pool.query(
-    `SELECT * FROM (
+    `SELECT row_number() over() as "Place", * FROM (
       SELECT
     "Score", 
     "Player Name", 
@@ -143,8 +179,8 @@ export const getSPHighScore = (request: Request, response: Response) => {
     ON g.layout_id = l.id
   WHERE u.id != 'easyAI' AND u.id != 'mediumAI'
   )_
-  WHERE opp_id = 'mediumAI')_
-  ORDER BY "Score" DESC
+  WHERE opp_id = 'mediumAI'
+  ORDER BY "Score" DESC)_
   LIMIT 5;`,
     (error: Error, results: { rows: any }) => {
       if (error) {
@@ -157,7 +193,7 @@ export const getSPHighScore = (request: Request, response: Response) => {
 
 export const getMPHighScore = (request: Request, response: Response) => {
   pool.query(
-    `SELECT * FROM (
+    `SELECT row_number() over() as "Place", * FROM (
       SELECT
     "Score", 
     "Player Name", 
@@ -186,8 +222,8 @@ export const getMPHighScore = (request: Request, response: Response) => {
     ON g.layout_id = l.id
   WHERE u.id != 'easyAI' AND u.id != 'mediumAI'
   )_
-  WHERE opp_id != 'easyAI' AND opp_id !='mediumAI')_
-  ORDER BY "Score" DESC
+  WHERE opp_id != 'easyAI' AND opp_id !='mediumAI'
+  ORDER BY "Score" DESC)_
   LIMIT 5;`,
     (error: Error, results: { rows: any }) => {
       if (error) {
