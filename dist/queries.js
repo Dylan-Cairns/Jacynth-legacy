@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import dotenv from 'dotenv';
 dotenv.config();
 import pkg from 'pg';
@@ -27,22 +36,14 @@ export const getUserNickname = (request, response) => {
         response.status(200).json(results.rows);
     });
 };
-// export async function isExistingNickname(nickname: string) {
-//   const result = await pool.query(
-//     `SELECT nickname FROM users WHERE nickname=$1`,
-//     [nickname],
-//     (error: Error, results: { rows: any }) => {
-//       if (error) {
-//         throw error;
-//       }
-//       response.status(200).json(results.rows);
-//     };
-// }
-export function isExistingNickname(nickname) {
+export const findExistingNick = (nickname) => {
     return pool.query(`SELECT nickname FROM users WHERE nickname = $1`, [
         nickname
     ]);
-}
+};
+export const findNickforUser = (userID) => __awaiter(void 0, void 0, void 0, function* () {
+    return pool.query(`SELECT nickname FROM users WHERE id = $1`, [userID]);
+});
 export const storeGameResult = (request, response) => {
     const { user1ID, user1Score, user2ID, user2Score, layout } = request.body;
     console.log(user1ID, user1Score, user2ID, user2Score, layout);

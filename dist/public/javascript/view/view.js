@@ -173,10 +173,6 @@ export class View {
             const undoMove = undoMovesJSON
                 ? JSON.parse(undoMovesJSON).pop()
                 : undefined;
-            console.log(this.getCurrPlyrAvailTokens);
-            if (this.getCurrPlyrAvailTokens)
-                console.log(this.getCurrPlyrAvailTokens());
-            console.log(undoMove);
             if (!(undoMove && undoMove.draggedEle === 'influenceToken') &&
                 this.getCurrPlyrAvailTokens &&
                 this.getCurrPlyrAvailTokens() > 0) {
@@ -226,23 +222,6 @@ export class View {
         this.winnerText = document.getElementById('winnerText');
         this.pickupSound = document.getElementById('pickupSound');
         this.dropSound = document.getElementById('dropSound');
-        // this.menuButton = document.getElementById(
-        //   'menuButton'
-        // ) as HTMLButtonElement;
-        // this.closeMenuButton = document.getElementById(
-        //   'closeMenuButton'
-        // ) as HTMLButtonElement;
-        // this.menu = document.getElementById('menu-popup') as HTMLElement;
-        // this.rulesButton = document.getElementById(
-        //   'rulesButton'
-        // ) as HTMLButtonElement;
-        // this.closeRulesButton = document.getElementById(
-        //   'closeRulesButton'
-        // ) as HTMLButtonElement;
-        // this.rules = document.getElementById('rules') as HTMLElement;
-        // this.newGameButton = document.getElementById(
-        //   'newGameBttn'
-        // ) as HTMLAnchorElement;
         this.overlay = document.getElementById('overlay');
         this.newGameOptionsOverlay = document.getElementById('newGameOptionsOverlay');
         this.newGameMenu = document.getElementById('newGameOptionsModal');

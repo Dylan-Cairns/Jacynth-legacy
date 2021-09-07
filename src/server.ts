@@ -7,7 +7,6 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import eoc from 'express-openid-connect';
 const { auth, requiresAuth } = eoc;
-import { CustomValidator } from 'express-validator';
 import ep from 'express-validator';
 const { body, validationResult } = ep;
 
@@ -15,7 +14,8 @@ const { body, validationResult } = ep;
 import { Card, Decktet } from './public/javascript/model/decktet.js';
 import { BoardSpace } from './public/javascript/model/gameboard.js';
 
-import * as Queries from './queries.js';
+import * as Queries from './utils/queries.js';
+import * as Utils from './utils/utils.js';
 
 // configuration
 
@@ -59,19 +59,31 @@ app.get('/', (req, res) => {
   res.render('home');
 });
 
-app.get('/singleplayer', (req, res) => {
-  console.log(req.oidc.isAuthenticated());
+app.get('/singleplayer', async (req, res) => {
+  // if user is logged in, check if they have chosen a nickname yet.
+  let hasNick = true;
+  if (res.locals.isAuthenticated && req.oidc.user) {
+    const result = await Utils.hasNickname(req.oidc.user.sub);
+    if (result !== undefined) hasNick = result;
+  }
+
   res.render('game', {
     gameType: 'singleplayer',
-    isAuthenticated: req.oidc.isAuthenticated(),
-    tacoStand: 'fish taco'
+    hasNick: hasNick
   });
 });
 
-app.get('/multiplayer', (req, res) => {
+app.get('/multiplayer', async (req, res) => {
+  // if user is logged in, check if they have chosen a nickname yet.
+  let hasNick = true;
+  if (res.locals.isAuthenticated && req.oidc.user) {
+    const result = await Utils.hasNickname(req.oidc.user.sub);
+    if (result !== undefined) hasNick = result;
+  }
+
   res.render('game', {
     gameType: 'multiplayer',
-    isAuthenticated: req.oidc.isAuthenticated()
+    hasNick: hasNick
   });
 });
 
@@ -85,16 +97,6 @@ app.get('/highscores', (req, res) => {
 
 // rest api routes
 
-// custom validator to check for existing username
-
-const isValidNickname: CustomValidator = (nickname) => {
-  return Queries.isExistingNickname(nickname).then((result) => {
-    if (result.rowCount > 0) {
-      return Promise.reject('Nickname already in use');
-    }
-  });
-};
-
 app.post(
   '/storeUserNick',
   requiresAuth(),
@@ -103,7 +105,7 @@ app.post(
     .exists()
     .escape()
     .matches(/^(?=.*[a-z])[a-z0-9_]{3,15}$/)
-    .custom(isValidNickname),
+    .custom(Utils.isValidNickname),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

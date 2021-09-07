@@ -43,23 +43,15 @@ export const getUserNickname = (request: Request, response: Response) => {
   );
 };
 
-// export async function isExistingNickname(nickname: string) {
-//   const result = await pool.query(
-//     `SELECT nickname FROM users WHERE nickname=$1`,
-//     [nickname],
-//     (error: Error, results: { rows: any }) => {
-//       if (error) {
-//         throw error;
-//       }
-//       response.status(200).json(results.rows);
-//     };
-// }
-
-export function isExistingNickname(nickname: string) {
+export const findExistingNick = (nickname: string) => {
   return pool.query(`SELECT nickname FROM users WHERE nickname = $1`, [
     nickname
   ]);
-}
+};
+
+export const findNickforUser = async (userID: string) => {
+  return pool.query(`SELECT nickname FROM users WHERE id = $1`, [userID]);
+};
 
 export const storeGameResult = (request: Request, response: Response) => {
   const { user1ID, user1Score, user2ID, user2Score, layout } = request.body;

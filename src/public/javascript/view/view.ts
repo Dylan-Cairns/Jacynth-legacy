@@ -28,13 +28,6 @@ export class View {
   disconnectedAlert: HTMLElement;
   pickupSound: HTMLMediaElement;
   dropSound: HTMLMediaElement;
-  // menuButton: HTMLButtonElement;
-  // closeMenuButton: HTMLButtonElement;
-  // menu: HTMLElement;
-  // rulesButton: HTMLButtonElement;
-  // closeRulesButton: HTMLButtonElement;
-  // rules: HTMLElement;
-  // newGameButton: HTMLAnchorElement;
   overlay: HTMLElement;
   newGameOptionsOverlay: HTMLElement;
   newGameMenu: HTMLElement;
@@ -103,23 +96,6 @@ export class View {
       'pickupSound'
     ) as HTMLMediaElement;
     this.dropSound = document.getElementById('dropSound') as HTMLMediaElement;
-    // this.menuButton = document.getElementById(
-    //   'menuButton'
-    // ) as HTMLButtonElement;
-    // this.closeMenuButton = document.getElementById(
-    //   'closeMenuButton'
-    // ) as HTMLButtonElement;
-    // this.menu = document.getElementById('menu-popup') as HTMLElement;
-    // this.rulesButton = document.getElementById(
-    //   'rulesButton'
-    // ) as HTMLButtonElement;
-    // this.closeRulesButton = document.getElementById(
-    //   'closeRulesButton'
-    // ) as HTMLButtonElement;
-    // this.rules = document.getElementById('rules') as HTMLElement;
-    // this.newGameButton = document.getElementById(
-    //   'newGameBttn'
-    // ) as HTMLAnchorElement;
     this.overlay = document.getElementById('overlay') as HTMLElement;
     this.newGameOptionsOverlay = document.getElementById(
       'newGameOptionsOverlay'
@@ -791,9 +767,6 @@ export class View {
     const undoMove = undoMovesJSON
       ? JSON.parse(undoMovesJSON).pop()
       : undefined;
-    console.log(this.getCurrPlyrAvailTokens);
-    if (this.getCurrPlyrAvailTokens) console.log(this.getCurrPlyrAvailTokens());
-    console.log(undoMove);
     if (
       !(undoMove && undoMove.draggedEle === 'influenceToken') &&
       this.getCurrPlyrAvailTokens &&

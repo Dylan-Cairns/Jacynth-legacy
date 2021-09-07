@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import express from 'express';
 import path from 'path';
 import http from 'http';
@@ -43,20 +52,30 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
     res.render('home');
 });
-app.get('/singleplayer', (req, res) => {
-    console.log(req.oidc.isAuthenticated());
+app.get('/singleplayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let hasNick = true;
+    if (res.locals.isAuthenticated && req.oidc.user) {
+        const result = yield hasNickname(req.oidc.user.sub);
+        if (result !== undefined)
+            hasNick = result;
+    }
     res.render('game', {
         gameType: 'singleplayer',
-        isAuthenticated: req.oidc.isAuthenticated(),
-        tacoStand: 'fish taco'
+        hasNick: hasNick
     });
-});
-app.get('/multiplayer', (req, res) => {
+}));
+app.get('/multiplayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let hasNick = true;
+    if (res.locals.isAuthenticated && req.oidc.user) {
+        const result = yield hasNickname(req.oidc.user.sub);
+        if (result !== undefined)
+            hasNick = result;
+    }
     res.render('game', {
         gameType: 'multiplayer',
-        isAuthenticated: req.oidc.isAuthenticated()
+        hasNick: hasNick
     });
-});
+}));
 app.get('/profile', requiresAuth(), (req, res) => {
     res.render('profile');
 });
@@ -66,12 +85,23 @@ app.get('/highscores', (req, res) => {
 // rest api routes
 // custom validator to check for existing username
 const isValidNickname = (nickname) => {
-    return Queries.isExistingNickname(nickname).then((result) => {
+    return Queries.findExistingNick(nickname).then((result) => {
         if (result.rowCount > 0) {
             return Promise.reject('Nickname already in use');
         }
     });
 };
+// method user to check if user has chosen a nickname
+const hasNickname = (userID) => __awaiter(void 0, void 0, void 0, function* () {
+    let results;
+    try {
+        results = yield Queries.findNickforUser(userID);
+    }
+    catch (error) {
+        console.log(error);
+    }
+    return results && results.rowCount > 0;
+});
 app.post('/storeUserNick', requiresAuth(), body('nickname')
     .trim()
     .exists()
