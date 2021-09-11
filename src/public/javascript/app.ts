@@ -14,7 +14,9 @@ declare const gameType: 'singleplayer' | 'multiplayer';
 
 declare const hasNick: boolean;
 
-const nickNameFormHandler = new NickNameFormHandler(true);
+console.log(hasNick);
+
+const nickNameFormHandler = new NickNameFormHandler(!hasNick);
 
 const mainMenuHandler = new MainMenuHandler(false, false);
 

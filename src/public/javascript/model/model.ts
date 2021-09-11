@@ -157,7 +157,7 @@ export class SinglePlayerGameModel extends GameModel {
   }
 
   public addRecordtoDB = async () => {
-    // user1 score will either be guest or authenticated user ID.
+    // user1 ID will either be guest or authenticated user ID.
     // that determination is handled server side,
     // so user1ID is not added here.
     const gameResults = {
@@ -226,5 +226,32 @@ export class MultiplayerGameModel extends GameModel {
     const layoutArr = BOARD_LAYOUTS[layout];
     this.socket.emit('createStartingLayout', layoutArr);
     this.socket.emit('playerReady', 'Player 2');
+  };
+
+  public addRecordtoDB = async () => {
+    // user IDs are added server side.
+    const gameResults = {
+      user1Score: this.currPlyr.getScore(),
+      user2Score: this.opposPlyr.getScore(),
+      layout: this.layout
+    };
+
+    (async () => {
+      try {
+        const response = await fetch('/storeMPGameResult', {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: 'post',
+          body: JSON.stringify(gameResults)
+        });
+
+        const message = await response;
+        console.log(message);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   };
 }

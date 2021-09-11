@@ -43,7 +43,7 @@ export class SinglePlayerGameModel extends GameModel {
             localStorage.removeItem(`Computer-hand`);
         };
         this.addRecordtoDB = () => __awaiter(this, void 0, void 0, function* () {
-            // user1 score will either be guest or authenticated user ID.
+            // user1 ID will either be guest or authenticated user ID.
             // that determination is handled server side,
             // so user1ID is not added here.
             const gameResults = {
@@ -159,6 +159,31 @@ export class MultiplayerGameModel extends GameModel {
             this.socket.emit('createStartingLayout', layoutArr);
             this.socket.emit('playerReady', 'Player 2');
         };
+        this.addRecordtoDB = () => __awaiter(this, void 0, void 0, function* () {
+            // user IDs are added server side.
+            const gameResults = {
+                user1Score: this.currPlyr.getScore(),
+                user2Score: this.opposPlyr.getScore(),
+                layout: this.layout
+            };
+            (() => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    const response = yield fetch('/storeMPGameResult', {
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'post',
+                        body: JSON.stringify(gameResults)
+                    });
+                    const message = yield response;
+                    console.log(message);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }))();
+        });
         this.socket = socket;
         socket.on('recieveLayoutCard', (cardID, spaceID) => {
             const space = this.board.getSpace(spaceID);

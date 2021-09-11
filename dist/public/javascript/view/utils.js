@@ -135,8 +135,8 @@ function convertDate(dateObj) {
     return newDate;
 }
 export class NickNameFormHandler {
-    constructor(display) {
-        if (!display)
+    constructor(visible) {
+        if (!visible)
             return;
         const container = document.getElementById('nickNameFormContainer');
         container.classList.add('active');
@@ -162,8 +162,8 @@ export class NickNameFormHandler {
                         .then(function (response) {
                         console.log(response);
                         if (response.ok) {
-                            resultDiv.classList.add('success', 'active');
                             resultDiv.innerHTML = 'OK!';
+                            resultDiv.classList.add('success', 'active');
                             setTimeout(() => container.classList.remove('active'), 1000);
                         }
                         else {
@@ -173,8 +173,10 @@ export class NickNameFormHandler {
                         .then(function (data) {
                         console.log(data);
                         if (data.errors) {
-                            resultDiv.classList.add('error', 'active');
-                            setTimeout(() => (resultDiv.innerHTML = data.errors[0].msg), 200);
+                            setTimeout(() => {
+                                resultDiv.classList.add('error', 'active');
+                                resultDiv.innerHTML = data.errors[0].msg;
+                            }, 200);
                         }
                     });
                 }

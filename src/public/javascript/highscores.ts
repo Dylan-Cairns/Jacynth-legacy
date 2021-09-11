@@ -4,37 +4,34 @@ const mainMenuHandler = new MainMenuHandler(false, true);
 const tabsHandler = new TabsHandler();
 
 (async () => {
+  let SPgameData;
+  let MPgameData;
+
   try {
-    const response = await fetch('/getSPHighScores');
-
-    const SPgameData = await response.json();
-
-    if (SPgameData) {
-      // create sp game data table
-      populateTable(SPgameData, 'SPGameRecords');
-
-      document.getElementById('spinner')!.style.visibility = 'hidden';
-      document.getElementById('loadScreen')!.classList.remove('active');
-    }
+    const response = await fetch('/api/v1/rest/getSPHighScores');
+    SPgameData = await response.json();
   } catch (error) {
     console.log(error);
   }
-})();
 
-(async () => {
+  if (SPgameData.length > 0) {
+    // create sp game data table
+    populateTable(SPgameData, 'SPGameRecords');
+  }
+
   try {
-    const response = await fetch('/getMPHighScores');
+    const response = await fetch('/api/v1/rest/getMPHighScores');
 
-    const MPgameData = await response.json();
-
-    if (MPgameData) {
-      // create sp game data table
-      populateTable(MPgameData, 'MPGameRecords');
-
-      document.getElementById('spinner')!.style.visibility = 'hidden';
-      document.getElementById('loadScreen')!.classList.remove('active');
-    }
+    MPgameData = await response.json();
   } catch (error) {
     console.log(error);
   }
+
+  if (MPgameData.length > 0) {
+    // create mp game data table
+    populateTable(MPgameData, 'MPGameRecords');
+  }
+
+  document.getElementById('spinner')!.style.visibility = 'hidden';
+  document.getElementById('loadScreen')!.classList.remove('active');
 })();
