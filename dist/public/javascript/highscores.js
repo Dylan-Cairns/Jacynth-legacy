@@ -11,32 +11,30 @@ import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
 const mainMenuHandler = new MainMenuHandler(false, true);
 const tabsHandler = new TabsHandler();
 (() => __awaiter(void 0, void 0, void 0, function* () {
+    let SPgameData;
+    let MPgameData;
     try {
-        const response = yield fetch('/getSPHighScores');
-        const SPgameData = yield response.json();
-        if (SPgameData) {
-            // create sp game data table
-            populateTable(SPgameData, 'SPGameRecords');
-            document.getElementById('spinner').style.visibility = 'hidden';
-            document.getElementById('loadScreen').classList.remove('active');
-        }
+        const response = yield fetch('/api/v1/rest/getSPHighScores');
+        SPgameData = yield response.json();
     }
     catch (error) {
         console.log(error);
     }
-}))();
-(() => __awaiter(void 0, void 0, void 0, function* () {
+    if (SPgameData.length > 0) {
+        // create sp game data table
+        populateTable(SPgameData, 'SPGameRecords');
+    }
     try {
-        const response = yield fetch('/getMPHighScores');
-        const MPgameData = yield response.json();
-        if (MPgameData) {
-            // create sp game data table
-            populateTable(MPgameData, 'MPGameRecords');
-            document.getElementById('spinner').style.visibility = 'hidden';
-            document.getElementById('loadScreen').classList.remove('active');
-        }
+        const response = yield fetch('/api/v1/rest/getMPHighScores');
+        MPgameData = yield response.json();
     }
     catch (error) {
         console.log(error);
     }
+    if (MPgameData.length > 0) {
+        // create mp game data table
+        populateTable(MPgameData, 'MPGameRecords');
+    }
+    document.getElementById('spinner').style.visibility = 'hidden';
+    document.getElementById('loadScreen').classList.remove('active');
 }))();

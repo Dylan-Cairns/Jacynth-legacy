@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { findExistingNick, findNickforUser } from '../api/queries.js';
+import { findExistingNick, findNickforUser } from './queries.js';
 export const isValidNickname = (nickname) => {
     return findExistingNick(nickname).then((result) => {
         if (result.rowCount > 0) {
