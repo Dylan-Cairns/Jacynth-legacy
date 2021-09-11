@@ -3,7 +3,7 @@ import {
   MultiPlayerController
 } from './controller/controller.js';
 import { PlayerID } from './model/player.js';
-import { MainMenuHandler } from './view/utils.js';
+import { MainMenuHandler, NickNameFormHandler } from './view/utils.js';
 
 // TODO: resolve import error when using 'import' on client side.
 // For now, declare the io variables here.
@@ -13,7 +13,8 @@ declare const io: any;
 declare const gameType: 'singleplayer' | 'multiplayer';
 
 declare const hasNick: boolean;
-console.log(hasNick);
+
+const nickNameFormHandler = new NickNameFormHandler(true);
 
 const mainMenuHandler = new MainMenuHandler(false, false);
 

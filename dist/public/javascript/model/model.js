@@ -63,7 +63,7 @@ export class SinglePlayerGameModel extends GameModel {
                         body: JSON.stringify(gameResults)
                     });
                     const message = yield response;
-                    console.log(response);
+                    console.log(message);
                 }
                 catch (error) {
                     console.log(error);

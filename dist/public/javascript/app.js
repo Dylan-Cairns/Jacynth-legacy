@@ -1,6 +1,6 @@
 import { SinglePlayerController, MultiPlayerController } from './controller/controller.js';
-import { MainMenuHandler } from './view/utils.js';
-console.log(hasNick);
+import { MainMenuHandler, NickNameFormHandler } from './view/utils.js';
+const nickNameFormHandler = new NickNameFormHandler(true);
 const mainMenuHandler = new MainMenuHandler(false, false);
 if (gameType === 'singleplayer') {
     const controller = new SinglePlayerController('basicDeck');

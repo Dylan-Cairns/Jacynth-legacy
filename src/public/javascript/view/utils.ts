@@ -161,3 +161,66 @@ function convertDate(dateObj: Date) {
   const newDate = year + '/' + month + '/' + day;
   return newDate;
 }
+
+export class NickNameFormHandler {
+  constructor(display: boolean) {
+    if (!display) return;
+
+    const container = document.getElementById(
+      'nickNameFormContainer'
+    ) as HTMLElement;
+    container.classList.add('active');
+
+    const submitButton = document.getElementById(
+      'nickSubmitButton'
+    ) as HTMLButtonElement;
+    const resultDiv = document.getElementById('resultDiv') as HTMLElement;
+
+    submitButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      resultDiv.innerHTML = '';
+      resultDiv.classList.remove('error', 'success', 'active');
+
+      const nickField = document.getElementById(
+        'nickTextField'
+      ) as HTMLTextAreaElement;
+      const nickname = nickField.value;
+      const data = { nickname: nickname };
+
+      (async () => {
+        try {
+          const response = await fetch('/storeUserNick', {
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json'
+            },
+            method: 'post',
+            body: JSON.stringify(data)
+          })
+            .then(function (response) {
+              console.log(response);
+              if (response.ok) {
+                resultDiv.classList.add('success', 'active');
+                resultDiv.innerHTML = 'OK!';
+                setTimeout(() => container.classList.remove('active'), 1000);
+              } else {
+                return response.json();
+              }
+            })
+            .then(function (data) {
+              console.log(data);
+              if (data.errors) {
+                resultDiv.classList.add('error', 'active');
+                setTimeout(
+                  () => (resultDiv.innerHTML = data.errors[0].msg),
+                  200
+                );
+              }
+            });
+        } catch (error) {
+          console.log('error', error);
+        }
+      })();
+    });
+  }
+}

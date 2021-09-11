@@ -179,7 +179,7 @@ export class SinglePlayerGameModel extends GameModel {
         });
 
         const message = await response;
-        console.log(response);
+        console.log(message);
       } catch (error) {
         console.log(error);
       }

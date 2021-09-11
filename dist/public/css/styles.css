@@ -52,12 +52,14 @@ body {
 
 /* main menu and in game button styling */
 
-button {
+button,
+input[type='submit'] {
   all: unset;
   font-family: 'Fortune Letters';
 }
 
-button:hover {
+button:hover,
+input[type='submit']:hover {
   cursor: pointer;
   color: var(--icon-text-color);
 }
@@ -724,6 +726,40 @@ table td::before {
   bottom: -0.1em;
   border-radius: 1000px;
   animation: ripple 3s linear infinite;
+}
+
+/* choose nick form styling */
+#resultDiv {
+  display: none;
+}
+#resultDiv.active {
+  display: inline;
+  font-family: 'Open Sans', sans-serif;
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+}
+
+#nickSubmitButton {
+  width: 100%;
+}
+
+.error {
+  color: red;
+  background-color: rgba(255, 0, 0, 0.103);
+}
+
+.success {
+  color: green;
+  background-color: rgba(172, 255, 47, 0.294);
+}
+
+.formTitle {
+  font-size: 1.5rem;
+}
+
+.subtext {
+  font-size: 0.9rem;
+  font-family: 'Open Sans', sans-serif;
 }
 
 @keyframes ripple {
