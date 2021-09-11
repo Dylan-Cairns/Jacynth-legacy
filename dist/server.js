@@ -20,7 +20,8 @@ import ep from 'express-validator';
 const { body, validationResult } = ep;
 // game objects used by server side multiplayer code
 import { Decktet } from './public/javascript/model/decktet.js';
-import * as Queries from './queries.js';
+import * as Queries from './utils/queries.js';
+import * as Utils from './utils/utils.js';
 // configuration
 dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -53,9 +54,10 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 app.get('/singleplayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // if user is logged in, check if they have chosen a nickname yet.
     let hasNick = true;
     if (res.locals.isAuthenticated && req.oidc.user) {
-        const result = yield hasNickname(req.oidc.user.sub);
+        const result = yield Utils.hasNickname(req.oidc.user.sub);
         if (result !== undefined)
             hasNick = result;
     }
@@ -65,9 +67,10 @@ app.get('/singleplayer', (req, res) => __awaiter(void 0, void 0, void 0, functio
     });
 }));
 app.get('/multiplayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // if user is logged in, check if they have chosen a nickname yet.
     let hasNick = true;
     if (res.locals.isAuthenticated && req.oidc.user) {
-        const result = yield hasNickname(req.oidc.user.sub);
+        const result = yield Utils.hasNickname(req.oidc.user.sub);
         if (result !== undefined)
             hasNick = result;
     }
@@ -83,31 +86,13 @@ app.get('/highscores', (req, res) => {
     res.render('highscores');
 });
 // rest api routes
-// custom validator to check for existing username
-const isValidNickname = (nickname) => {
-    return Queries.findExistingNick(nickname).then((result) => {
-        if (result.rowCount > 0) {
-            return Promise.reject('Nickname already in use');
-        }
-    });
-};
-// method user to check if user has chosen a nickname
-const hasNickname = (userID) => __awaiter(void 0, void 0, void 0, function* () {
-    let results;
-    try {
-        results = yield Queries.findNickforUser(userID);
-    }
-    catch (error) {
-        console.log(error);
-    }
-    return results && results.rowCount > 0;
-});
 app.post('/storeUserNick', requiresAuth(), body('nickname')
     .trim()
     .exists()
     .escape()
-    .matches(/^(?=.*[a-z])[a-z0-9_]{3,15}$/)
-    .custom(isValidNickname), (req, res) => {
+    .matches(/^[a-zA-Z0-9]{5,20}$/, 'i')
+    .withMessage('Nickname must be between 5-20 characters and contain only letters and numbers.')
+    .custom(Utils.isValidNickname), (req, res) => {
     var _a;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

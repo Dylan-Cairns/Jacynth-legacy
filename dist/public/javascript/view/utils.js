@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 // class to handle the main menu on all pages
 export class MainMenuHandler {
     constructor(startVisible, showResume) {
@@ -124,4 +133,55 @@ function convertDate(dateObj) {
     const year = dateObj.getUTCFullYear();
     const newDate = year + '/' + month + '/' + day;
     return newDate;
+}
+export class NickNameFormHandler {
+    constructor(display) {
+        if (!display)
+            return;
+        const container = document.getElementById('nickNameFormContainer');
+        container.classList.add('active');
+        const submitButton = document.getElementById('nickSubmitButton');
+        const resultDiv = document.getElementById('resultDiv');
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            resultDiv.innerHTML = '';
+            resultDiv.classList.remove('error', 'success', 'active');
+            const nickField = document.getElementById('nickTextField');
+            const nickname = nickField.value;
+            const data = { nickname: nickname };
+            (() => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    const response = yield fetch('/storeUserNick', {
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'post',
+                        body: JSON.stringify(data)
+                    })
+                        .then(function (response) {
+                        console.log(response);
+                        if (response.ok) {
+                            resultDiv.classList.add('success', 'active');
+                            resultDiv.innerHTML = 'OK!';
+                            setTimeout(() => container.classList.remove('active'), 1000);
+                        }
+                        else {
+                            return response.json();
+                        }
+                    })
+                        .then(function (data) {
+                        console.log(data);
+                        if (data.errors) {
+                            resultDiv.classList.add('error', 'active');
+                            setTimeout(() => (resultDiv.innerHTML = data.errors[0].msg), 200);
+                        }
+                    });
+                }
+                catch (error) {
+                    console.log('error', error);
+                }
+            }))();
+        });
+    }
 }

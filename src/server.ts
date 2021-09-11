@@ -104,7 +104,10 @@ app.post(
     .trim()
     .exists()
     .escape()
-    .matches(/^(?=.*[a-z])[a-z0-9_]{3,15}$/)
+    .matches(/^[a-zA-Z0-9]{5,20}$/, 'i')
+    .withMessage(
+      'Nickname must be between 5-20 characters and contain only letters and numbers.'
+    )
     .custom(Utils.isValidNickname),
   (req, res) => {
     const errors = validationResult(req);

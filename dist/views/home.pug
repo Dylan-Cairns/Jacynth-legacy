@@ -1,8 +1,8 @@
 include ../components/authentication-buttons.pug
 
 include ../components/header.pug
-.main-grid
 img#titlePageBackground.dark_shadow(src='./assets/homebackground.png')
+.main-grid
 #menu-popup.menu-popup.modal.title-menu.dark_shadow
   .menu-header Jacynth
     br
@@ -18,5 +18,6 @@ img#titlePageBackground.dark_shadow(src='./assets/homebackground.png')
     a(href='/highscores') High Scores
   #rulesButton.menu-button.light_shadow
     button(href='#') Rules &amp; Credits
+
 include ../components/rules.pug
 script(type='module' src='/javascript/home.js')
