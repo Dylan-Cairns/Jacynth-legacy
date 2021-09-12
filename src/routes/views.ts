@@ -19,21 +19,24 @@ viewRouter.get('/singleplayer', async (req, res) => {
 
   res.render('../dist/views/game', {
     gameType: 'singleplayer',
+    userID: 'guest',
     hasNick: hasNick
   });
 });
 
 viewRouter.get('/multiplayer', async (req, res) => {
   // if user is logged in, check if they have chosen a nickname yet.
-  if (req.oidc.user && req.oidc.user.sub) console.log(req.oidc.user.sub);
+  let userID = 'guest';
   let hasNick = true;
   if (res.locals.isAuthenticated && req.oidc.user) {
+    userID = req.oidc.user.sub;
     const result = await Utils.hasNickname(req.oidc.user.sub);
     if (result !== undefined) hasNick = result;
   }
 
   res.render('../dist/views/game', {
     gameType: 'multiplayer',
+    userID: userID,
     hasNick: hasNick
   });
 });

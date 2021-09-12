@@ -56,7 +56,7 @@ app.use('/', viewRouter);
 app.use('/rest', rest);
 
 // authentication routes
-app.use('/auth/', authRouter);
+app.use('/auth', authRouter);
 
 // socket.io server
 const sockServer = new SocketServer(io);

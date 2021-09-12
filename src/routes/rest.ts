@@ -38,7 +38,7 @@ rest.post('/storeSPGameResult', (req, res) => {
   }
   req.body['user1ID'] = user1ID;
 
-  Queries.storeGameResult(req, res);
+  Queries.storeSPGameResult(req, res);
 });
 
 rest.get('/getSPGameRecords', requiresAuth(), (req, res) => {

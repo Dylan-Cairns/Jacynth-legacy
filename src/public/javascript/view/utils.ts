@@ -8,7 +8,7 @@ export class MainMenuHandler {
   rules: HTMLElement;
   overlay: HTMLElement | undefined;
   newGameButton: HTMLAnchorElement;
-  constructor(startVisible: boolean, showResume: boolean) {
+  constructor(startVisible: boolean) {
     this.menuButton = document.getElementById('menuButton') as
       | HTMLButtonElement
       | undefined;
@@ -77,8 +77,7 @@ export class MainMenuHandler {
     }
 
     // remove 'resume game' button if there is no stored game info,
-    // or if the showResume switch was set to false upon class initialization
-    if (!localStorage.getItem('layout') || !showResume) {
+    if (!localStorage.getItem('layout')) {
       document.getElementById('singlePlayerResumeBttn')?.remove();
     }
   }
@@ -163,7 +162,7 @@ function convertDate(dateObj: Date) {
 }
 
 export class NickNameFormHandler {
-  constructor(visible: boolean) {
+  constructor(visible: boolean, showCancelButton: boolean) {
     if (!visible) return;
 
     const container = document.getElementById(
@@ -174,6 +173,20 @@ export class NickNameFormHandler {
     const submitButton = document.getElementById(
       'nickSubmitButton'
     ) as HTMLButtonElement;
+
+    const cancelButton = document.getElementById(
+      'cancelBttn'
+    ) as HTMLButtonElement;
+
+    if (showCancelButton) {
+      cancelButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        container.classList.remove('active');
+      });
+    } else {
+      document.getElementById('cancelButton')?.remove();
+    }
+
     const resultDiv = document.getElementById('resultDiv') as HTMLElement;
 
     submitButton.addEventListener('click', (event) => {
@@ -189,7 +202,7 @@ export class NickNameFormHandler {
 
       (async () => {
         try {
-          const response = await fetch('/storeUserNick', {
+          const response = await fetch('/rest/storeUserNick', {
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json'
@@ -208,8 +221,8 @@ export class NickNameFormHandler {
               }
             })
             .then(function (data) {
-              console.log(data);
-              if (data.errors) {
+              if (data && data.errors) {
+                console.log(data);
                 setTimeout(() => {
                   resultDiv.classList.add('error', 'active');
                   resultDiv.innerHTML = data.errors[0].msg;

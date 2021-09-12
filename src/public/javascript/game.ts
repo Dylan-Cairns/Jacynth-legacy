@@ -11,14 +11,12 @@ declare const io: any;
 
 // gametype variable passed in by express route
 declare const gameType: 'singleplayer' | 'multiplayer';
-
+declare const userID: string;
 declare const hasNick: boolean;
 
-console.log(hasNick);
+const nickNameFormHandler = new NickNameFormHandler(true, false);
 
-const nickNameFormHandler = new NickNameFormHandler(!hasNick);
-
-const mainMenuHandler = new MainMenuHandler(false, false);
+const mainMenuHandler = new MainMenuHandler(false);
 
 if (gameType === 'singleplayer') {
   const controller = new SinglePlayerController('basicDeck');
@@ -28,7 +26,7 @@ if (gameType === 'multiplayer') {
   const socket = io();
   let currPlyrID: PlayerID;
 
-  socket.emit('getPlayerID');
+  socket.emit('getPlayerID', userID);
 
   socket.on('recievePlayerID', (playerID: PlayerID) => {
     currPlyrID = playerID;

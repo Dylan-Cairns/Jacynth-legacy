@@ -9,7 +9,7 @@ export class SinglePlayerController {
             this.model.startGame(layout, aiDifficulty);
             this.view.enableCardHandDragging();
         };
-        this.model = new SinglePlayerGameModel(deckType);
+        this.model = new SinglePlayerGameModel(deckType, 'singlePlayer');
         this.view = new SinglePlayerView(this.model.board, 'Player 1', this.model.opposPlyr.playerID);
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
@@ -45,7 +45,7 @@ export class MultiPlayerController {
     constructor(deckType, currentPlayer, socket) {
         this.currentPlayer = currentPlayer;
         this.socket = socket;
-        this.model = new MultiplayerGameModel(deckType, socket, currentPlayer);
+        this.model = new MultiplayerGameModel(deckType, 'multiPlayer', socket, currentPlayer);
         this.view = new MultiPlayerView(this.model.board, socket, currentPlayer, this.model.opposPlyr.playerID);
         this.model.currPlyr.bindDrawCard(this.view.playerDrawCardCB);
         this.model.opposPlyr.bindSendCardPlayToView(this.view.nonPlayerCardPlacementCB);
@@ -65,6 +65,7 @@ export class MultiPlayerController {
         this.view.bindGetOpponentScore(this.model.opposPlyr.getScore);
         this.view.bindStartGame(this.model.createLayout);
         this.view.bindGetControlledSpaces(this.model.board.getSpacesControlledByToken);
+        this.view.bindAddRecordtoDB(this.model.addRecordtoDB);
         if (this.currentPlayer === 'Player 1')
             socket.emit('playerReady', currentPlayer);
     }

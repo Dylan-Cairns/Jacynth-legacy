@@ -1,5 +1,15 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 // game objects used by server side multiplayer code
 import { Decktet } from '../public/javascript/model/decktet.js';
+import { storeMPGameResult } from '../model/queries.js';
 export class SocketServer {
     constructor(io) {
         const roomsGameData = [];
@@ -33,7 +43,7 @@ export class SocketServer {
             room = io.sockets.adapter.rooms.get(`room-${currRoomNo}`);
             let playerID;
             const deck = new Decktet('basicDeck');
-            socket.on('getPlayerID', () => {
+            socket.on('getPlayerID', (userID) => {
                 if (!roomsGameData[currRoomNo] || (room && room.size === 1)) {
                     playerID = 'Player 1';
                     // if the game data obj doesn't exist create it. Or overwrite the existing
@@ -42,8 +52,9 @@ export class SocketServer {
                         roomName: `room-${currRoomNo}`,
                         layoutSpaces: undefined,
                         layoutCards: [],
+                        layout: undefined,
                         p1Connected: true,
-                        p1ID: 'guest',
+                        p1ID: userID,
                         p1ready: false,
                         p2Connected: false,
                         p2ID: 'guest',
@@ -54,18 +65,17 @@ export class SocketServer {
                 else {
                     playerID = 'Player 2';
                     roomsGameData[currRoomNo].p2Connected = true;
+                    roomsGameData[currRoomNo].p2ID = userID;
                 }
                 socket.emit('recievePlayerID', playerID);
             });
-            socket.on('chooseLayout', (layout) => {
-                io.to(`room-${currRoomNo}`).emit('beginGame', layout);
-            });
             // draw cards for the starting layout. they will be sent later once the
             // playerReady command is recieved from both players
-            socket.on('createStartingLayout', (layoutArr) => {
+            socket.on('createStartingLayout', (layout, layoutArr) => {
                 console.log('getStartingLayout called');
                 // if this is the first player initiated call to this method,
                 // draw the cards for the layout. Otherwise ignore it.
+                roomsGameData[currRoomNo].layout = layout;
                 if (!roomsGameData[currRoomNo].layoutSpaces) {
                     console.log('drawing cards & generating layout');
                     roomsGameData[currRoomNo].layoutSpaces = layoutArr;
@@ -126,6 +136,21 @@ export class SocketServer {
                 // next player start turn
                 const nextPlayer = playerID === 'Player 1' ? 'Player 2' : 'Player 1';
                 socket.to(`room-${currRoomNo}`).emit('beginNextTurn', nextPlayer);
+            });
+            socket.on('addRecordtoDB', (player1Score, player2Score) => {
+                const user1ID = roomsGameData[currRoomNo].p1ID;
+                const user2ID = roomsGameData[currRoomNo].p2ID;
+                const layout = roomsGameData[currRoomNo].layout;
+                console.log('server recieved add game record to DB request');
+                (() => __awaiter(this, void 0, void 0, function* () {
+                    try {
+                        const result = yield storeMPGameResult(user1ID, player1Score, user2ID, player2Score, layout);
+                        console.log(result);
+                    }
+                    catch (error) {
+                        console.log(error);
+                    }
+                }))();
             });
             socket.on('disconnect', () => {
                 console.log(`${playerID} disconnected`);

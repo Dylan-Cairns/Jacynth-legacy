@@ -11,6 +11,7 @@ import {
 } from './player.js';
 import { io, Socket } from 'socket.io-client';
 import { auth } from 'express-openid-connect';
+import { stringify } from 'querystring';
 
 export type GameType = 'multiPlayer' | 'singlePlayer' | 'solitaire';
 export type Layout = 'razeway' | 'towers' | 'oldcity' | 'solitaire';
@@ -27,13 +28,15 @@ const TWOPLAYER_BOARD_DIMENSIONS = 6;
 export class GameModel {
   board: GameBoard;
   deck: Decktet;
+  gameType: GameType;
   layout: Layout | undefined;
   sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
   sendTokenPlaytoView: SendTokenPlayToViewCB | undefined;
 
-  constructor(deckType: DeckType) {
+  constructor(deckType: DeckType, gameType: GameType) {
     this.board = new GameBoard(TWOPLAYER_BOARD_DIMENSIONS);
     this.deck = new Decktet(deckType);
+    this.gameType = gameType;
   }
 
   bindSendCardPlayToView(sendCardPlaytoView: SendCardPlaytoViewCB) {
@@ -48,12 +51,18 @@ export class GameModel {
 export class SinglePlayerGameModel extends GameModel {
   currPlyr: Player_SinglePlayer;
   opposPlyr: Player_ComputerPlayer;
-  constructor(deckType: DeckType) {
-    super(deckType);
+  constructor(deckType: DeckType, gameType: GameType) {
+    super(deckType, gameType);
 
-    this.currPlyr = new Player_SinglePlayer('Player 1', this.board, this.deck);
+    this.currPlyr = new Player_SinglePlayer(
+      'Player 1',
+      gameType,
+      this.board,
+      this.deck
+    );
     this.opposPlyr = new Player_ComputerPlayer(
       'Computer',
+      gameType,
       this.board,
       this.deck,
       'Player 1',
@@ -169,7 +178,7 @@ export class SinglePlayerGameModel extends GameModel {
 
     (async () => {
       try {
-        const response = await fetch('/storeSPGameResult', {
+        const response = await fetch('/rest/storeSPGameResult', {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json'
@@ -191,8 +200,13 @@ export class MultiplayerGameModel extends GameModel {
   socket: Socket;
   currPlyr: Player_MultiPlayer;
   opposPlyr: Player_MultiPlayer;
-  constructor(deckType: DeckType, socket: Socket, currPlyrID: PlayerID) {
-    super(deckType);
+  constructor(
+    deckType: DeckType,
+    gameType: GameType,
+    socket: Socket,
+    currPlyrID: PlayerID
+  ) {
+    super(deckType, gameType);
     this.socket = socket;
 
     socket.on('recieveLayoutCard', (cardID, spaceID) => {
@@ -206,6 +220,7 @@ export class MultiplayerGameModel extends GameModel {
 
     this.currPlyr = new Player_MultiPlayer(
       currPlyrID,
+      gameType,
       this.board,
       this.deck,
       this.socket
@@ -215,6 +230,7 @@ export class MultiplayerGameModel extends GameModel {
 
     this.opposPlyr = new Player_MultiPlayer(
       opposingPlyr,
+      gameType,
       this.board,
       this.deck,
       this.socket
@@ -224,34 +240,16 @@ export class MultiplayerGameModel extends GameModel {
   public createLayout = (layout: Layout) => {
     this.layout = layout;
     const layoutArr = BOARD_LAYOUTS[layout];
-    this.socket.emit('createStartingLayout', layoutArr);
+    this.socket.emit('createStartingLayout', layout, layoutArr);
     this.socket.emit('playerReady', 'Player 2');
   };
 
   public addRecordtoDB = async () => {
     // user IDs are added server side.
-    const gameResults = {
-      user1Score: this.currPlyr.getScore(),
-      user2Score: this.opposPlyr.getScore(),
-      layout: this.layout
-    };
+    const player1Score = this.currPlyr.getScore();
+    const player2Score = this.opposPlyr.getScore();
 
-    (async () => {
-      try {
-        const response = await fetch('/storeMPGameResult', {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'post',
-          body: JSON.stringify(gameResults)
-        });
-
-        const message = await response;
-        console.log(message);
-      } catch (error) {
-        console.log(error);
-      }
-    })();
+    console.log('add record to DB request sent');
+    this.socket.emit('addRecordtoDB', player1Score, player2Score);
   };
 }

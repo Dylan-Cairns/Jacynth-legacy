@@ -739,6 +739,7 @@ table td::before {
   padding: 0.5rem;
 }
 
+.nickButton,
 #nickSubmitButton {
   width: 100%;
 }
