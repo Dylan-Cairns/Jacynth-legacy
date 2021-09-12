@@ -14,7 +14,7 @@ export class SinglePlayerController {
   model: SinglePlayerGameModel;
   view: SinglePlayerView;
   constructor(deckType: DeckType) {
-    this.model = new SinglePlayerGameModel(deckType);
+    this.model = new SinglePlayerGameModel(deckType, 'singlePlayer');
 
     this.view = new SinglePlayerView(
       this.model.board,
@@ -81,7 +81,12 @@ export class MultiPlayerController {
   constructor(deckType: DeckType, currentPlayer: PlayerID, socket: Socket) {
     this.currentPlayer = currentPlayer;
     this.socket = socket;
-    this.model = new MultiplayerGameModel(deckType, socket, currentPlayer);
+    this.model = new MultiplayerGameModel(
+      deckType,
+      'multiPlayer',
+      socket,
+      currentPlayer
+    );
 
     this.view = new MultiPlayerView(
       this.model.board,
@@ -123,6 +128,8 @@ export class MultiPlayerController {
     this.view.bindGetControlledSpaces(
       this.model.board.getSpacesControlledByToken
     );
+
+    this.view.bindAddRecordtoDB(this.model.addRecordtoDB);
 
     if (this.currentPlayer === 'Player 1')
       socket.emit('playerReady', currentPlayer);

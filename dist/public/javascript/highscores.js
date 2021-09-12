@@ -8,13 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
-const mainMenuHandler = new MainMenuHandler(false, true);
+const mainMenuHandler = new MainMenuHandler(false);
 const tabsHandler = new TabsHandler();
 (() => __awaiter(void 0, void 0, void 0, function* () {
     let SPgameData;
     let MPgameData;
     try {
-        const response = yield fetch('/api/v1/rest/getSPHighScores');
+        const response = yield fetch('/rest/getSPHighScores');
         SPgameData = yield response.json();
     }
     catch (error) {
@@ -25,7 +25,7 @@ const tabsHandler = new TabsHandler();
         populateTable(SPgameData, 'SPGameRecords');
     }
     try {
-        const response = yield fetch('/api/v1/rest/getMPHighScores');
+        const response = yield fetch('/rest/getMPHighScores');
         MPgameData = yield response.json();
     }
     catch (error) {

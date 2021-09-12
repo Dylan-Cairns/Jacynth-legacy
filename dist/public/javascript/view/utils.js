@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // class to handle the main menu on all pages
 export class MainMenuHandler {
-    constructor(startVisible, showResume) {
+    constructor(startVisible) {
         var _a;
         this.menuButton = document.getElementById('menuButton');
         this.closeMenuButton = document.getElementById('closeMenuButton');
@@ -58,8 +58,7 @@ export class MainMenuHandler {
             this.menu.classList.add('active');
         }
         // remove 'resume game' button if there is no stored game info,
-        // or if the showResume switch was set to false upon class initialization
-        if (!localStorage.getItem('layout') || !showResume) {
+        if (!localStorage.getItem('layout')) {
             (_a = document.getElementById('singlePlayerResumeBttn')) === null || _a === void 0 ? void 0 : _a.remove();
         }
     }
@@ -135,12 +134,23 @@ function convertDate(dateObj) {
     return newDate;
 }
 export class NickNameFormHandler {
-    constructor(visible) {
+    constructor(visible, showCancelButton) {
+        var _a;
         if (!visible)
             return;
         const container = document.getElementById('nickNameFormContainer');
         container.classList.add('active');
         const submitButton = document.getElementById('nickSubmitButton');
+        const cancelButton = document.getElementById('cancelBttn');
+        if (showCancelButton) {
+            cancelButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                container.classList.remove('active');
+            });
+        }
+        else {
+            (_a = document.getElementById('cancelButton')) === null || _a === void 0 ? void 0 : _a.remove();
+        }
         const resultDiv = document.getElementById('resultDiv');
         submitButton.addEventListener('click', (event) => {
             event.preventDefault();
@@ -151,7 +161,7 @@ export class NickNameFormHandler {
             const data = { nickname: nickname };
             (() => __awaiter(this, void 0, void 0, function* () {
                 try {
-                    const response = yield fetch('/storeUserNick', {
+                    const response = yield fetch('/rest/storeUserNick', {
                         headers: {
                             Accept: 'application/json',
                             'Content-Type': 'application/json'
@@ -171,8 +181,8 @@ export class NickNameFormHandler {
                         }
                     })
                         .then(function (data) {
-                        console.log(data);
-                        if (data.errors) {
+                        if (data && data.errors) {
+                            console.log(data);
                             setTimeout(() => {
                                 resultDiv.classList.add('error', 'active');
                                 resultDiv.innerHTML = data.errors[0].msg;

@@ -1,6 +1,6 @@
 import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
 
-const mainMenuHandler = new MainMenuHandler(false, true);
+const mainMenuHandler = new MainMenuHandler(false);
 const tabsHandler = new TabsHandler();
 
 (async () => {
@@ -8,7 +8,7 @@ const tabsHandler = new TabsHandler();
   let MPgameData;
 
   try {
-    const response = await fetch('/api/v1/rest/getSPHighScores');
+    const response = await fetch('/rest/getSPHighScores');
     SPgameData = await response.json();
   } catch (error) {
     console.log(error);
@@ -20,7 +20,7 @@ const tabsHandler = new TabsHandler();
   }
 
   try {
-    const response = await fetch('/api/v1/rest/getMPHighScores');
+    const response = await fetch('/rest/getMPHighScores');
 
     MPgameData = await response.json();
   } catch (error) {

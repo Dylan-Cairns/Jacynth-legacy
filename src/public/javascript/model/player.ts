@@ -3,6 +3,7 @@ import { Socket } from 'socket.io-client';
 
 import { Suit, Card, Decktet } from './decktet.js';
 import { BoardSpace, GameBoard } from './gameboard.js';
+import { GameType } from './model.js';
 
 // game variables that never change
 const PLAYER_INFLUENCE_TOKENS = 4;
@@ -38,6 +39,7 @@ export type AIDifficulty = 'easyAI' | 'mediumAI';
 
 export class Player {
   public playerID: PlayerID;
+  public gameType: GameType;
   protected hand: Card[];
   protected deck: Decktet;
   protected gameBoard: GameBoard;
@@ -46,8 +48,14 @@ export class Player {
   protected sendCardDrawtoView: SendCardDrawtoViewCB | undefined;
   protected sendTokenPlayToView: SendTokenPlayToViewCB | undefined;
 
-  constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet) {
+  constructor(
+    playerID: PlayerID,
+    gameType: GameType,
+    gameBoard: GameBoard,
+    deck: Decktet
+  ) {
     this.playerID = playerID;
+    this.gameType = gameType;
     this.gameBoard = gameBoard;
     this.deck = deck;
     this.hand = [];
@@ -61,22 +69,26 @@ export class Player {
     if (!this.gameBoard.setCard(spaceID, card)) {
       return false;
     } else {
-      // add card play info to localStorage
-      const movesJSON = localStorage.getItem('movesArr');
-      const movesArr = movesJSON ? JSON.parse(movesJSON) : [];
-      movesArr.push({
-        player: this.playerID,
-        cardToPlay: cardID,
-        spaceToPlaceCard: spaceID
-      });
-      localStorage.setItem('movesArr', JSON.stringify(movesArr));
       // remove card from hand
       this.hand = this.hand.filter((ele) => ele !== card);
-      // remove card from hand backup in local storage
-      const handJSON = localStorage.getItem(`${this.playerID}-hand`);
-      let handArr = handJSON ? JSON.parse(handJSON) : [];
-      handArr = handArr.filter((ele: string) => ele !== card.getId());
-      localStorage.setItem(`${this.playerID}-hand`, JSON.stringify(handArr));
+
+      if (this.gameType === 'singlePlayer') {
+        // add card play info to localStorage
+        const movesJSON = localStorage.getItem('movesArr');
+        const movesArr = movesJSON ? JSON.parse(movesJSON) : [];
+        movesArr.push({
+          player: this.playerID,
+          cardToPlay: cardID,
+          spaceToPlaceCard: spaceID
+        });
+        localStorage.setItem('movesArr', JSON.stringify(movesArr));
+
+        // remove card from hand backup in local storage
+        const handJSON = localStorage.getItem(`${this.playerID}-hand`);
+        let handArr = handJSON ? JSON.parse(handJSON) : [];
+        handArr = handArr.filter((ele: string) => ele !== card.getId());
+        localStorage.setItem(`${this.playerID}-hand`, JSON.stringify(handArr));
+      }
       return true;
     }
   };
@@ -88,22 +100,28 @@ export class Player {
       if (card) {
         // return card to hand
         this.hand.push(card);
-        // return card to local storage backup
-        const handJSON = localStorage.getItem(`${this.playerID}-hand`);
-        if (handJSON) {
-          const handArr = JSON.parse(handJSON);
-          handArr.push(card.getId());
-          localStorage.setItem(
-            `${this.playerID}-hand`,
-            JSON.stringify(handArr)
-          );
-        }
         // remove card from board
         this.gameBoard.removeCardAndResolveBoard(spaceID);
-        // remove card play from localStorage
-        const movesArr = JSON.parse(localStorage.getItem('movesArr') as string);
-        movesArr.pop();
-        localStorage.setItem('movesArr', JSON.stringify(movesArr));
+
+        if (this.gameType === 'singlePlayer') {
+          // return card to local storage backup
+          const handJSON = localStorage.getItem(`${this.playerID}-hand`);
+          if (handJSON) {
+            const handArr = JSON.parse(handJSON);
+            handArr.push(card.getId());
+            localStorage.setItem(
+              `${this.playerID}-hand`,
+              JSON.stringify(handArr)
+            );
+          }
+
+          // remove card play from localStorage
+          const movesArr = JSON.parse(
+            localStorage.getItem('movesArr') as string
+          );
+          movesArr.pop();
+          localStorage.setItem('movesArr', JSON.stringify(movesArr));
+        }
       }
     }
   };
@@ -119,7 +137,7 @@ export class Player {
       // place token
       this.gameBoard.setPlayerToken(spaceID, this.playerID);
       // record token play info in local storage
-      this.recordTokenPlay(spaceID);
+      if (this.gameType === 'singlePlayer') this.recordTokenPlay(spaceID);
     }
     return true;
   };
@@ -151,7 +169,7 @@ export class Player {
     // remove token from board
     this.gameBoard.removePlayerTokenAndResolveBoard(spaceID);
     // remove token play from local storage
-    this.recordUndoTokenPlay(spaceID);
+    if (this.gameType === 'singlePlayer') this.recordUndoTokenPlay(spaceID);
   };
 
   protected recordUndoTokenPlay = (spaceID: string) => {
@@ -197,11 +215,12 @@ export class Player_MultiPlayer extends Player {
   socket: Socket;
   constructor(
     playerID: PlayerID,
+    gameType: GameType,
     gameBoard: GameBoard,
     deck: Decktet,
     socket: Socket
   ) {
-    super(playerID, gameBoard, deck);
+    super(playerID, gameType, gameBoard, deck);
     this.socket = socket;
 
     socket.on(
@@ -248,8 +267,13 @@ export class Player_MultiPlayer extends Player {
 }
 
 export class Player_SinglePlayer extends Player {
-  constructor(playerID: PlayerID, gameBoard: GameBoard, deck: Decktet) {
-    super(playerID, gameBoard, deck);
+  constructor(
+    playerID: PlayerID,
+    gameType: GameType,
+    gameBoard: GameBoard,
+    deck: Decktet
+  ) {
+    super(playerID, gameType, gameBoard, deck);
   }
 
   drawCard = () => {
@@ -259,7 +283,7 @@ export class Player_SinglePlayer extends Player {
       // add new card to hand
       this.hand.push(newCard);
       // save info to local storage
-      this.saveCardDrawToStorage(newCard);
+      if (this.gameType === 'singlePlayer') this.saveCardDrawToStorage(newCard);
       // send card to view
       if (this.sendCardDrawtoView) {
         this.sendCardDrawtoView(newCard);
@@ -313,6 +337,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
   removeOpponentToken: (spaceID: string) => void;
   constructor(
     playerID: PlayerID,
+    gameType: GameType,
     gameBoard: GameBoard,
     deck: Decktet,
     opponentID: PlayerID,
@@ -320,7 +345,7 @@ export class Player_ComputerPlayer extends Player_SinglePlayer {
     placeOpponentTokenCB: (spaceID: string) => boolean,
     removeOpponentTokenCB: (spaceID: string) => void
   ) {
-    super(playerID, gameBoard, deck);
+    super(playerID, gameType, gameBoard, deck);
     this.opponentID = opponentID;
     this.getOpponentTokensNum = getOpponentTokensNumCB;
     this.placeOpponentToken = placeOpponentTokenCB;

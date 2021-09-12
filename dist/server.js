@@ -6,11 +6,11 @@ import { dirname } from 'path';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import eoc from 'express-openid-connect';
-const { auth, requiresAuth } = eoc;
+const { auth } = eoc;
 import { SocketServer } from './routes/socket.js';
 import { rest } from './routes/rest.js';
 import { authRouter } from './routes/auth.js';
-import { htmlRouter } from './routes/html.js';
+import { viewRouter } from './routes/views.js';
 // configuration
 dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -38,46 +38,12 @@ app.use((req, res, next) => {
     res.locals.activeRoute = req.originalUrl;
     next();
 });
-// routes
+// view routes
+app.use('/', viewRouter);
 // rest api routes
-app.use('/api/v1/rest', rest);
+app.use('/rest', rest);
 // authentication routes
-app.use('/api/v1/auth/', authRouter);
-// HTML routes
-app.use('/', htmlRouter);
-// app.get('/', (req, res) => {
-//   res.render('home');
-// });
-// app.get('/singleplayer', async (req, res) => {
-//   // if user is logged in, check if they have chosen a nickname yet.
-//   let hasNick = true;
-//   if (res.locals.isAuthenticated && req.oidc.user) {
-//     const result = await Utils.hasNickname(req.oidc.user.sub);
-//     if (result !== undefined) hasNick = result;
-//   }
-//   res.render('game', {
-//     gameType: 'singleplayer',
-//     hasNick: hasNick
-//   });
-// });
-// app.get('/multiplayer', async (req, res) => {
-//   // if user is logged in, check if they have chosen a nickname yet.
-//   if (req.oidc.user && req.oidc.user.sub) console.log(req.oidc.user.sub);
-//   let hasNick = true;
-//   if (res.locals.isAuthenticated && req.oidc.user) {
-//     const result = await Utils.hasNickname(req.oidc.user.sub);
-//     if (result !== undefined) hasNick = result;
-//   }
-//   res.render('game', {
-//     gameType: 'multiplayer',
-//     hasNick: hasNick
-//   });
-// });
-// app.get('/profile', requiresAuth(), (req, res) => {
-//   res.render('profile');
-// });
-// app.get('/highscores', (req, res) => {
-//   res.render('highscores');
-// });
+app.use('/auth', authRouter);
+// socket.io server
 const sockServer = new SocketServer(io);
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

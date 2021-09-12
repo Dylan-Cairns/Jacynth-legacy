@@ -221,7 +221,8 @@ export class View {
           // play can end turn after placing a card
           this.endTurnButton.disabled = false;
           // set turn status in localStorage
-          localStorage.setItem('turnStatus', 'playedCard');
+          if (gameType === 'singleplayer')
+            localStorage.setItem('turnStatus', 'playedCard');
           // or place a token
         } else if (this.draggedElement.classList.contains('influenceToken')) {
           this.draggedElement.parentNode.removeChild(this.draggedElement);
@@ -233,7 +234,8 @@ export class View {
 
           this.undoButton.disabled = false;
           // set turn status in localStorage
-          localStorage.setItem('turnStatus', 'playedToken');
+          if (gameType === 'singleplayer')
+            localStorage.setItem('turnStatus', 'playedToken');
         }
 
         // save move information for undo
@@ -242,21 +244,22 @@ export class View {
           targetSpace: targetSpace
         };
         this.movesArr.push(undoMoveObj);
-
-        // Save move information to localStorage. We can't save the HTMLElement directoy
-        // because card elements have children which won't be included in the JSON object.
-        // We could make a custom method to jsonify the children elements, but it's easier
-        // to just find the elements on the page by id later.
-        const undoMovesArr = localStorage.getItem('undoMoves')
-          ? JSON.parse(localStorage.getItem('undoMoves')!)
-          : [];
-        undoMovesArr.push({
-          draggedEle: undoMoveObj.draggedEle.id
-            ? undoMoveObj.draggedEle.id
-            : 'influenceToken',
-          targetSpace: undoMoveObj.targetSpace.id
-        });
-        localStorage.setItem('undoMoves', JSON.stringify(undoMovesArr));
+        if (gameType === 'singleplayer') {
+          // Save move information to localStorage. We can't save the HTMLElement directoy
+          // because card elements have children which won't be included in the JSON object.
+          // We could make a custom method to jsonify the children elements, but it's easier
+          // to just find the elements on the page by id later.
+          const undoMovesArr = localStorage.getItem('undoMoves')
+            ? JSON.parse(localStorage.getItem('undoMoves')!)
+            : [];
+          undoMovesArr.push({
+            draggedEle: undoMoveObj.draggedEle.id
+              ? undoMoveObj.draggedEle.id
+              : 'influenceToken',
+            targetSpace: undoMoveObj.targetSpace.id
+          });
+          localStorage.setItem('undoMoves', JSON.stringify(undoMovesArr));
+        }
       });
     });
 
@@ -287,7 +290,7 @@ export class View {
         if (this.movesArr.length > 0) {
           moveObj = this.movesArr.pop()!;
           const undoMovesJSON = localStorage.getItem('undoMoves');
-          if (undoMovesJSON) {
+          if (undoMovesJSON && gameType === 'singleplayer') {
             const undoMoves = JSON.parse(undoMovesJSON);
             undoMoves.pop();
             localStorage.setItem('undoMoves', JSON.stringify(undoMoves));
@@ -299,6 +302,7 @@ export class View {
           const undoMoves = JSON.parse(localStorage.getItem('undoMoves')!);
 
           moveObj = undoMoves.pop();
+
           localStorage.setItem('undoMoves', JSON.stringify(undoMoves));
           moveObj.targetSpace = this.gameBoard.querySelector(
             `#${moveObj.targetSpace}`
@@ -326,7 +330,8 @@ export class View {
           this.undoButton.disabled = true;
           this.endTurnButton.disabled = true;
           // update turn status in storage for resuming game
-          localStorage.removeItem('turnStatus');
+          if (gameType === 'singleplayer')
+            localStorage.removeItem('turnStatus');
           // if it's a token, leave undo button active.
         } else if (cardOrTokenToUndo?.classList.contains('influenceToken')) {
           targetSpace.removeChild(cardOrTokenToUndo);
@@ -336,51 +341,21 @@ export class View {
           }
           this.enableTokenDragging();
           // update turn status in storage for resuming game
-          localStorage.setItem('turnStatus', 'playedCard');
+          if (gameType === 'singleplayer')
+            localStorage.setItem('turnStatus', 'playedCard');
         }
       }
     });
 
-    // menu modals and buttons
-    // this.menuButton.addEventListener('click', () => {
-    //   this.removeControlledSpacesHighlighting();
-    //   this.removeSpaceHighlighting();
-    //   this.openModal(this.menu);
-    // });
-
-    // this.closeMenuButton.addEventListener('click', () => {
-    //   this.closeModal(this.menu);
-    // });
-
-    // this.overlay.addEventListener('click', () => {
-    //   const modals = document.querySelectorAll('.modal.active');
-    //   modals.forEach((modal) => {
-    //     this.closeModal(modal);
-    //   });
-    // });
-
-    // this.rulesButton.addEventListener('click', () => {
-    //   this.openModal(this.rules);
-    // });
-
-    // this.closeRulesButton.addEventListener('click', () => {
-    //   rules.classList.remove('active');
-    // });
-
-    // this.rules.addEventListener('click', (event) => {
-    //   if (event.target === this.rules) {
-    //     rules.classList.remove('active');
-    //   }
-    // });
-
-    // this.newGameButton.addEventListener('click', (event) => {
-    //   event.preventDefault();
-    //   if (this.resetStorage) this.resetStorage();
-    //   location.href = this.newGameButton.href;
-    // });
+    // show tips for new players if it's the users first time playing.
+    if (!localStorage.userHasPlayedBefore) {
+      this.howToPlayInfo.classList.add('active');
+      this.overlay.classList.add('active');
+      localStorage.userHasPlayedBefore = 'true';
+    }
   }
 
-  // END OF CONSTRUCTOR
+  // END OF VIEW CLASS CONSTRUCTOR
 
   protected dragstartHandler = (event: any) => {
     this.removeControlledSpacesHighlighting();
@@ -594,7 +569,8 @@ export class View {
       this.gameOverBox.style.visibility = 'visible';
       // if this was a single player game, reset local storage copy of in progress game
       if (this.resetStorage && gameType === 'singleplayer') this.resetStorage();
-      if (this.addRecordtoDB) this.addRecordtoDB();
+      if (this.currPlyrID === 'Player 1' && this.addRecordtoDB)
+        this.addRecordtoDB();
       return true;
     }
     return false;
@@ -925,7 +901,7 @@ export class SinglePlayerView extends View {
 
       const layoutChoice = formData.get('layout') as Layout;
       const aiDifficulty = formData.get('difficulty') as AIDifficulty;
-      console.log(aiDifficulty);
+
       if (!layoutChoice || !aiDifficulty || !this.startGame) return;
       // set difficulty setting in localstorage, for restoring
       // in progress games, as well as setting the default
@@ -933,13 +909,6 @@ export class SinglePlayerView extends View {
       localStorage.setItem('difficulty', aiDifficulty);
       localStorage.setItem('layoutChoice', layoutChoice);
       this.startGame(layoutChoice, aiDifficulty);
-
-      // show tips for new players if it's the users first time playing.
-      if (!localStorage.userHasPlayedBefore) {
-        this.howToPlayInfo.classList.add('active');
-        this.overlay.classList.add('active');
-        localStorage.userHasPlayedBefore = 'true';
-      }
     });
   }
 
@@ -987,8 +956,6 @@ export class MultiPlayerView extends View {
       this.currPlyrIcon.classList.add('player1Icon');
       this.currPlyrIcon.classList.add('losing');
       this.currPlyrIcon.classList.add('active');
-      this.howToPlayInfo.classList.add('active');
-      this.overlay.classList.add('active');
     } else {
       this.currPlyrHUDID.innerHTML = 'Player 2';
       this.opponentHUDID.innerHTML = 'Player 1';
@@ -1022,9 +989,6 @@ export class MultiPlayerView extends View {
 
         if (!layoutChoice || !this.startGame) return;
         this.startGame(layoutChoice);
-
-        this.howToPlayInfo.classList.add('active');
-        this.overlay.classList.add('active');
       });
     }
 
@@ -1055,7 +1019,6 @@ export class MultiPlayerView extends View {
       this.currPlyrIcon.classList.add('active');
       this.opponentIcon.classList.remove('active');
       this.enableCardHandDragging();
-      this.checkForGameEnd();
     });
 
     socket.on('disconnect', () => {

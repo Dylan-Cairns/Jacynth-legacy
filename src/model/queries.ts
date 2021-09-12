@@ -5,6 +5,8 @@ dotenv.config();
 import pkg from 'pg';
 const { Pool } = pkg;
 
+import { Layout } from '../public/javascript/model/model';
+
 const pool = new Pool({
   user: process.env.DB_user,
   host: process.env.DB_host,
@@ -17,8 +19,8 @@ export const storeUserNick = (request: Request, response: Response) => {
   const { nickname, userID } = request.body;
 
   pool.query(
-    'UPDATE users SET nickname = $1 WHERE id = $2',
-    [nickname, userID],
+    'INSERT INTO users (id, nickname) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET nickname=$2;',
+    [userID, nickname],
     (error: Error, results) => {
       if (error) {
         throw error;
@@ -53,10 +55,32 @@ export const findNickforUser = async (userID: string) => {
   return pool.query(`SELECT nickname FROM users WHERE id = $1`, [userID]);
 };
 
-export const storeGameResult = (request: Request, response: Response) => {
-  const { user1ID, user1Score, user2ID, user2Score, layout } = request.body;
+export const storeMPGameResult = (
+  user1ID: string,
+  user1Score: number,
+  user2ID: string,
+  user2Score: number,
+  layout: Layout
+) => {
+  console.log(
+    'data recieved by query method',
+    user1ID,
+    user1Score,
+    user2ID,
+    user2Score,
+    layout
+  );
+  return pool.query('SELECT add_game_record($1, $2, $3, $4, $5)', [
+    user1ID,
+    user1Score,
+    user2ID,
+    user2Score,
+    layout
+  ]);
+};
 
-  console.log(user1ID, user1Score, user2ID, user2Score, layout);
+export const storeSPGameResult = (request: Request, response: Response) => {
+  const { user1ID, user1Score, user2ID, user2Score, layout } = request.body;
 
   pool.query(
     'SELECT add_game_record($1, $2, $3, $4, $5)',

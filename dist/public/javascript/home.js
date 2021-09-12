@@ -6,4 +6,4 @@ import { MainMenuHandler } from './view/utils.js';
 // relevant link: https://stackoverflow.com/questions/2638292/after-travelling-back-in-firefox-history-javascript-wont-run
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 window.onunload = function () { };
-const mainMenuHandler = new MainMenuHandler(true, true);
+const mainMenuHandler = new MainMenuHandler(true);

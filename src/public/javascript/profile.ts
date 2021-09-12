@@ -1,6 +1,6 @@
 import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
 
-const mainMenuHandler = new MainMenuHandler(false, true);
+const mainMenuHandler = new MainMenuHandler(false);
 const tabsHandler = new TabsHandler();
 
 declare class Plotly {
@@ -19,7 +19,7 @@ document.getElementById('mpGridContainer')?.classList.remove('active');
 (async () => {
   let SPgameData;
   try {
-    const response = await fetch('/getSPGameRecords');
+    const response = await fetch('/rest/getSPGameRecords');
     SPgameData = await response.json();
   } catch (error) {
     console.log(error);
@@ -112,7 +112,7 @@ document.getElementById('mpGridContainer')?.classList.remove('active');
 
   let MPgameData;
   try {
-    const response = await fetch('/getMPGameRecords');
+    const response = await fetch('/rest/getMPGameRecords');
     MPgameData = await response.json();
   } catch (error) {
     console.log(error);

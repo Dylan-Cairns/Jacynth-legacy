@@ -8,4 +8,4 @@ import { MainMenuHandler } from './view/utils.js';
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 window.onunload = function () {};
 
-const mainMenuHandler = new MainMenuHandler(true, true);
+const mainMenuHandler = new MainMenuHandler(true);

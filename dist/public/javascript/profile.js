@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var _a;
 import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
-const mainMenuHandler = new MainMenuHandler(false, true);
+const mainMenuHandler = new MainMenuHandler(false);
 const tabsHandler = new TabsHandler();
 // Remove active class from multiplayer grid container to set it's display to none.
 // Initially loading the page without the active class will cause plotly
@@ -19,7 +19,7 @@ const tabsHandler = new TabsHandler();
 (() => __awaiter(void 0, void 0, void 0, function* () {
     let SPgameData;
     try {
-        const response = yield fetch('/getSPGameRecords');
+        const response = yield fetch('/rest/getSPGameRecords');
         SPgameData = yield response.json();
     }
     catch (error) {
@@ -96,7 +96,7 @@ const tabsHandler = new TabsHandler();
     }
     let MPgameData;
     try {
-        const response = yield fetch('/getMPGameRecords');
+        const response = yield fetch('/rest/getMPGameRecords');
         MPgameData = yield response.json();
     }
     catch (error) {

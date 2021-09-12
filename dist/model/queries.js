@@ -20,7 +20,7 @@ const pool = new Pool({
 });
 export const storeUserNick = (request, response) => {
     const { nickname, userID } = request.body;
-    pool.query('UPDATE users SET nickname = $1 WHERE id = $2', [nickname, userID], (error, results) => {
+    pool.query('INSERT INTO users (id, nickname) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET nickname=$2;', [userID, nickname], (error, results) => {
         if (error) {
             throw error;
         }
@@ -44,9 +44,18 @@ export const findExistingNick = (nickname) => {
 export const findNickforUser = (userID) => __awaiter(void 0, void 0, void 0, function* () {
     return pool.query(`SELECT nickname FROM users WHERE id = $1`, [userID]);
 });
-export const storeGameResult = (request, response) => {
+export const storeMPGameResult = (user1ID, user1Score, user2ID, user2Score, layout) => {
+    console.log('data recieved by query method', user1ID, user1Score, user2ID, user2Score, layout);
+    return pool.query('SELECT add_game_record($1, $2, $3, $4, $5)', [
+        user1ID,
+        user1Score,
+        user2ID,
+        user2Score,
+        layout
+    ]);
+};
+export const storeSPGameResult = (request, response) => {
     const { user1ID, user1Score, user2ID, user2Score, layout } = request.body;
-    console.log(user1ID, user1Score, user2ID, user2Score, layout);
     pool.query('SELECT add_game_record($1, $2, $3, $4, $5)', [user1ID, user1Score, user2ID, user2Score, layout], (error, results) => {
         if (error) {
             throw error;
