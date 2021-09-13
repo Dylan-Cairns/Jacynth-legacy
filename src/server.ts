@@ -25,7 +25,7 @@ const io = new Server(server);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-// app.enable('trust proxy');
+app.enable('trust proxy');
 
 // middleware
 
