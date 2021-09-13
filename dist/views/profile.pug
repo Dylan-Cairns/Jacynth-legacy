@@ -2,9 +2,14 @@ include ../components/header.pug
 include ../components/mainMenu.pug
 include ../components/rules.pug
 include ../components/loadscreen.pug
+include ../components/chooseNick.pug
 
 #profile-grid
   include ../components/menubar.pug
+  #nickNameContainer.dark_shadow
+    div Nickname:
+    #nickname 
+    button#editNickBttn.menu-button.light_shadow Edit
   #tabSet.dataDiv
       .tab.active.dark_shadow(data-tab-target='#spGridContainer') Single Player
       .tab.dark_shadow(data-tab-target='#mpGridContainer') Multi Player

@@ -1,6 +1,12 @@
-import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
+import {
+  MainMenuHandler,
+  TabsHandler,
+  populateTable,
+  NickNameFormHandler
+} from './view/utils.js';
 
 const mainMenuHandler = new MainMenuHandler(false);
+const nickNameFormHandler = new NickNameFormHandler(false, true);
 const tabsHandler = new TabsHandler();
 
 declare class Plotly {
@@ -202,6 +208,19 @@ declare class Plotly {
   // Initially loading the page without the active class will cause plotly
   // To render the charts at an incorrect size.
   document.getElementById('mpGridContainer')?.classList.remove('active');
+
+  let nickResult;
+  try {
+    const response = await fetch('/rest/getUserNick');
+    nickResult = await response.json();
+  } catch (error) {
+    console.log(error);
+  }
+  console.log(nickResult, nickResult[0].nickname);
+  if (nickResult.length > 0) {
+    const nickDiv = document.getElementById('nickname');
+    if (nickDiv) nickDiv.innerHTML += nickResult[0].nickname;
+  }
 
   // remove load screen after data finished loading
   document.getElementById('spinner')!.style.visibility = 'hidden';

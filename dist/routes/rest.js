@@ -1,8 +1,8 @@
 import express from 'express';
 import ep from 'express-validator';
 const { body, validationResult } = ep;
-import * as Queries from '../model/queries.js';
-import * as Utils from '../model/utils.js';
+import * as Queries from '../db_model/queries.js';
+import * as Utils from '../db_model/utils.js';
 import eoc from 'express-openid-connect';
 const { requiresAuth } = eoc;
 export const rest = express();
@@ -41,3 +41,8 @@ rest.get('/getMPGameRecords', requiresAuth(), (req, res) => {
 });
 rest.get('/getSPHighScores', Queries.getSPHighScore);
 rest.get('/getMPHighScores', Queries.getMPHighScore);
+rest.get('/getUserNick', requiresAuth(), (req, res) => {
+    var _a;
+    req.body['userID'] = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.sub;
+    Queries.getUserNickname(req, res);
+});

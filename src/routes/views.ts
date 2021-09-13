@@ -1,5 +1,5 @@
 import express from 'express';
-import * as Utils from '../model/utils.js';
+import * as Utils from '../db_model/utils.js';
 import eoc from 'express-openid-connect';
 const { requiresAuth } = eoc;
 

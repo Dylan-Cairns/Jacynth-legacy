@@ -7,8 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
+import { MainMenuHandler, TabsHandler, populateTable, NickNameFormHandler } from './view/utils.js';
 const mainMenuHandler = new MainMenuHandler(false);
+const nickNameFormHandler = new NickNameFormHandler(false, true);
 const tabsHandler = new TabsHandler();
 // Load SP and MP data from DB
 (() => __awaiter(void 0, void 0, void 0, function* () {
@@ -171,6 +172,20 @@ const tabsHandler = new TabsHandler();
     // Initially loading the page without the active class will cause plotly
     // To render the charts at an incorrect size.
     (_a = document.getElementById('mpGridContainer')) === null || _a === void 0 ? void 0 : _a.classList.remove('active');
+    let nickResult;
+    try {
+        const response = yield fetch('/rest/getUserNick');
+        nickResult = yield response.json();
+    }
+    catch (error) {
+        console.log(error);
+    }
+    console.log(nickResult, nickResult[0].nickname);
+    if (nickResult.length > 0) {
+        const nickDiv = document.getElementById('nickname');
+        if (nickDiv)
+            nickDiv.innerHTML += nickResult[0].nickname;
+    }
     // remove load screen after data finished loading
     document.getElementById('spinner').style.visibility = 'hidden';
     document.getElementById('loadScreen').classList.remove('active');
