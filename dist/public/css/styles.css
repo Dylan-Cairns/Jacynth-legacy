@@ -44,28 +44,89 @@ body {
   background-size: 100vw, auto;
   background-blend-mode: multiply;
   background-repeat: no-repeat, repeat;
-  background-position: bottom center, top left;
+  background-position: top center, top left;
   font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
   border-style: none;
+  overflow-x: hidden;
 }
 
-button {
+/* main menu and in game button styling */
+
+button,
+input[type='submit'] {
   all: unset;
   font-family: 'Fortune Letters';
 }
 
-button:hover {
-  color: var(--link-hover);
+button:hover,
+input[type='submit']:hover {
+  cursor: pointer;
+  color: var(--icon-text-color);
+}
+
+/* in game button container */
+
+.button-Container {
+  display: grid;
+  grid-template-columns: auto auto;
+  background-color: var(--box-background);
+  border-radius: var(--border-radius);
+  padding: 5px;
+}
+
+.inGameButton {
+  position: relative;
+  color: var(--icon-text-color);
+  background-color: var(--box-background);
+  border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
+  border-radius: var(--border-radius);
+  margin: 0px;
+  width: var(--card-size);
+  height: var(--card-size);
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  font-size: var(--text-large);
+  user-select: none;
   cursor: pointer;
 }
 
-/* safari has problems with align/center on buttons directly.
-that makes it necessary to style the div around the endgame
-buttons instead of the button itself. This rules allows for the different 
-hover color for menu vs in game buttons */
-
-.inGameButton:hover > button:hover {
+.inGameButton:hover {
   color: white;
+}
+
+.inGameButton:disabled {
+  color: rgb(107, 107, 107);
+  cursor: unset;
+}
+
+.menu-button {
+  font-size: 1.5rem;
+  background-color: var(--box-background);
+  padding: 6px;
+  color: white;
+  border-radius: calc(var(--border-radius) * 0.5);
+  margin: 5px;
+  text-justify: center;
+  cursor: pointer;
+}
+
+.menu_button:hover {
+  color: var(--icon-text-color);
+}
+
+.auth-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: stretch;
+}
+
+/* .menuBar-item .auth-button {
+  font-size: 1.2rem;
+} */
+
+.menuBar-item button {
+  font-size: 1.2rem;
 }
 
 .main-grid {
@@ -170,17 +231,279 @@ hover color for menu vs in game buttons */
 .menuBar {
   grid-area: menuBar;
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 100fr auto auto auto;
   align-items: center;
   align-content: start;
-  justify-items: center;
-  justify-content: space-between;
+  justify-items: start;
+  justify-content: stretch;
+  justify-self: stretch;
   padding: 0.25em 0em;
+}
+
+/* tabs rules */
+
+#tabSet {
+  grid-area: tabSet;
+  grid-gap: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.tab {
+  font-size: 2rem;
+  background-color: var(--icon-label-text);
+  padding: 1rem;
+  color: black;
+  border-radius: var(--border-radius);
+  text-justify: center;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: white;
+}
+
+.tab.active {
+  background-color: white;
+  color: var(--icon-text-color);
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  list-style-type: none;
+}
+
+[data-tab-content] {
+  display: none;
+}
+
+.active[data-tab-content] {
+  display: grid;
+}
+
+#tabbedContentContainer {
+  grid-area: tabbedContent;
+  width: 100%;
+}
+
+/* end tabs rules */
+
+/* profile page CSS */
+
+.hideOnMobile {
+  display: none;
+}
+
+#profile-grid {
+  display: grid;
+  padding: 1rem;
+  justify-content: stretch;
+  justify-items: center;
+  align-items: start;
+  align-content: start;
+  grid-gap: 1rem;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'menuBar'
+    'tabSet'
+    'tabbedContent';
+}
+
+.statsGridContainer {
+  justify-content: stretch;
+  justify-items: center;
+  align-items: start;
+  align-content: start;
+  grid-gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.removeGridGaps {
+  grid-gap: none;
+}
+
+#spGridContainer {
+  grid-template-areas:
+    'spTitle'
+    'spPieChart'
+    'spBarGraph'
+    'spData';
+}
+
+#mpGridContainer {
+  grid-template-areas:
+    'mpTitle'
+    'mpPieChart'
+    'mpBarGraph'
+    'mpData';
+}
+
+#spTitle {
+  grid-area: spTitle;
+}
+
+#mpTitle {
+  grid-area: mpTitle;
+}
+
+.profileTitleContainer {
+  background-color: white;
+  display: grid;
+  width: 100%;
+  justify-content: stretch;
+  justify-items: stretch;
+}
+
+.profileHud {
+  display: grid;
+  justify-content: space-evenly;
+  align-content: center;
+  align-items: center;
+  grid-template-columns: auto auto;
+  padding: 1rem;
+  grid-gap: 1rem;
+}
+
+.profileHudTitle {
+  display: grid;
+  grid-column-start: span 2;
+  font-size: 1.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.profileHudItem {
+  font-size: 1.5rem;
+}
+
+.hudNumbers {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--icon-text-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--title-text);
+}
+
+#spData {
+  grid-area: spData;
+}
+
+#mpData {
+  grid-area: mpData;
+}
+
+#spPieChart {
+  grid-area: spPieChart;
+}
+
+#spPieChart2 {
+  grid-area: spBarGraph;
+}
+
+#mpPieChart {
+  grid-area: mpPieChart;
+}
+
+#mpPieChart2 {
+  grid-area: mpBarGraph;
+}
+
+.pieChart {
+  width: 100%;
+  background-color: white;
+  overflow: hidden;
+}
+
+.dataDiv {
+  border-radius: var(--border-radius);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+table {
+  border-collapse: collapse;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  font-size: 1rem;
+  font-family: 'Open Sans', sans-serif;
+}
+
+thead tr {
+  background-color: var(--box-background);
+  color: #ffffff;
+  text-align: left;
+}
+
+thead th {
+  font-weight: bold;
+}
+
+th,
+td {
+  padding: 12px 15px;
+}
+
+tbody tr {
+  background-color: white;
+}
+
+tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+table td:last-child {
+  border-bottom: 0;
+}
+
+/* responsive tables */
+
+table,
+thead,
+tbody,
+th,
+td,
+tr {
+  display: block;
+}
+
+table thead {
+  display: none;
+}
+
+table td {
+  border-bottom: 1px solid rgba(221, 221, 221, 0.692);
+  text-align: right;
+}
+
+table td::before {
+  content: attr(data-label);
+  float: left;
+  font-weight: bold;
+}
+
+/* end responsive tables */
+
+/* end profile page css*/
+
+.light_shadow {
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  overflow: hidden;
+}
+
+.dark_shadow {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 8px;
+  overflow: hidden;
 }
 
 .menuBar-item {
   color: rgb(255, 255, 255);
-  padding: 0.2em;
+  padding: 0em;
   font-size: var(--text-large);
   text-align: center;
 }
@@ -207,40 +530,6 @@ hover color for menu vs in game buttons */
   padding: 3px;
   align-items: center;
   justify-content: stretch;
-}
-
-.button-Container {
-  display: grid;
-  grid-template-columns: auto auto;
-  background-color: var(--box-background);
-  border-radius: var(--border-radius);
-  padding: 5px;
-}
-
-.inGameButton {
-  position: relative;
-  color: var(--icon-text-color);
-  background-color: var(--box-background);
-  border: calc(0.005 * var(--gameboard-width)) solid rgb(75, 75, 75);
-  border-radius: var(--border-radius);
-  margin: 0px;
-  width: var(--card-size);
-  height: var(--card-size);
-  display: grid;
-  justify-content: center;
-  align-content: center;
-  font-size: var(--text-large);
-  user-select: none;
-  cursor: pointer;
-}
-
-.inGameButton:hover {
-  color: white;
-}
-
-.inGameButton:disabled {
-  color: rgb(107, 107, 107);
-  cursor: unset;
 }
 
 .gameboard {
@@ -361,6 +650,7 @@ hover color for menu vs in game buttons */
   justify-content: center;
   box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.1),
     inset -2px -2px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .draggable {
@@ -436,6 +726,41 @@ hover color for menu vs in game buttons */
   bottom: -0.1em;
   border-radius: 1000px;
   animation: ripple 3s linear infinite;
+}
+
+/* choose nick form styling */
+#resultDiv {
+  display: none;
+}
+#resultDiv.active {
+  display: inline;
+  font-family: 'Open Sans', sans-serif;
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+}
+
+.nickButton,
+#nickSubmitButton {
+  width: 100%;
+}
+
+.error {
+  color: red;
+  background-color: rgba(255, 0, 0, 0.103);
+}
+
+.success {
+  color: green;
+  background-color: rgba(172, 255, 47, 0.294);
+}
+
+.formTitle {
+  font-size: 1.5rem;
+}
+
+.subtext {
+  font-size: 0.9rem;
+  font-family: 'Open Sans', sans-serif;
 }
 
 @keyframes ripple {
@@ -613,21 +938,6 @@ a:hover {
   font-size: 2rem;
 }
 
-.menu-button {
-  font-size: 1.5em;
-  background-color: var(--box-background);
-  padding: 10px;
-  color: white;
-  border-radius: var(--border-radius);
-  margin: 5px;
-  text-justify: center;
-  cursor: pointer;
-}
-
-.menu-button:hover {
-  color: var(--icon-text-color);
-}
-
 .menu-popup .close {
   position: absolute;
   top: 0px;
@@ -764,6 +1074,7 @@ input[type='radio']:checked + label > img {
 .rules-content {
   margin: 10px 0px;
   font-family: 'Open Sans', sans-serif;
+  font-size: 1.2rem;
   width: var(--gameboard-width);
   background-color: floralwhite;
   padding: 20px;
@@ -1034,6 +1345,71 @@ input[type='radio']:checked + label > img {
       '. . gameboard';
   }
 
+  #profile-grid {
+    width: 80vw;
+    margin: auto;
+  }
+
+  #spGridContainer {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      'spTitle spTitle'
+      'spPieChart spBarGraph'
+      'spData spData';
+  }
+
+  #mpGridContainer {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      'mpTitle mpTitle'
+      'mpPieChart mpBarGraph'
+      'mpData mpData';
+  }
+
+  /* responsive tables */
+
+  table thead {
+    display: table-header-group;
+  }
+
+  table {
+    display: table;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tbody {
+    display: table-row-group;
+  }
+  th {
+    display: table-cell;
+  }
+  td {
+    display: table-cell;
+  }
+  tr {
+    display: table-row;
+  }
+
+  table td {
+    text-align: left;
+  }
+
+  table td::before {
+    content: none;
+    float: unset;
+  }
+
+  /* end responsive tables */
+
+  .hideOnMobile {
+    display: inherit;
+  }
+
+  .profileHud {
+    grid-template-columns: auto auto auto auto;
+  }
+
   .HUDText {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
@@ -1042,10 +1418,6 @@ input[type='radio']:checked + label > img {
   .gameboard {
     grid-row-start: span 8;
   }
-
-  /* .endTurnbutton {
-    font-size: 2em;
-  } */
 
   .card {
     box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.4),

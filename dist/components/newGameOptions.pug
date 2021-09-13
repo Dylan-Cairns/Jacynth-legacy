@@ -1,30 +1,30 @@
 #newGameOptionsOverlay
 
-#newGameOptionsModal.menu-popup.modal
+#newGameOptionsModal.menu-popup.modal.dark_shadow
   form#gameOptionsForm
     p#difficultyTitle Difficulty
     #difficulty
-      input#Easy(type='radio', name='difficulty', value='Easy' checked)
-      label(for='Easy')
-        .layoutButton Easy
+      input#easyAI(type='radio', name='difficulty', value='easyAI' checked)
+      label(for='easyAI')
+        .layoutButton.light_shadow Easy
 
-      input#Medium(type='radio', name='difficulty', value='Medium')
-      label(for='Medium') 
-        .layoutButton Medium
+      input#mediumAI(type='radio', name='difficulty', value='mediumAI')
+      label(for='mediumAI') 
+        .layoutButton.light_shadow Medium
 
     p Starting layout
     #layoutRadioBttns
       input#razeway(type='radio', name='layout', value='razeway' checked)
       label(for='razeway')
-        img.layoutButton(src="./assets/razeway.png" alt='razeway')
+        img.layoutButton.light_shadow(src="./assets/razeway.png" alt='razeway')
 
       input#towers(type='radio', name='layout', value='towers')
       label(for='towers')
-        img.layoutButton(src="./assets/towers.png" alt='towers')
+        img.layoutButton.light_shadow(src="./assets/towers.png" alt='towers')
 
       input#oldcity(type='radio', name='layout', value='oldcity')
       label(for='oldcity')
-        img.layoutButton(src="./assets/oldcity.png" alt='oldcity')
+        img.layoutButton.light_shadow(src="./assets/oldcity.png" alt='oldcity')
 
     p
-      button.menu-button(type='submit') Start game
+      button.menu-button.light_shadow(type='submit') Start game

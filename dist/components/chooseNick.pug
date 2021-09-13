@@ -1,0 +1,13 @@
+#nickNameFormContainer.menu-popup.dark_shadow
+    form#nickNameForm.formTitle
+      label(for='nickname') Choose a display name
+      p
+      .subtext Display name should be between 5-20 characters and consist of letters and numbers
+      p
+      input#nickTextField(type='text' name='nickname')
+      p
+      .menu-button.light_shadow
+        input#nickSubmitButton(type='submit' value="OK").nickButton
+      .menu-button#cancelButton.light_shadow
+        button#cancelBttn.nickButton Cancel
+    #resultDiv.light_shadow

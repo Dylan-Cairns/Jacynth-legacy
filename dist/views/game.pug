@@ -1,8 +1,11 @@
 include ../components/header.pug
+include ../components/chooseNick.pug
 audio#pickupSound(src='assets/pickupsound.wav' preload='auto')
 audio#dropSound(src='assets/switch8.wav' preload='auto')
 script.
     const gameType = JSON.parse('!{JSON.stringify(gameType)}');
+    const userID = JSON.parse('!{JSON.stringify(userID)}');
+    const hasNick = JSON.parse('!{JSON.stringify(hasNick)}');
 
 include ../components/gameTable.pug
 
@@ -17,5 +20,5 @@ include ../components/rules.pug
 include ../components/loadscreen.pug
 
 script(src='/socket.io/socket.io.js')
-script(type='module' src='/javascript/app.js')
+script(type='module' src='/javascript/game.js')
 script(src='/javascript/DragDropTouch.js')

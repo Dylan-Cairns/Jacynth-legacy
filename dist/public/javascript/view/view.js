@@ -1,6 +1,6 @@
 export class View {
     constructor(board, currPlyrID, opposPlyrID) {
-        // END OF CONSTRUCTOR
+        // END OF VIEW CLASS CONSTRUCTOR
         this.dragstartHandler = (event) => {
             this.removeControlledSpacesHighlighting();
             this.removeSpaceHighlighting();
@@ -123,6 +123,8 @@ export class View {
                 // if this was a single player game, reset local storage copy of in progress game
                 if (this.resetStorage && gameType === 'singleplayer')
                     this.resetStorage();
+                if (this.currPlyrID === 'Player 1' && this.addRecordtoDB)
+                    this.addRecordtoDB();
                 return true;
             }
             return false;
@@ -171,10 +173,6 @@ export class View {
             const undoMove = undoMovesJSON
                 ? JSON.parse(undoMovesJSON).pop()
                 : undefined;
-            console.log(this.getCurrPlyrAvailTokens);
-            if (this.getCurrPlyrAvailTokens)
-                console.log(this.getCurrPlyrAvailTokens());
-            console.log(undoMove);
             if (!(undoMove && undoMove.draggedEle === 'influenceToken') &&
                 this.getCurrPlyrAvailTokens &&
                 this.getCurrPlyrAvailTokens() > 0) {
@@ -224,19 +222,12 @@ export class View {
         this.winnerText = document.getElementById('winnerText');
         this.pickupSound = document.getElementById('pickupSound');
         this.dropSound = document.getElementById('dropSound');
-        this.menuButton = document.getElementById('menuButton');
-        this.closeMenuButton = document.getElementById('closeMenuButton');
-        this.menu = document.getElementById('menu-popup');
-        this.rulesButton = document.getElementById('rulesButton');
-        this.closeRulesButton = document.getElementById('closeRulesButton');
-        this.rules = document.getElementById('rules');
         this.overlay = document.getElementById('overlay');
         this.newGameOptionsOverlay = document.getElementById('newGameOptionsOverlay');
         this.newGameMenu = document.getElementById('newGameOptionsModal');
         this.gameOptionsForm = document.getElementById('gameOptionsForm');
         this.howToPlayInfo = document.getElementById('howToPlayInfo');
         this.howToPlayButton = document.getElementById('howToPlayButton');
-        this.newGameButton = document.getElementById('newGameBttn');
         //preload images
         this.preload_images();
         // make sure board and hand are empty
@@ -315,7 +306,8 @@ export class View {
                     // play can end turn after placing a card
                     this.endTurnButton.disabled = false;
                     // set turn status in localStorage
-                    localStorage.setItem('turnStatus', 'playedCard');
+                    if (gameType === 'singleplayer')
+                        localStorage.setItem('turnStatus', 'playedCard');
                     // or place a token
                 }
                 else if (this.draggedElement.classList.contains('influenceToken')) {
@@ -327,7 +319,8 @@ export class View {
                     }
                     this.undoButton.disabled = false;
                     // set turn status in localStorage
-                    localStorage.setItem('turnStatus', 'playedToken');
+                    if (gameType === 'singleplayer')
+                        localStorage.setItem('turnStatus', 'playedToken');
                 }
                 // save move information for undo
                 const undoMoveObj = {
@@ -335,20 +328,22 @@ export class View {
                     targetSpace: targetSpace
                 };
                 this.movesArr.push(undoMoveObj);
-                // Save move information to localStorage. We can't save the HTMLElement directoy
-                // because card elements have children which won't be included in the JSON object.
-                // We could make a custom method to jsonify the children elements, but it's easier
-                // to just find the elements on the page by id later.
-                const undoMovesArr = localStorage.getItem('undoMoves')
-                    ? JSON.parse(localStorage.getItem('undoMoves'))
-                    : [];
-                undoMovesArr.push({
-                    draggedEle: undoMoveObj.draggedEle.id
-                        ? undoMoveObj.draggedEle.id
-                        : 'influenceToken',
-                    targetSpace: undoMoveObj.targetSpace.id
-                });
-                localStorage.setItem('undoMoves', JSON.stringify(undoMovesArr));
+                if (gameType === 'singleplayer') {
+                    // Save move information to localStorage. We can't save the HTMLElement directoy
+                    // because card elements have children which won't be included in the JSON object.
+                    // We could make a custom method to jsonify the children elements, but it's easier
+                    // to just find the elements on the page by id later.
+                    const undoMovesArr = localStorage.getItem('undoMoves')
+                        ? JSON.parse(localStorage.getItem('undoMoves'))
+                        : [];
+                    undoMovesArr.push({
+                        draggedEle: undoMoveObj.draggedEle.id
+                            ? undoMoveObj.draggedEle.id
+                            : 'influenceToken',
+                        targetSpace: undoMoveObj.targetSpace.id
+                    });
+                    localStorage.setItem('undoMoves', JSON.stringify(undoMovesArr));
+                }
             });
         });
         document.addEventListener('dragend', () => {
@@ -375,7 +370,7 @@ export class View {
                 if (this.movesArr.length > 0) {
                     moveObj = this.movesArr.pop();
                     const undoMovesJSON = localStorage.getItem('undoMoves');
-                    if (undoMovesJSON) {
+                    if (undoMovesJSON && gameType === 'singleplayer') {
                         const undoMoves = JSON.parse(undoMovesJSON);
                         undoMoves.pop();
                         localStorage.setItem('undoMoves', JSON.stringify(undoMoves));
@@ -411,7 +406,8 @@ export class View {
                     this.undoButton.disabled = true;
                     this.endTurnButton.disabled = true;
                     // update turn status in storage for resuming game
-                    localStorage.removeItem('turnStatus');
+                    if (gameType === 'singleplayer')
+                        localStorage.removeItem('turnStatus');
                     // if it's a token, leave undo button active.
                 }
                 else if (cardOrTokenToUndo === null || cardOrTokenToUndo === void 0 ? void 0 : cardOrTokenToUndo.classList.contains('influenceToken')) {
@@ -422,42 +418,17 @@ export class View {
                     }
                     this.enableTokenDragging();
                     // update turn status in storage for resuming game
-                    localStorage.setItem('turnStatus', 'playedCard');
+                    if (gameType === 'singleplayer')
+                        localStorage.setItem('turnStatus', 'playedCard');
                 }
             }
         });
-        // menu modals and buttons
-        this.menuButton.addEventListener('click', () => {
-            this.removeControlledSpacesHighlighting();
-            this.removeSpaceHighlighting();
-            this.openModal(this.menu);
-        });
-        this.closeMenuButton.addEventListener('click', () => {
-            this.closeModal(this.menu);
-        });
-        this.overlay.addEventListener('click', () => {
-            const modals = document.querySelectorAll('.modal.active');
-            modals.forEach((modal) => {
-                this.closeModal(modal);
-            });
-        });
-        this.rulesButton.addEventListener('click', () => {
-            this.openModal(this.rules);
-        });
-        this.closeRulesButton.addEventListener('click', () => {
-            rules.classList.remove('active');
-        });
-        this.rules.addEventListener('click', (event) => {
-            if (event.target === this.rules) {
-                rules.classList.remove('active');
-            }
-        });
-        this.newGameButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            if (this.resetStorage)
-                this.resetStorage();
-            location.href = this.newGameButton.href;
-        });
+        // show tips for new players if it's the users first time playing.
+        if (!localStorage.userHasPlayedBefore) {
+            this.howToPlayInfo.classList.add('active');
+            this.overlay.classList.add('active');
+            localStorage.userHasPlayedBefore = 'true';
+        }
     }
     createElement(tag, ...classNames) {
         const element = document.createElement(tag);
@@ -686,6 +657,9 @@ export class View {
     bindResetStorage(resetStorageCB) {
         this.resetStorage = resetStorageCB;
     }
+    bindAddRecordtoDB(addRecordtoDBCB) {
+        this.addRecordtoDB = addRecordtoDBCB;
+    }
 }
 export class SinglePlayerView extends View {
     constructor(board, currPlyrID, opposPlyrID) {
@@ -695,9 +669,6 @@ export class SinglePlayerView extends View {
             this.pickupSound.play();
             this.currPlyrIcon.classList.remove('active');
             this.opponentIcon.classList.add('active');
-            if (this.computerTakeTurn) {
-                this.computerTakeTurn();
-            }
             if (this.getCardDrawFromModel) {
                 this.getCardDrawFromModel();
             }
@@ -707,12 +678,15 @@ export class SinglePlayerView extends View {
             this.undoButton.disabled = true;
             this.endTurnButton.disabled = true;
             this.updateScore();
-            this.checkForGameEnd();
             this.currPlyrIcon.classList.add('active');
             this.opponentIcon.classList.remove('active');
             //set turn status in local storage
             localStorage.removeItem('turnStatus');
             localStorage.removeItem('undoMoves');
+            if (!this.checkForGameEnd() && this.computerTakeTurn) {
+                this.computerTakeTurn();
+            }
+            this.updateScore();
         };
         this.currPlyrHUDID.innerHTML = `Player`;
         this.opponentHUDID.innerHTML = `Computer`;
@@ -748,7 +722,6 @@ export class SinglePlayerView extends View {
             const formData = new FormData(this.gameOptionsForm);
             const layoutChoice = formData.get('layout');
             const aiDifficulty = formData.get('difficulty');
-            console.log(aiDifficulty);
             if (!layoutChoice || !aiDifficulty || !this.startGame)
                 return;
             // set difficulty setting in localstorage, for restoring
@@ -757,12 +730,6 @@ export class SinglePlayerView extends View {
             localStorage.setItem('difficulty', aiDifficulty);
             localStorage.setItem('layoutChoice', layoutChoice);
             this.startGame(layoutChoice, aiDifficulty);
-            // show tips for new players if it's the users first time playing.
-            if (!localStorage.userHasPlayedBefore) {
-                this.howToPlayInfo.classList.add('active');
-                this.overlay.classList.add('active');
-                localStorage.userHasPlayedBefore = 'true';
-            }
         });
     }
 }
@@ -795,8 +762,6 @@ export class MultiPlayerView extends View {
             this.currPlyrIcon.classList.add('player1Icon');
             this.currPlyrIcon.classList.add('losing');
             this.currPlyrIcon.classList.add('active');
-            this.howToPlayInfo.classList.add('active');
-            this.overlay.classList.add('active');
         }
         else {
             this.currPlyrHUDID.innerHTML = 'Player 2';
@@ -825,8 +790,6 @@ export class MultiPlayerView extends View {
                 if (!layoutChoice || !this.startGame)
                     return;
                 this.startGame(layoutChoice);
-                this.howToPlayInfo.classList.add('active');
-                this.overlay.classList.add('active');
             });
         }
         this.roomNumber = document.getElementById('roomNumber');
@@ -852,7 +815,6 @@ export class MultiPlayerView extends View {
             this.currPlyrIcon.classList.add('active');
             this.opponentIcon.classList.remove('active');
             this.enableCardHandDragging();
-            this.checkForGameEnd();
         });
         socket.on('disconnect', () => {
             this.disconnectedAlert.style.visibility = 'visible';
