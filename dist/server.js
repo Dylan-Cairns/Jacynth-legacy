@@ -35,7 +35,6 @@ app.use(auth({
 }));
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.oidc.isAuthenticated();
-    res.locals.activeRoute = req.originalUrl;
     next();
 });
 // view routes
