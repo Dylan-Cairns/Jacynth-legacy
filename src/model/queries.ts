@@ -8,13 +8,15 @@ const { Pool } = pkg;
 import { Layout } from '../public/javascript/model/model';
 
 const isProduction = process.env.NODE_ENV === 'production';
+const connectionString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
 
 const pool = new Pool({
-  user: process.env.DB_user,
-  host: process.env.DB_host,
-  database: 'jacynth',
-  password: process.env.DB_password,
-  port: process.env.DB_port ? parseInt(process.env.DB_port) : 5432,
+  connectionString: isProduction ? process.env.DATABASE_URL : connectionString,
+  // user: process.env.DB_user,
+  // host: process.env.DB_host,
+  // database: 'jacynth',
+  // password: process.env.DB_password,
+  // port: process.env.DB_port ? parseInt(process.env.DB_port) : 5432,
   ssl: isProduction
 });
 
