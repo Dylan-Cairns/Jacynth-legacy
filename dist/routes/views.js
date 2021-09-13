@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import express from 'express';
-import * as Utils from '../model/utils.js';
+import * as Utils from '../db_model/utils.js';
 import eoc from 'express-openid-connect';
 const { requiresAuth } = eoc;
 export const viewRouter = express();

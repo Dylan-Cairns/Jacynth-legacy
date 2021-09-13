@@ -6,8 +6,9 @@
       p
       input#nickTextField(type='text' name='nickname')
       p
-      .menu-button.light_shadow
-        input#nickSubmitButton(type='submit' value="OK").nickButton
-      .menu-button#cancelButton.light_shadow
-        button#cancelBttn.nickButton Cancel
+      #nickFormButtons
+        .menu-button.light_shadow
+          input#nickSubmitButton(type='submit' value="OK").nickButton
+        .menu-button#cancelButton.light_shadow
+          button#cancelBttn.nickButton Cancel
     #resultDiv.light_shadow

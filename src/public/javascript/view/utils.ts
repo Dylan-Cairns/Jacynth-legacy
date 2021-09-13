@@ -163,12 +163,19 @@ function convertDate(dateObj: Date) {
 
 export class NickNameFormHandler {
   constructor(visible: boolean, showCancelButton: boolean) {
-    if (!visible) return;
-
     const container = document.getElementById(
       'nickNameFormContainer'
     ) as HTMLElement;
-    container.classList.add('active');
+    if (visible) container.classList.add('active');
+
+    // edit nick button is only used on profile page
+    const editNickButton = document.getElementById('editNickBttn');
+    if (editNickButton) {
+      editNickButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        container.classList.add('active');
+      });
+    }
 
     const submitButton = document.getElementById(
       'nickSubmitButton'
@@ -178,16 +185,18 @@ export class NickNameFormHandler {
       'cancelBttn'
     ) as HTMLButtonElement;
 
+    const resultDiv = document.getElementById('resultDiv') as HTMLElement;
+
     if (showCancelButton) {
       cancelButton.addEventListener('click', (event) => {
         event.preventDefault();
         container.classList.remove('active');
+        resultDiv.innerHTML = '';
+        resultDiv.classList.remove('error', 'success', 'active');
       });
     } else {
       document.getElementById('cancelButton')?.remove();
     }
-
-    const resultDiv = document.getElementById('resultDiv') as HTMLElement;
 
     submitButton.addEventListener('click', (event) => {
       event.preventDefault();
@@ -215,6 +224,8 @@ export class NickNameFormHandler {
               if (response.ok) {
                 resultDiv.innerHTML = 'OK!';
                 resultDiv.classList.add('success', 'active');
+                const nickDiv = document.getElementById('nickname');
+                if (nickDiv) nickDiv.innerHTML = nickname;
                 setTimeout(() => container.classList.remove('active'), 1000);
               } else {
                 return response.json();

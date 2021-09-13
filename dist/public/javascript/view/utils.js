@@ -136,22 +136,31 @@ function convertDate(dateObj) {
 export class NickNameFormHandler {
     constructor(visible, showCancelButton) {
         var _a;
-        if (!visible)
-            return;
         const container = document.getElementById('nickNameFormContainer');
-        container.classList.add('active');
+        if (visible)
+            container.classList.add('active');
+        // edit nick button is only used on profile page
+        const editNickButton = document.getElementById('editNickBttn');
+        if (editNickButton) {
+            editNickButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                container.classList.add('active');
+            });
+        }
         const submitButton = document.getElementById('nickSubmitButton');
         const cancelButton = document.getElementById('cancelBttn');
+        const resultDiv = document.getElementById('resultDiv');
         if (showCancelButton) {
             cancelButton.addEventListener('click', (event) => {
                 event.preventDefault();
                 container.classList.remove('active');
+                resultDiv.innerHTML = '';
+                resultDiv.classList.remove('error', 'success', 'active');
             });
         }
         else {
             (_a = document.getElementById('cancelButton')) === null || _a === void 0 ? void 0 : _a.remove();
         }
-        const resultDiv = document.getElementById('resultDiv');
         submitButton.addEventListener('click', (event) => {
             event.preventDefault();
             resultDiv.innerHTML = '';
@@ -174,6 +183,9 @@ export class NickNameFormHandler {
                         if (response.ok) {
                             resultDiv.innerHTML = 'OK!';
                             resultDiv.classList.add('success', 'active');
+                            const nickDiv = document.getElementById('nickname');
+                            if (nickDiv)
+                                nickDiv.innerHTML = nickname;
                             setTimeout(() => container.classList.remove('active'), 1000);
                         }
                         else {

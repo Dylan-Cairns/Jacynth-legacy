@@ -231,10 +231,10 @@ input[type='submit']:hover {
 .menuBar {
   grid-area: menuBar;
   display: grid;
-  grid-template-columns: 100fr auto auto auto;
+  grid-template-columns: auto 100fr auto auto;
   align-items: center;
   align-content: start;
-  justify-items: start;
+  justify-items: center;
   justify-content: stretch;
   justify-self: stretch;
   padding: 0.25em 0em;
@@ -307,8 +307,32 @@ input[type='submit']:hover {
   grid-template-columns: 1fr;
   grid-template-areas:
     'menuBar'
+    'nickName'
     'tabSet'
     'tabbedContent';
+}
+
+#nickNameContainer {
+  width: 100%;
+  grid-area: nickName;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  justify-content: stretch;
+  justify-items: stretch;
+  align-items: center;
+  align-content: center;
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 6px;
+}
+
+#nickname {
+  font-size: 1.5rem;
+  padding: 6px;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  margin: 5px;
 }
 
 .statsGridContainer {
@@ -739,19 +763,24 @@ table td::before {
   padding: 0.5rem;
 }
 
+#nickFormButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
 .nickButton,
 #nickSubmitButton {
   width: 100%;
 }
 
 .error {
-  color: red;
-  background-color: rgba(255, 0, 0, 0.103);
+  color: var(--enemy-color);
+  background-color: #d93b1823;
 }
 
 .success {
-  color: green;
-  background-color: rgba(172, 255, 47, 0.294);
+  color: var(--link-color);
+  background-color: #94eb6b42;
 }
 
 .formTitle {
@@ -907,7 +936,7 @@ a:hover {
   transform: translate(-50%, -50%) scale(0);
   transition: 200ms ease-in-out;
   border-radius: var(--border-radius);
-  background-color: rgb(255, 250, 240);
+  background-color: white;
   display: grid;
   align-items: top;
   grid-template-columns: auto;

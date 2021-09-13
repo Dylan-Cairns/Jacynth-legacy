@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // game objects used by server side multiplayer code
 import { Decktet } from '../public/javascript/model/decktet.js';
-import { storeMPGameResult } from '../model/queries.js';
+import { storeMPGameResult } from '../db_model/queries.js';
 export class SocketServer {
     constructor(io) {
         const roomsGameData = [];

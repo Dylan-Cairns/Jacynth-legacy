@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 // game objects used by server side multiplayer code
 import { Card, Decktet } from '../public/javascript/model/decktet.js';
 import { BoardSpace } from '../public/javascript/model/gameboard.js';
-import { storeMPGameResult } from '../model/queries.js';
+import { storeMPGameResult } from '../db_model/queries.js';
 import { Layout } from '../public/javascript/model/model.js';
 
 type roomDataObject = {
