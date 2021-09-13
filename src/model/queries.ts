@@ -17,7 +17,7 @@ const pool = new Pool({
   // database: 'jacynth',
   // password: process.env.DB_password,
   // port: process.env.DB_port ? parseInt(process.env.DB_port) : 5432,
-  ssl: isProduction
+  ssl: { rejectUnauthorized: false }
 });
 
 export const storeUserNick = (request: Request, response: Response) => {
