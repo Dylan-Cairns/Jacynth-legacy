@@ -1,0 +1,13 @@
+include ./login-button
+include ./logout-button
+include ./signup-button
+include ./profile-button
+
+mixin authentication-buttons(isAuthenticated)
+  div.auth-buttons
+    if isAuthenticated
+      +profile-button
+      +logout-button
+    else
+      +login-button
+      +signup-button

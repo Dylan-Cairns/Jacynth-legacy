@@ -1,12 +1,19 @@
+include ../components/authentication-buttons.pug
+
 #overlay
-#menu-popup.menu-popup.modal
+#menu-popup.menu-popup.modal.dark_shadow
   button#closeMenuButton.close(href='#') &times;
   .menu-header Jacynth
       br
       span.subheader A Decktet Game
-  #singlePlayerBttn.menu-button
+  #singlePlayerBttn.menu-button.light_shadow
     a(href='/singleplayer')#newGameBttn New Singleplayer Game
-  #multiPlayerBttn.menu-button
+  #singlePlayerResumeBttn.menu-button.light_shadow
+    a(href='/singleplayer') Resume Game
+  #multiPlayerBttn.menu-button.light_shadow
     a(href='/multiplayer') New Multiplayer Game
-  #rulesButton.menu-button
+  +authentication-buttons(isAuthenticated)
+  #highScoresButton.menu-button.light_shadow
+    a(href='/highscores') High Scores
+  #rulesButton.menu-button.light_shadow
     button Rules &amp; Credits

@@ -1,30 +1,32 @@
 import {
   SinglePlayerController,
-  MultiPlayerController,
-  Controller
+  MultiPlayerController
 } from './controller/controller.js';
-import { Layout, BOARD_LAYOUTS } from './model/model.js';
 import { PlayerID } from './model/player.js';
+import { MainMenuHandler, NickNameFormHandler } from './view/utils.js';
 
 // TODO: resolve import error when using 'import' on client side.
-// For now, declare the socket variables here.
-declare const socket: any;
+// For now, declare the io variables here.
 declare const io: any;
 
 // gametype variable passed in by express route
 declare const gameType: 'singleplayer' | 'multiplayer';
+declare const userID: string;
+declare const hasNick: boolean;
 
-let controller: Controller;
+const nickNameFormHandler = new NickNameFormHandler(!hasNick, false);
+
+const mainMenuHandler = new MainMenuHandler(false);
 
 if (gameType === 'singleplayer') {
-  controller = new SinglePlayerController('basicDeck');
+  const controller = new SinglePlayerController('basicDeck');
 }
 
 if (gameType === 'multiplayer') {
   const socket = io();
   let currPlyrID: PlayerID;
 
-  socket.emit('getPlayerID');
+  socket.emit('getPlayerID', userID);
 
   socket.on('recievePlayerID', (playerID: PlayerID) => {
     currPlyrID = playerID;

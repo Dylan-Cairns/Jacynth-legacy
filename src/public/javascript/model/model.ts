@@ -10,12 +10,11 @@ import {
   AIDifficulty
 } from './player.js';
 import { io, Socket } from 'socket.io-client';
+import { auth } from 'express-openid-connect';
+import { stringify } from 'querystring';
 
 export type GameType = 'multiPlayer' | 'singlePlayer' | 'solitaire';
 export type Layout = 'razeway' | 'towers' | 'oldcity' | 'solitaire';
-
-const SOLITAIRE_BOARD_DIMENSIONS = 4;
-const TWOPLAYER_BOARD_DIMENSIONS = 6;
 export const BOARD_LAYOUTS = {
   razeway: ['x0y0', 'x1y1', 'x2y2', 'x3y3', 'x4y4', 'x5y5'],
   towers: ['x1y1', 'x4y1', 'x1y4', 'x4y4'],
@@ -23,15 +22,21 @@ export const BOARD_LAYOUTS = {
   solitaire: ['x0y0', 'x0y3', 'x0y3', 'x3y3']
 };
 
+const SOLITAIRE_BOARD_DIMENSIONS = 4;
+const TWOPLAYER_BOARD_DIMENSIONS = 6;
+
 export class GameModel {
   board: GameBoard;
   deck: Decktet;
+  gameType: GameType;
+  layout: Layout | undefined;
   sendCardPlaytoView: SendCardPlaytoViewCB | undefined;
   sendTokenPlaytoView: SendTokenPlayToViewCB | undefined;
 
-  constructor(deckType: DeckType) {
+  constructor(deckType: DeckType, gameType: GameType) {
     this.board = new GameBoard(TWOPLAYER_BOARD_DIMENSIONS);
     this.deck = new Decktet(deckType);
+    this.gameType = gameType;
   }
 
   bindSendCardPlayToView(sendCardPlaytoView: SendCardPlaytoViewCB) {
@@ -46,12 +51,18 @@ export class GameModel {
 export class SinglePlayerGameModel extends GameModel {
   currPlyr: Player_SinglePlayer;
   opposPlyr: Player_ComputerPlayer;
-  constructor(deckType: DeckType) {
-    super(deckType);
+  constructor(deckType: DeckType, gameType: GameType) {
+    super(deckType, gameType);
 
-    this.currPlyr = new Player_SinglePlayer('Player 1', this.board, this.deck);
+    this.currPlyr = new Player_SinglePlayer(
+      'Player 1',
+      gameType,
+      this.board,
+      this.deck
+    );
     this.opposPlyr = new Player_ComputerPlayer(
       'Computer',
+      gameType,
       this.board,
       this.deck,
       'Player 1',
@@ -61,7 +72,7 @@ export class SinglePlayerGameModel extends GameModel {
     );
   }
 
-  public startGame(layout: Layout, aiDifficulty: AIDifficulty = 'Easy') {
+  public startGame(layout: Layout, aiDifficulty: AIDifficulty = 'easyAI') {
     this.createLayout(this.deck, layout);
     this.currPlyr.drawStartingHand();
     this.opposPlyr.drawStartingHand();
@@ -86,8 +97,8 @@ export class SinglePlayerGameModel extends GameModel {
     localStorage.removeItem('movesArr');
     localStorage.removeItem('undoMoves');
     localStorage.removeItem('turnStatus');
-    localStorage.removeItem(`${this.currPlyr.playerID}-hand`);
-    localStorage.removeItem(`${this.opposPlyr.playerID}-hand`);
+    localStorage.removeItem(`Player 1-hand`);
+    localStorage.removeItem(`Computer-hand`);
   };
 
   private restorePlayedMoves() {
@@ -120,6 +131,7 @@ export class SinglePlayerGameModel extends GameModel {
   }
 
   private createLayout(deck: Decktet, layout: Layout) {
+    this.layout = layout;
     const layoutStorArr = [] as { cardID: string; spaceID: string }[];
 
     const handleInitialPlacementCB = (spaceID: string) => {
@@ -141,6 +153,7 @@ export class SinglePlayerGameModel extends GameModel {
   private restoreLayout() {
     // check for stored layout info
     const layoutJSON = localStorage.getItem('layout');
+    this.layout = localStorage.getItem('layoutChoice') as Layout;
     if (layoutJSON) {
       const layoutArr = JSON.parse(layoutJSON);
       layoutArr.forEach((obj: { cardID: string; spaceID: string }) => {
@@ -151,14 +164,49 @@ export class SinglePlayerGameModel extends GameModel {
       });
     }
   }
+
+  public addRecordtoDB = async () => {
+    // user1 ID will either be guest or authenticated user ID.
+    // that determination is handled server side,
+    // so user1ID is not added here.
+    const gameResults = {
+      user1Score: this.currPlyr.getScore(),
+      user2ID: this.opposPlyr.aiDifficulty,
+      user2Score: this.opposPlyr.getScore(),
+      layout: this.layout
+    };
+
+    (async () => {
+      try {
+        const response = await fetch('/rest/storeSPGameResult', {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: 'post',
+          body: JSON.stringify(gameResults)
+        });
+
+        const message = await response;
+        console.log(message);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  };
 }
 
 export class MultiplayerGameModel extends GameModel {
   socket: Socket;
   currPlyr: Player_MultiPlayer;
   opposPlyr: Player_MultiPlayer;
-  constructor(deckType: DeckType, socket: Socket, currPlyrID: PlayerID) {
-    super(deckType);
+  constructor(
+    deckType: DeckType,
+    gameType: GameType,
+    socket: Socket,
+    currPlyrID: PlayerID
+  ) {
+    super(deckType, gameType);
     this.socket = socket;
 
     socket.on('recieveLayoutCard', (cardID, spaceID) => {
@@ -172,6 +220,7 @@ export class MultiplayerGameModel extends GameModel {
 
     this.currPlyr = new Player_MultiPlayer(
       currPlyrID,
+      gameType,
       this.board,
       this.deck,
       this.socket
@@ -181,6 +230,7 @@ export class MultiplayerGameModel extends GameModel {
 
     this.opposPlyr = new Player_MultiPlayer(
       opposingPlyr,
+      gameType,
       this.board,
       this.deck,
       this.socket
@@ -188,8 +238,18 @@ export class MultiplayerGameModel extends GameModel {
   }
 
   public createLayout = (layout: Layout) => {
+    this.layout = layout;
     const layoutArr = BOARD_LAYOUTS[layout];
-    this.socket.emit('createStartingLayout', layoutArr);
+    this.socket.emit('createStartingLayout', layout, layoutArr);
     this.socket.emit('playerReady', 'Player 2');
+  };
+
+  public addRecordtoDB = async () => {
+    // user IDs are added server side.
+    const player1Score = this.currPlyr.getScore();
+    const player2Score = this.opposPlyr.getScore();
+
+    console.log('add record to DB request sent');
+    this.socket.emit('addRecordtoDB', player1Score, player2Score);
   };
 }

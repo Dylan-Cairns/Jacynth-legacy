@@ -1,0 +1,42 @@
+include ../components/header.pug
+include ../components/mainMenu.pug
+include ../components/rules.pug
+include ../components/loadscreen.pug
+
+#profile-grid
+  include ../components/menubar.pug
+  #tabSet.dataDiv
+      .tab.active.dark_shadow(data-tab-target='#spGridContainer') Single Player
+      .tab.dark_shadow(data-tab-target='#mpGridContainer') Multi Player
+  #tabbedContentContainer.dataDiv
+      #spGridContainer.statsGridContainer.active(data-tab-content='')
+        #spTitle.dataDiv.dark_shadow.profileTitleContainer
+          .profileHud
+            .profileHudItem Highest score: 
+            #spHighScore.profileHudItem.hudNumbers.light_shadow
+            .profileHudItem Longest winning streak:
+            #spStreak.profileHudItem.hudNumbers.light_shadow
+        #spPieChart.dataDiv.pieChart.dark_shadow
+        #spPieChart2.dataDiv.pieChart.dark_shadow
+        #spData.fullWidth.dark_shadow.hideOnMobile
+          table#SPGameRecords.dataDiv.dark_shadow
+            tbody
+      #mpGridContainer.statsGridContainer.active(data-tab-content='')
+        #mpTitle.dataDiv.dark_shadow.profileTitleContainer
+          .profileHud
+            .profileHudItem Highest score: 
+            #mpHighScore.profileHudItem.hudNumbers.light_shadow
+            .profileHudItem Longest winning streak:
+            #mpStreak.profileHudItem.hudNumbers.light_shadow
+        #mpPieChart.dataDiv.pieChart.dark_shadow
+        #mpPieChart2.dataDiv.pieChart.dark_shadow
+        #mpData.fullWidth.dark_shadow.hideOnMobile
+          table#MPGameRecords.dataDiv
+            tbody
+    
+
+
+footer
+  script(type="text/javascript" src="https://cdn.plot.ly/plotly-2.4.2.min.js")
+  script(type='module' src='/javascript/profile.js')
+  
