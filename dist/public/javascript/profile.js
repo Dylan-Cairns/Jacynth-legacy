@@ -7,16 +7,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var _a;
 import { MainMenuHandler, TabsHandler, populateTable } from './view/utils.js';
 const mainMenuHandler = new MainMenuHandler(false);
 const tabsHandler = new TabsHandler();
-// Remove active class from multiplayer grid container to set it's display to none.
-// Initially loading the page without the active class will cause plotly
-// To render the charts at an incorrect size.
-(_a = document.getElementById('mpGridContainer')) === null || _a === void 0 ? void 0 : _a.classList.remove('active');
 // Load SP and MP data from DB
 (() => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     let SPgameData;
     try {
         const response = yield fetch('/rest/getSPGameRecords');
@@ -171,6 +167,10 @@ const tabsHandler = new TabsHandler();
             barmode: 'group'
         }, { responsive: true });
     }
+    // Remove active class from multiplayer grid container to set it's display to none.
+    // Initially loading the page without the active class will cause plotly
+    // To render the charts at an incorrect size.
+    (_a = document.getElementById('mpGridContainer')) === null || _a === void 0 ? void 0 : _a.classList.remove('active');
     // remove load screen after data finished loading
     document.getElementById('spinner').style.visibility = 'hidden';
     document.getElementById('loadScreen').classList.remove('active');
