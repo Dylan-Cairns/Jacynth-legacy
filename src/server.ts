@@ -16,6 +16,7 @@ import { viewRouter } from './routes/views.js';
 // configuration
 
 dotenv.config();
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const app = express();

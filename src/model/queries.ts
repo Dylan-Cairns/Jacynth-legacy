@@ -7,12 +7,15 @@ const { Pool } = pkg;
 
 import { Layout } from '../public/javascript/model/model';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const pool = new Pool({
   user: process.env.DB_user,
   host: process.env.DB_host,
   database: 'jacynth',
   password: process.env.DB_password,
-  port: process.env.DB_port ? parseInt(process.env.DB_port) : 5432
+  port: process.env.DB_port ? parseInt(process.env.DB_port) : 5432,
+  ssl: isProduction
 });
 
 export const storeUserNick = (request: Request, response: Response) => {

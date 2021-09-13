@@ -9,11 +9,6 @@ declare class Plotly {
   static newPlot(arg0: string, data: any, layout: any, config: any): any;
 }
 
-// Remove active class from multiplayer grid container to set it's display to none.
-// Initially loading the page without the active class will cause plotly
-// To render the charts at an incorrect size.
-document.getElementById('mpGridContainer')?.classList.remove('active');
-
 // Load SP and MP data from DB
 
 (async () => {
@@ -202,6 +197,11 @@ document.getElementById('mpGridContainer')?.classList.remove('active');
       { responsive: true }
     );
   }
+
+  // Remove active class from multiplayer grid container to set it's display to none.
+  // Initially loading the page without the active class will cause plotly
+  // To render the charts at an incorrect size.
+  document.getElementById('mpGridContainer')?.classList.remove('active');
 
   // remove load screen after data finished loading
   document.getElementById('spinner')!.style.visibility = 'hidden';
