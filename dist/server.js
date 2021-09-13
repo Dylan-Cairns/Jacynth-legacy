@@ -9,7 +9,6 @@ import eoc from 'express-openid-connect';
 const { auth } = eoc;
 import { SocketServer } from './routes/socket.js';
 import { rest } from './routes/rest.js';
-import { authRouter } from './routes/auth.js';
 import { viewRouter } from './routes/views.js';
 // configuration
 dotenv.config();
@@ -42,7 +41,14 @@ app.use('/', viewRouter);
 // rest api routes
 app.use('/rest', rest);
 // authentication routes
-app.use('/auth', authRouter);
+// app.use('/auth', authRouter);
+app.get('/sign-up/', (req, res) => {
+    res.oidc.login({
+        authorizationParams: {
+            screen_hint: 'signup'
+        }
+    });
+});
 // socket.io server
 const sockServer = new SocketServer(io);
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
