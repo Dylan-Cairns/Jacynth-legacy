@@ -10,7 +10,7 @@ const { auth } = eoc;
 
 import { SocketServer } from './routes/socket.js';
 import { rest } from './routes/rest.js';
-import { authRouter } from './routes/auth.js';
+// import { authRouter } from './routes/auth.js';
 import { viewRouter } from './routes/views.js';
 
 // configuration
@@ -25,12 +25,22 @@ const io = new Server(server);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+app.enable('trust proxy');
 
 // middleware
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/favicon.ico', express.static('assets/favicon.ico'));
 app.use(express.json());
+
+//redirect http to https
+app.use(function (request, response, next) {
+  if (process.env.NODE_ENV != 'development' && !request.secure) {
+    return response.redirect('https://' + request.headers.host + request.url);
+  }
+
+  next();
+});
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(
@@ -44,6 +54,7 @@ app.use(
   })
 );
 
+//made isAuthenticated method available on all responses.
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.oidc.isAuthenticated();
   next();
