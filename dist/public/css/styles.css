@@ -335,6 +335,17 @@ input[type='submit']:hover {
   margin: 5px;
 }
 
+#editNickBttn {
+  font-size: 1rem;
+}
+
+input[type='text'] {
+  border: 1px solid var(--icon-label-text);
+  border-radius: calc(var(--border-radius) * 0.5);
+  background-color: whitesmoke;
+  padding: 6px;
+}
+
 .statsGridContainer {
   justify-content: stretch;
   justify-items: center;
@@ -761,6 +772,7 @@ table td::before {
   font-family: 'Open Sans', sans-serif;
   border-radius: var(--border-radius);
   padding: 0.5rem;
+  animation: fadeIn linear 200ms;
 }
 
 #nickFormButtons {
@@ -790,6 +802,15 @@ table td::before {
 .subtext {
   font-size: 0.9rem;
   font-family: 'Open Sans', sans-serif;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes ripple {

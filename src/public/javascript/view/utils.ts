@@ -173,6 +173,8 @@ export class NickNameFormHandler {
     if (editNickButton) {
       editNickButton.addEventListener('click', (event) => {
         event.preventDefault();
+        resultDiv.innerHTML = '';
+        resultDiv.classList.remove('error', 'success', 'active');
         container.classList.add('active');
       });
     }
