@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { MainMenuHandler, TabsHandler, populateTable, NickNameFormHandler } from './view/utils.js';
 const mainMenuHandler = new MainMenuHandler(false);
-const nickNameFormHandler = new NickNameFormHandler(false, true);
+const nickNameFormHandler = new NickNameFormHandler(!hasNick, true);
 const tabsHandler = new TabsHandler();
 // Load SP and MP data from DB
 (() => __awaiter(void 0, void 0, void 0, function* () {
@@ -172,6 +172,7 @@ const tabsHandler = new TabsHandler();
     // Initially loading the page without the active class will cause plotly
     // To render the charts at an incorrect size.
     (_a = document.getElementById('mpGridContainer')) === null || _a === void 0 ? void 0 : _a.classList.remove('active');
+    // Display nickname
     let nickResult;
     try {
         const response = yield fetch('/rest/getUserNick');
@@ -180,8 +181,8 @@ const tabsHandler = new TabsHandler();
     catch (error) {
         console.log(error);
     }
-    console.log(nickResult, nickResult[0].nickname);
     if (nickResult.length > 0) {
+        console.log(nickResult);
         const nickDiv = document.getElementById('nickname');
         if (nickDiv)
             nickDiv.innerHTML += nickResult[0].nickname;

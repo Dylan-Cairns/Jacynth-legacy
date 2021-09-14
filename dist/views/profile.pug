@@ -3,6 +3,8 @@ include ../components/mainMenu.pug
 include ../components/rules.pug
 include ../components/loadscreen.pug
 include ../components/chooseNick.pug
+script.
+    const hasNick = JSON.parse('!{JSON.stringify(hasNick)}');
 
 #profile-grid
   include ../components/menubar.pug
