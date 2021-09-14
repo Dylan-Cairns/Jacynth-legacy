@@ -7,12 +7,12 @@ include ../components/chooseNick.pug
 #profile-grid
   include ../components/menubar.pug
   #nickNameContainer.dark_shadow
-    div Nickname:
+    div
     #nickname 
     button#editNickBttn.menu-button.light_shadow Edit
   #tabSet.dataDiv
-      .tab.active.dark_shadow(data-tab-target='#spGridContainer') Single Player
-      .tab.dark_shadow(data-tab-target='#mpGridContainer') Multi Player
+      .tab.active.dark_shadow(data-tab-target='#spGridContainer') Single Player Stats
+      .tab.dark_shadow(data-tab-target='#mpGridContainer') Multi Player Stats
   #tabbedContentContainer.dataDiv
       #spGridContainer.statsGridContainer.active(data-tab-content='')
         #spTitle.dataDiv.dark_shadow.profileTitleContainer

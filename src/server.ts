@@ -69,7 +69,7 @@ app.use('/rest', rest);
 
 // authentication routes
 // app.use('/auth', authRouter);
-app.get('/sign-up/', (req, res) => {
+app.get('/sign-up', (req, res) => {
   res.oidc.login({
     authorizationParams: {
       screen_hint: 'signup'
