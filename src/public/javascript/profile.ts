@@ -5,15 +5,17 @@ import {
   NickNameFormHandler
 } from './view/utils.js';
 
-const mainMenuHandler = new MainMenuHandler(false);
-const nickNameFormHandler = new NickNameFormHandler(false, true);
-const tabsHandler = new TabsHandler();
-
 declare class Plotly {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor(data: any);
   static newPlot(arg0: string, data: any, layout: any, config: any): any;
 }
+
+declare const hasNick: boolean;
+
+const mainMenuHandler = new MainMenuHandler(false);
+const nickNameFormHandler = new NickNameFormHandler(!hasNick, true);
+const tabsHandler = new TabsHandler();
 
 // Load SP and MP data from DB
 
@@ -209,6 +211,7 @@ declare class Plotly {
   // To render the charts at an incorrect size.
   document.getElementById('mpGridContainer')?.classList.remove('active');
 
+  // Display nickname
   let nickResult;
   try {
     const response = await fetch('/rest/getUserNick');
@@ -216,8 +219,9 @@ declare class Plotly {
   } catch (error) {
     console.log(error);
   }
-  console.log(nickResult, nickResult[0].nickname);
+
   if (nickResult.length > 0) {
+    console.log(nickResult);
     const nickDiv = document.getElementById('nickname');
     if (nickDiv) nickDiv.innerHTML += nickResult[0].nickname;
   }

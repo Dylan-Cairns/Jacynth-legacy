@@ -41,8 +41,14 @@ viewRouter.get('/multiplayer', async (req, res) => {
   });
 });
 
-viewRouter.get('/profile', requiresAuth(), (req, res) => {
-  res.render('../dist/views/profile');
+viewRouter.get('/profile', requiresAuth(), async (req, res) => {
+  let hasNick = true;
+  if (res.locals.isAuthenticated && req.oidc.user) {
+    const result = await Utils.hasNickname(req.oidc.user.sub);
+    if (result !== undefined) hasNick = result;
+  }
+
+  res.render('../dist/views/profile', { hasNick: hasNick });
 });
 
 viewRouter.get('/highscores', (req, res) => {
