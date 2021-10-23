@@ -74,7 +74,8 @@ app.get('/sign-up', (req, res) => {
   res.oidc.login({
     authorizationParams: {
       screen_hint: 'signup'
-    }
+    },
+    returnTo: 'https://jacynth.herokuapp.com/'
   });
 });
 
