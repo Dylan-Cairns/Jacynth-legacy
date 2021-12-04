@@ -51,7 +51,10 @@ app.use(
     secret: process.env.AUTH0_session_secret,
     baseURL: process.env.AUTH0_baseURL,
     clientID: process.env.AUTH0_clientID,
-    issuerBaseURL: process.env.AUTH0_issuerBaseURL
+    issuerBaseURL: process.env.AUTH0_issuerBaseURL,
+    routes: {
+      login: false
+    }
   })
 );
 
@@ -70,6 +73,8 @@ app.use('/rest', rest);
 // authentication routes
 // only using one route, just put the route code here rather than importing from auth.ts
 // app.use('/auth', authRouter);
+app.get('/login', (req, res) => res.oidc.login({ returnTo: '/' }));
+
 app.get('/sign-up', (req, res) => {
   res.oidc.login({
     authorizationParams: {
