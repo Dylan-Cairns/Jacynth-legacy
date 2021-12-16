@@ -40,7 +40,10 @@ app.use(auth({
     secret: process.env.AUTH0_session_secret,
     baseURL: process.env.AUTH0_baseURL,
     clientID: process.env.AUTH0_clientID,
-    issuerBaseURL: process.env.AUTH0_issuerBaseURL
+    issuerBaseURL: process.env.AUTH0_issuerBaseURL,
+    routes: {
+        login: false
+    }
 }));
 //made isAuthenticated method available on all responses.
 app.use((req, res, next) => {
@@ -52,12 +55,15 @@ app.use('/', viewRouter);
 // rest api routes
 app.use('/rest', rest);
 // authentication routes
+// only using one route, just put the route code here rather than importing from auth.ts
 // app.use('/auth', authRouter);
+app.get('/login', (req, res) => res.oidc.login({ returnTo: '/' }));
 app.get('/sign-up', (req, res) => {
     res.oidc.login({
         authorizationParams: {
             screen_hint: 'signup'
-        }
+        },
+        returnTo: 'https://jacynth.herokuapp.com/'
     });
 });
 // socket.io server
