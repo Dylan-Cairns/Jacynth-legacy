@@ -1,6 +1,6 @@
 # A digital adaptation of the game Jacynth
 
-## Note: this repository contains the code for a version of the game which is no longer hosted. A simplified single player version can be player [here](https://dylan-cairns.github.io/jacynth/) with code [here](https://github.com/Dylan-Cairns/Jacynth)
+## Note: this repository contains the code for a version of the game which is no longer hosted. A simplified single player version can be player [here](https://dylan-cairns.github.io/jacynth/) with code [here](https://github.com/Dylan-Cairns/Jacynth).
 
 This is an implementation of the card game [Jacynth](http://wiki.decktet.com/game:jacynth) from the [Decktet](https://www.decktet.com/).
 
